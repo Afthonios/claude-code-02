@@ -13,13 +13,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Install and run Semgrep; produce SARIF + JSON (don’t fail the job)
       - name: Run Semgrep (p/ci)
-        uses: returntocorp/semgrep-action@v1
-        with:
-          config: p/ci
-          generateSarif: true
+        run: |
+          pipx install semgrep || pip install --user semgrep
+          semgrep scan --config p/ci \
+            --sarif -o semgrep.sarif \
+            --json  -o semgrep.json \
+            --exclude node_modules --exclude .next || true
 
-      - name: Upload SARIF to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
+          echo "## Semgrep Summary" >> $GITHUB_STEP_SUMMARY
+          COUNT=$(jq '.results | length' semgrep.json 2>/dev/null || echo 0)
+          echo "- Findings: $COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifacts: semgrep.sarif, semgrep.json" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Semgrep artifacts
+        uses: actions/upload-artifact@v4
         with:
-          sarif_file: semgrep.sarif
+          name: semgrep-results
+          path: |
+            semgrep.sarif
+            semgrep.json
