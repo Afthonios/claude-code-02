@@ -72,11 +72,13 @@ body {
 
 /* Apply Afthonios brand colors to body */
 body {
-  @apply bg-white text-textlight;
+  background-color: white;
+  color: #1A1A1A; /* textlight */
 }
 
-body.dark {
-  @apply bg-darkbg text-textdark;
+.dark body {
+  background-color: #1E4E79; /* darkbg */
+  color: #FFFFFF; /* textdark */
 }
 
 /* Custom scrollbar styles for better theming */
