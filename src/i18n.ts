@@ -9,12 +9,15 @@ export type Locale = (typeof locales)[number];
 export const defaultLocale: Locale = 'fr';
 
 export default getRequestConfig(async ({ locale }) => {
+  // Handle undefined locale by using default locale
+  const resolvedLocale = locale || defaultLocale;
+  
   // Validate that the incoming `locale` parameter is valid
-  if (!locales.includes(locale as Locale)) notFound();
+  if (!locales.includes(resolvedLocale as Locale)) notFound();
 
   return {
-    locale: locale as string,
-    messages: (await import(`../messages/${locale}.json`)).default,
+    locale: resolvedLocale as string,
+    messages: (await import(`../messages/${resolvedLocale}.json`)).default,
     timeZone: 'Europe/Paris',
   };
 });
