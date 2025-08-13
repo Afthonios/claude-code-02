@@ -14,7 +14,7 @@ export default function Header() {
   const t = useTranslations('navigation');
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-transparent backdrop-blur dark:bg-darkbg/95">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur">
       <div className="container flex h-14 max-w-screen-2xl items-center">
         {/* Logo and Site Name */}
         <div className="mr-4 flex">
@@ -86,7 +86,7 @@ export default function Header() {
               </Link>
               <Link
                 href="/auth/signup"
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-accent bg-primary text-white hover:bg-primary-dark h-9 px-3"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-accent bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3"
               >
                 {t('signup')}
               </Link>

@@ -27,12 +27,15 @@ const config: Config = {
           foreground: "hsl(var(--secondary-foreground))",
         },
         
-        // Additional brand colors
-        accent: "#F2B705",
-        neutral: "#F5F1EE",
-        darkbg: "#1E4E79",
-        textlight: "#1A1A1A",
-        textdark: "#FFFFFF",
+        // Additional brand colors using CSS variables
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        neutral: "hsl(var(--muted))",
+        darkbg: "hsl(var(--background))",
+        textlight: "hsl(var(--foreground))",
+        textdark: "hsl(var(--foreground))",
         
         // Existing shadcn colors (keep for compatibility)
         background: "hsl(var(--background))",
