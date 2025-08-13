@@ -57,14 +57,14 @@ export default async function HomePage({ params }: Props) {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Link 
                 href="/courses"
-                className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 dark:hover:bg-primary/80 rounded-md transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 <BookOpen className="w-5 h-5 mr-2" />
                 {tHome('hero.cta')}
               </Link>
               <Link 
                 href="/about"
-                className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-secondary border border-secondary/30 hover:border-secondary dark:text-accent dark:border-accent/30 dark:hover:border-accent rounded-md transition-all duration-200"
+                className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90 dark:bg-accent dark:text-accent-foreground dark:hover:bg-accent/90 border border-secondary/20 dark:border-accent/20 hover:border-secondary/40 dark:hover:border-accent/40 rounded-md transition-all duration-200"
               >
                 {tHome('hero.learnMore')}
               </Link>
