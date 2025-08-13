@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "@/components/i18n/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { GraduationCap } from "lucide-react";
+import Image from "next/image";
 
 /**
  * Header component with site navigation, language switcher, and theme toggle
@@ -12,7 +12,7 @@ export default function Header() {
   const t = useTranslations('navigation');
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-transparent backdrop-blur dark:bg-darkbg/95">
       <div className="container flex h-14 max-w-screen-2xl items-center">
         {/* Logo and Site Name */}
         <div className="mr-4 flex">
@@ -21,7 +21,13 @@ export default function Header() {
             className="mr-4 flex items-center space-x-2 font-bold"
             aria-label="Afthonios - Return to homepage"
           >
-            <GraduationCap className="h-6 w-6 text-primary" />
+            <Image 
+              src="/logo.svg" 
+              alt="Afthonios Logo" 
+              width={24} 
+              height={24} 
+              className="h-6 w-6"
+            />
             <span className="hidden font-bold sm:inline-block">
               Afthonios
             </span>
@@ -32,25 +38,25 @@ export default function Header() {
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
           <Link
             href="/courses"
-            className="transition-colors hover:text-foreground/80 text-foreground/60"
+            className="transition-colors text-secondary hover:underline dark:text-accent dark:hover:underline focus:outline-none focus:ring-2 focus:ring-accent"
           >
             {t('courses')}
           </Link>
           <Link
             href="/cours-de-la-semaine"
-            className="transition-colors hover:text-foreground/80 text-foreground/60"
+            className="transition-colors text-secondary hover:underline dark:text-accent dark:hover:underline focus:outline-none focus:ring-2 focus:ring-accent"
           >
             {t('courseOfTheWeek')}
           </Link>
           <Link
             href="/gestion-de-projet"
-            className="transition-colors hover:text-foreground/80 text-foreground/60"
+            className="transition-colors text-secondary hover:underline dark:text-accent dark:hover:underline focus:outline-none focus:ring-2 focus:ring-accent"
           >
             {t('projectManagement')}
           </Link>
           <Link
             href="/nouvelle-offre"
-            className="transition-colors hover:text-foreground/80 text-foreground/60"
+            className="transition-colors text-secondary hover:underline dark:text-accent dark:hover:underline focus:outline-none focus:ring-2 focus:ring-accent"
           >
             {t('newOffer')}
           </Link>
@@ -72,13 +78,13 @@ export default function Header() {
             <nav className="hidden md:flex items-center space-x-2">
               <Link
                 href="/auth/login"
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-accent text-secondary border border-secondary/30 hover:border-secondary dark:text-accent dark:border-accent/30 dark:hover:border-accent h-9 px-3"
               >
                 {t('login')}
               </Link>
               <Link
                 href="/auth/signup"
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-accent bg-primary text-white hover:bg-primary-dark h-9 px-3"
               >
                 {t('signup')}
               </Link>

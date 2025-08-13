@@ -67,9 +67,16 @@
 }
 
 body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
   font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* Apply Afthonios brand colors to body */
+body {
+  @apply bg-white text-textlight;
+}
+
+body.dark {
+  @apply bg-darkbg text-textdark;
 }
 
 /* Custom scrollbar styles for better theming */

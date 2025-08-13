@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { BookOpen, Users, Award, Clock, Globe, Star } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -24,7 +25,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20">
+      <section className="relative overflow-hidden bg-neutral dark:bg-darkbg">
         <div className="absolute inset-0 opacity-30">
           <div className="absolute inset-0" style={{
             backgroundImage: `radial-gradient(circle at 25px 25px, #6366f1 2px, transparent 2px)`,
@@ -35,58 +36,56 @@ export default function HomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
           <div className="text-center">
             {/* Badge */}
-            <div className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 mb-8">
+            <div className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium bg-accent/10 text-primary dark:bg-accent/20 dark:text-accent mb-8">
               <Star className="w-4 h-4 mr-2" />
               {tHome('hero.badge')}
             </div>
             
             {/* Main Heading */}
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-textlight dark:text-textdark mb-6 leading-tight">
               {tHome('hero.title')}
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+              <span className="block text-primary dark:text-accent">
                 {tHome('hero.titleHighlight')}
               </span>
             </h1>
             
             {/* Subtitle */}
-            <p className="text-xl lg:text-2xl text-gray-600 dark:text-gray-300 mb-10 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-xl lg:text-2xl text-textlight/70 dark:text-textdark/80 mb-10 max-w-4xl mx-auto leading-relaxed">
               {tHome('hero.subtitle')}
             </p>
             
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-              <Link
-                href="/courses"
-                className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-xl text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                <BookOpen className="w-5 h-5 mr-2" />
-                {tHome('hero.cta')}
+              <Link href="/courses">
+                <Button variant="primary" className="px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+                  <BookOpen className="w-5 h-5 mr-2" />
+                  {tHome('hero.cta')}
+                </Button>
               </Link>
-              <Link
-                href="/about"
-                className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-xl text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-200"
-              >
-                {tHome('hero.learnMore')}
+              <Link href="/about">
+                <Button variant="secondary" className="px-8 py-4 text-lg font-semibold transition-all duration-200">
+                  {tHome('hero.learnMore')}
+                </Button>
               </Link>
             </div>
             
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
               <div className="text-center">
-                <div className="text-3xl lg:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">250+</div>
-                <div className="text-sm lg:text-base text-gray-600 dark:text-gray-400">{tHome('stats.courses')}</div>
+                <div className="text-3xl lg:text-4xl font-bold text-primary mb-2">250+</div>
+                <div className="text-sm lg:text-base text-textlight/60 dark:text-textdark/70">{tHome('stats.courses')}</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl lg:text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2">50k+</div>
-                <div className="text-sm lg:text-base text-gray-600 dark:text-gray-400">{tHome('stats.students')}</div>
+                <div className="text-3xl lg:text-4xl font-bold text-secondary dark:text-accent mb-2">50k+</div>
+                <div className="text-sm lg:text-base text-textlight/60 dark:text-textdark/70">{tHome('stats.students')}</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl lg:text-4xl font-bold text-green-600 dark:text-green-400 mb-2">98%</div>
-                <div className="text-sm lg:text-base text-gray-600 dark:text-gray-400">{tHome('stats.satisfaction')}</div>
+                <div className="text-3xl lg:text-4xl font-bold text-accent mb-2">98%</div>
+                <div className="text-sm lg:text-base text-textlight/60 dark:text-textdark/70">{tHome('stats.satisfaction')}</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl lg:text-4xl font-bold text-orange-600 dark:text-orange-400 mb-2">24/7</div>
-                <div className="text-sm lg:text-base text-gray-600 dark:text-gray-400">{tHome('stats.support')}</div>
+                <div className="text-3xl lg:text-4xl font-bold text-primary-dark mb-2">24/7</div>
+                <div className="text-sm lg:text-base text-textlight/60 dark:text-textdark/70">{tHome('stats.support')}</div>
               </div>
             </div>
           </div>
@@ -94,13 +93,13 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-white dark:bg-gray-800">
+      <section className="py-24 bg-white dark:bg-darkbg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-3xl lg:text-5xl font-bold text-textlight dark:text-textdark mb-6">
               {tHome('features.title')}
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-textlight/70 dark:text-textdark/80 max-w-3xl mx-auto">
               {tHome('features.subtitle')}
             </p>
           </div>
@@ -206,13 +205,13 @@ export default function HomePage() {
       </section>
 
       {/* Popular Courses Preview */}
-      <section className="py-24 bg-gray-50 dark:bg-gray-900">
+      <section className="py-24 bg-neutral dark:bg-darkbg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-3xl lg:text-5xl font-bold text-textlight dark:text-textdark mb-6">
               {tHome('courses.title')}
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+            <p className="text-xl text-textlight/70 dark:text-textdark/80 max-w-3xl mx-auto mb-8">
               {tHome('courses.subtitle')}
             </p>
             <Link
@@ -258,7 +257,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="py-24 bg-primary dark:bg-secondary">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl lg:text-5xl font-bold text-white mb-6">
             {tHome('cta.title')}

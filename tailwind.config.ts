@@ -14,6 +14,19 @@ const config: Config = {
     extend: {
       // Custom color palette for light/dark modes
       colors: {
+        // Afthonios brand colors
+        primary: {
+          DEFAULT: "#C2410C",
+          dark: "#A1350A",
+        },
+        secondary: "#1E4E79",
+        accent: "#F2B705",
+        neutral: "#F5F1EE",
+        darkbg: "#1E4E79",
+        textlight: "#1A1A1A",
+        textdark: "#FFFFFF",
+        
+        // Existing shadcn colors (keep for compatibility)
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -24,21 +37,9 @@ const config: Config = {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
         },
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
