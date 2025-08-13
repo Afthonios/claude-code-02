@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 :root {
+  /* Brand colors */
+  --primary: #C2410C;
+  --secondary: #1E3A8A;
+  
   /* Light theme colors - Afthonios brand palette */
   --background: 0 0% 100%;
   --foreground: 0 0% 10%;         /* #1A1A1A */
@@ -8,9 +12,9 @@
   --card-foreground: 0 0% 10%;
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 10%;
-  --primary: 14 86% 41%;          /* #C2410C */
+  --primary-hsl: 14 86% 41%;      /* #C2410C in HSL */
   --primary-foreground: 0 0% 100%;/* white on primary */
-  --secondary: 208 60% 30%;       /* #1E4E79 */
+  --secondary-hsl: 221 83% 53%;   /* #1E3A8A in HSL */
   --secondary-foreground: 0 0% 100%;
   --muted: 24 33% 95%;            /* neutral section bg */
   --muted-foreground: 0 0% 30%;
@@ -22,7 +26,7 @@
   --input: 0 0% 90%;
   --ring: 14 86% 41%;             /* match primary for focus */
   --chart-1: 14 86% 41%;
-  --chart-2: 208 60% 30%;
+  --chart-2: 221 83% 53%;
   --chart-3: 47 95% 48%;
   --chart-4: 24 33% 95%;
   --chart-5: 0 0% 10%;
@@ -30,31 +34,35 @@
 }
 
 .dark {
+  /* Brand colors */
+  --primary: #C2410C;
+  --secondary: #1E3A8A;
+  
   /* Dark theme colors - Afthonios brand palette */
-  --background: 208 60% 30%;      /* darkbg = secondary */
+  --background: 221 83% 20%;      /* Darker version of secondary */
   --foreground: 0 0% 100%;
-  --card: 208 60% 30%;
+  --card: 221 83% 25%;
   --card-foreground: 0 0% 100%;
-  --popover: 208 60% 30%;
+  --popover: 221 83% 25%;
   --popover-foreground: 0 0% 100%;
-  --primary: 14 86% 41%;
+  --primary-hsl: 14 86% 41%;      /* Keep same primary */
   --primary-foreground: 0 0% 100%;
-  --secondary: 47 95% 48%;        /* use accent as secondary in dark for contrast */
-  --secondary-foreground: 0 0% 10%;
-  --muted: 208 60% 25%;
-  --muted-foreground: 0 0% 100%;
+  --secondary-hsl: 221 83% 53%;   /* Keep same secondary */
+  --secondary-foreground: 0 0% 100%;
+  --muted: 221 83% 15%;
+  --muted-foreground: 0 0% 80%;
   --accent: 47 95% 48%;
   --accent-foreground: 0 0% 10%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
-  --border: 208 60% 25%;
-  --input: 208 60% 25%;
-  --ring: 47 95% 48%;
+  --border: 221 83% 30%;
+  --input: 221 83% 30%;
+  --ring: 14 86% 41%;
   --chart-1: 14 86% 41%;
-  --chart-2: 47 95% 48%;
-  --chart-3: 0 0% 100%;
-  --chart-4: 208 60% 40%;
-  --chart-5: 24 33% 95%;
+  --chart-2: 221 83% 53%;
+  --chart-3: 47 95% 48%;
+  --chart-4: 221 83% 40%;
+  --chart-5: 0 0% 80%;
 }
 
 @theme inline {

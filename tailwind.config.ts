@@ -17,12 +17,17 @@ const config: Config = {
     extend: {
       // Custom color palette for light/dark modes
       colors: {
-        // Afthonios brand colors
+        // Afthonios brand colors using CSS variables
         primary: {
-          DEFAULT: "#C2410C",
-          dark: "#A1350A",
+          DEFAULT: "var(--primary)",
+          foreground: "hsl(var(--primary-foreground))",
         },
-        secondary: "#1E4E79",
+        secondary: {
+          DEFAULT: "var(--secondary)",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        
+        // Additional brand colors
         accent: "#F2B705",
         neutral: "#F5F1EE",
         darkbg: "#1E4E79",
