@@ -121,24 +121,61 @@
   },
   "home": {
     "hero": {
-      "title": "Développez vos compétences avec nos formations",
-      "subtitle": "Plus de 250 cours créés par des experts pour votre développement professionnel et personnel",
-      "cta": "Découvrir nos cours"
+      "badge": "🌟 Plateforme d'apprentissage #1 en France",
+      "title": "Développez vos compétences avec",
+      "titleHighlight": "nos formations d'excellence",
+      "subtitle": "Plus de 250 cours créés par des experts pour accélérer votre développement professionnel et personnel. Rejoignez 50 000+ apprenants qui transforment déjà leur carrière.",
+      "cta": "Découvrir nos cours",
+      "learnMore": "En savoir plus"
+    },
+    "stats": {
+      "courses": "Cours disponibles",
+      "students": "Étudiants actifs",
+      "satisfaction": "Satisfaction",
+      "support": "Support"
     },
     "features": {
       "title": "Pourquoi choisir Afthonios ?",
+      "subtitle": "Une expérience d'apprentissage complète conçue pour maximiser votre réussite et votre épanouissement professionnel.",
       "expert": {
         "title": "Formateurs experts",
-        "description": "Apprenez auprès de professionnels reconnus dans leur domaine"
+        "description": "Apprenez auprès de professionnels reconnus dans leur domaine avec une expérience terrain confirmée."
       },
       "flexible": {
         "title": "Apprentissage flexible",
-        "description": "Étudiez à votre rythme, où et quand vous le souhaitez"
+        "description": "Étudiez à votre rythme, où et quand vous le souhaitez, avec un accès 24h/24 sur tous vos appareils."
       },
       "certificate": {
         "title": "Certificats reconnus",
-        "description": "Obtenez des certificats pour valoriser vos nouvelles compétences"
+        "description": "Obtenez des certificats officiels pour valoriser vos nouvelles compétences auprès des employeurs."
+      },
+      "quality": {
+        "title": "Contenu de qualité",
+        "description": "Des cours actualisés régulièrement avec les dernières tendances et meilleures pratiques du marché."
+      },
+      "global": {
+        "title": "Accès mondial",
+        "description": "Formation disponible en français et anglais, accessible depuis n'importe où dans le monde."
+      },
+      "community": {
+        "title": "Communauté active",
+        "description": "Rejoignez une communauté d'apprenants motivés et échangez avec vos pairs et instructeurs."
       }
+    },
+    "courses": {
+      "title": "Cours populaires",
+      "subtitle": "Découvrez nos formations les plus appréciées par notre communauté d'apprenants.",
+      "viewAll": "Voir tous les cours",
+      "category": "Développement",
+      "sampleTitle": "Formation complète",
+      "sampleDescription": "Maîtrisez les compétences essentielles avec cette formation pratique et interactive.",
+      "instructor": "Expert"
+    },
+    "cta": {
+      "title": "Prêt à transformer votre carrière ?",
+      "subtitle": "Rejoignez des milliers d'apprenants qui ont déjà franchi le pas vers l'excellence professionnelle.",
+      "start": "Commencer maintenant",
+      "contact": "Nous contacter"
     }
   },
   "footer": {

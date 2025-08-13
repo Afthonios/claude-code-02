@@ -121,24 +121,61 @@
   },
   "home": {
     "hero": {
-      "title": "Develop your skills with our training",
-      "subtitle": "Over 250 courses created by experts for your professional and personal development",
-      "cta": "Discover our courses"
+      "badge": "🌟 #1 Learning Platform in France",
+      "title": "Develop your skills with",
+      "titleHighlight": "our excellence training",
+      "subtitle": "Over 250 courses created by experts to accelerate your professional and personal development. Join 50,000+ learners already transforming their careers.",
+      "cta": "Discover our courses",
+      "learnMore": "Learn more"
+    },
+    "stats": {
+      "courses": "Available courses",
+      "students": "Active students",
+      "satisfaction": "Satisfaction",
+      "support": "Support"
     },
     "features": {
       "title": "Why choose Afthonios?",
+      "subtitle": "A complete learning experience designed to maximize your success and professional fulfillment.",
       "expert": {
         "title": "Expert instructors",
-        "description": "Learn from recognized professionals in their field"
+        "description": "Learn from recognized professionals in their field with proven hands-on experience."
       },
       "flexible": {
         "title": "Flexible learning",
-        "description": "Study at your own pace, wherever and whenever you want"
+        "description": "Study at your own pace, wherever and whenever you want, with 24/7 access on all your devices."
       },
       "certificate": {
         "title": "Recognized certificates",
-        "description": "Get certificates to showcase your new skills"
+        "description": "Get official certificates to showcase your new skills to employers."
+      },
+      "quality": {
+        "title": "Quality content",
+        "description": "Courses regularly updated with the latest trends and best practices in the market."
+      },
+      "global": {
+        "title": "Global access",
+        "description": "Training available in French and English, accessible from anywhere in the world."
+      },
+      "community": {
+        "title": "Active community",
+        "description": "Join a community of motivated learners and interact with peers and instructors."
       }
+    },
+    "courses": {
+      "title": "Popular courses",
+      "subtitle": "Discover our most appreciated training courses by our learning community.",
+      "viewAll": "View all courses",
+      "category": "Development",
+      "sampleTitle": "Complete training",
+      "sampleDescription": "Master essential skills with this practical and interactive training.",
+      "instructor": "Expert"
+    },
+    "cta": {
+      "title": "Ready to transform your career?",
+      "subtitle": "Join thousands of learners who have already taken the step towards professional excellence.",
+      "start": "Start now",
+      "contact": "Contact us"
     }
   },
   "footer": {
