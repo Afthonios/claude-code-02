@@ -7,6 +7,8 @@ import type {
   DirectusCompetenceTranslation,
 } from '@/types/directus';
 
+// Directus client configured for public access only
+// All collections (courses, competences, instructors) are accessed without authentication
 const directus = createDirectus(
   process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://api.afthonios.com'
 ).with(rest());
@@ -26,32 +28,13 @@ export const coursesApi = {
     const query: Record<string, unknown> = {
       fields: [
         'id',
-        'slug',
         'status',
         'sort',
-        'created_at',
-        'updated_at',
-        'cover_image',
-        'duration_minutes',
-        'level',
-        'price_cents',
-        'currency',
-        'availability',
-        'translations.title',
-        'translations.subtitle',
-        'translations.summary',
-        'translations.description',
-        'translations.seo_title',
-        'translations.seo_description',
-        'translations.languages_code',
-        'competences.competences_id.id',
-        'competences.competences_id.translations.name',
-        'competences.competences_id.translations.description',
-        'competences.competences_id.translations.languages_code',
-        'instructors.instructors_id.id',
-        'instructors.instructors_id.name',
-        'instructors.instructors_id.email',
-        'instructors.instructors_id.avatar',
+        'date_created',
+        'date_updated',
+        'duration',
+        'course_image',
+        'translations.*',
       ],
       limit,
       page,
@@ -86,38 +69,15 @@ export const coursesApi = {
         readItems('courses', {
           fields: [
             'id',
-            'slug',
             'status',
-            'created_at',
-            'updated_at',
-            'cover_image',
-            'gallery',
-            'duration_minutes',
-            'level',
-            'price_cents',
-            'currency',
-            'availability',
-            'translations.title',
-            'translations.subtitle',
-            'translations.summary',
-            'translations.description',
-            'translations.seo_title',
-            'translations.seo_description',
-            'translations.og_image',
-            'translations.languages_code',
-            'competences.competences_id.id',
-            'competences.competences_id.slug',
-            'competences.competences_id.translations.name',
-            'competences.competences_id.translations.description',
-            'competences.competences_id.translations.languages_code',
-            'instructors.instructors_id.id',
-            'instructors.instructors_id.name',
-            'instructors.instructors_id.email',
-            'instructors.instructors_id.avatar',
-            'instructors.instructors_id.bio',
+            'date_created',
+            'date_updated',
+            'duration',
+            'course_image',
+            'translations.*',
           ],
           filter: {
-            slug: { _eq: slug },
+            'translations.slug': { _eq: slug },
             status: { _eq: 'published' },
           },
         })
@@ -130,41 +90,18 @@ export const coursesApi = {
     }
   },
 
-  async getById(id: string) {
+  async getById(id: string | number) {
     try {
       const response = await directus.request(
         readItem('courses', id, {
           fields: [
             'id',
-            'slug',
             'status',
-            'created_at',
-            'updated_at',
-            'cover_image',
-            'gallery',
-            'duration_minutes',
-            'level',
-            'price_cents',
-            'currency',
-            'availability',
-            'translations.title',
-            'translations.subtitle',
-            'translations.summary',
-            'translations.description',
-            'translations.seo_title',
-            'translations.seo_description',
-            'translations.og_image',
-            'translations.languages_code',
-            'competences.competences_id.id',
-            'competences.competences_id.slug',
-            'competences.competences_id.translations.name',
-            'competences.competences_id.translations.description',
-            'competences.competences_id.translations.languages_code',
-            'instructors.instructors_id.id',
-            'instructors.instructors_id.name',
-            'instructors.instructors_id.email',
-            'instructors.instructors_id.avatar',
-            'instructors.instructors_id.bio',
+            'date_created',
+            'date_updated',
+            'duration',
+            'course_image',
+            'translations.*',
           ],
         })
       );
@@ -182,24 +119,16 @@ export const coursesApi = {
         readItems('courses', {
           fields: [
             'id',
-            'slug',
-            'cover_image',
-            'duration_minutes',
-            'level',
-            'price_cents',
-            'currency',
-            'availability',
-            'translations.title',
-            'translations.subtitle',
-            'translations.summary',
-            'translations.languages_code',
+            'status',
+            'duration',
+            'course_image',
+            'translations.*',
           ],
           filter: {
             status: { _eq: 'published' },
-            featured: { _eq: true },
           },
           limit,
-          sort: ['-created_at'],
+          sort: ['-date_created'],
         })
       );
 
@@ -381,7 +310,14 @@ export function formatCurrency(cents: number, currency = 'EUR', locale = 'fr-FR'
   }).format(cents / 100);
 }
 
-export function formatDuration(minutes: number, locale = 'fr'): string {
+export function formatDuration(duration: number | string, locale = 'fr'): string {
+  // Handle both number (minutes) and string (from API) formats
+  const minutes = typeof duration === 'string' ? parseInt(duration, 10) : duration;
+  
+  if (isNaN(minutes) || minutes < 0) {
+    return locale === 'fr' ? 'Durée non disponible' : 'Duration not available';
+  }
+  
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
   
