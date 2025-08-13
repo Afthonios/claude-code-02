@@ -1,0 +1,158 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "clear": "Effacer",
+    "submit": "Soumettre",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "save": "Sauvegarder",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "home": "Accueil",
+    "menu": "Menu",
+    "language": "Langue",
+    "theme": "Thème"
+  },
+  "navigation": {
+    "courses": "Cours",
+    "courseOfTheWeek": "Cours de la semaine",
+    "projectManagement": "Gestion de projet",
+    "newOffer": "Nouvelle offre",
+    "about": "À propos",
+    "contact": "Contact",
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "register": "S'inscrire",
+    "profile": "Profil",
+    "dashboard": "Tableau de bord",
+    "logout": "Déconnexion"
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion",
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "submit": "Se connecter",
+      "forgotPassword": "Mot de passe oublié ?",
+      "noAccount": "Pas de compte ?",
+      "createAccount": "Créer un compte"
+    },
+    "register": {
+      "title": "Créer un compte",
+      "name": "Nom complet",
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "acceptTerms": "J'accepte les conditions d'utilisation",
+      "submit": "Créer un compte",
+      "hasAccount": "Déjà un compte ?",
+      "signIn": "Se connecter"
+    },
+    "errors": {
+      "invalidCredentials": "Identifiants invalides",
+      "emailExists": "Cette adresse e-mail est déjà utilisée",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "weakPassword": "Le mot de passe doit contenir au moins 8 caractères",
+      "invalidEmail": "Adresse e-mail invalide",
+      "required": "Ce champ est requis"
+    }
+  },
+  "courses": {
+    "title": "Nos Cours",
+    "searchPlaceholder": "Rechercher des cours...",
+    "filters": {
+      "level": "Niveau",
+      "competences": "Compétences",
+      "duration": "Durée",
+      "price": "Prix",
+      "availability": "Disponibilité"
+    },
+    "levels": {
+      "beginner": "Débutant",
+      "intermediate": "Intermédiaire",
+      "advanced": "Avancé"
+    },
+    "availability": {
+      "free": "Gratuit",
+      "paid": "Payant",
+      "subscription": "Abonnement"
+    },
+    "duration": {
+      "minutes": "minutes",
+      "hours": "heures"
+    },
+    "price": {
+      "free": "Gratuit",
+      "from": "À partir de"
+    },
+    "details": {
+      "overview": "Aperçu",
+      "curriculum": "Programme",
+      "instructor": "Instructeur",
+      "reviews": "Avis",
+      "enroll": "S'inscrire",
+      "startLearning": "Commencer à apprendre",
+      "prerequisites": "Prérequis",
+      "learningObjectives": "Objectifs d'apprentissage",
+      "whatYouWillLearn": "Ce que vous allez apprendre",
+      "courseContent": "Contenu du cours",
+      "duration": "Durée totale",
+      "level": "Niveau",
+      "language": "Langue",
+      "certificate": "Certificat inclus"
+    }
+  },
+  "theme": {
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système",
+    "toggleTheme": "Basculer le thème"
+  },
+  "meta": {
+    "title": "Afthonios - Plateforme d'apprentissage en ligne",
+    "description": "Découvrez plus de 250 cours en ligne pour développer vos compétences. Formation professionnelle et personnelle avec des experts.",
+    "keywords": "formation en ligne, cours, apprentissage, compétences, développement professionnel"
+  },
+  "home": {
+    "hero": {
+      "title": "Développez vos compétences avec nos formations",
+      "subtitle": "Plus de 250 cours créés par des experts pour votre développement professionnel et personnel",
+      "cta": "Découvrir nos cours"
+    },
+    "features": {
+      "title": "Pourquoi choisir Afthonios ?",
+      "expert": {
+        "title": "Formateurs experts",
+        "description": "Apprenez auprès de professionnels reconnus dans leur domaine"
+      },
+      "flexible": {
+        "title": "Apprentissage flexible",
+        "description": "Étudiez à votre rythme, où et quand vous le souhaitez"
+      },
+      "certificate": {
+        "title": "Certificats reconnus",
+        "description": "Obtenez des certificats pour valoriser vos nouvelles compétences"
+      }
+    }
+  },
+  "footer": {
+    "company": "Entreprise",
+    "about": "À propos",
+    "careers": "Carrières",
+    "contact": "Contact",
+    "support": "Support",
+    "help": "Aide",
+    "faq": "FAQ",
+    "legal": "Mentions légales",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation",
+    "social": "Suivez-nous",
+    "copyright": "© 2024 Afthonios. Tous droits réservés."
+  }
+}

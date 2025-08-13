@@ -1,0 +1,158 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "home": "Home",
+    "menu": "Menu",
+    "language": "Language",
+    "theme": "Theme"
+  },
+  "navigation": {
+    "courses": "Courses",
+    "courseOfTheWeek": "Course of the Week",
+    "projectManagement": "Project Management",
+    "newOffer": "New Offer",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Sign In",
+    "signup": "Sign Up",
+    "register": "Sign Up",
+    "profile": "Profile",
+    "dashboard": "Dashboard",
+    "logout": "Sign Out"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "email": "Email address",
+      "password": "Password",
+      "submit": "Sign In",
+      "forgotPassword": "Forgot password?",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create account"
+    },
+    "register": {
+      "title": "Create Account",
+      "name": "Full name",
+      "email": "Email address",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "acceptTerms": "I accept the terms of service",
+      "submit": "Create Account",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "errors": {
+      "invalidCredentials": "Invalid credentials",
+      "emailExists": "This email address is already in use",
+      "passwordMismatch": "Passwords do not match",
+      "weakPassword": "Password must be at least 8 characters long",
+      "invalidEmail": "Invalid email address",
+      "required": "This field is required"
+    }
+  },
+  "courses": {
+    "title": "Our Courses",
+    "searchPlaceholder": "Search courses...",
+    "filters": {
+      "level": "Level",
+      "competences": "Skills",
+      "duration": "Duration",
+      "price": "Price",
+      "availability": "Availability"
+    },
+    "levels": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "availability": {
+      "free": "Free",
+      "paid": "Paid",
+      "subscription": "Subscription"
+    },
+    "duration": {
+      "minutes": "minutes",
+      "hours": "hours"
+    },
+    "price": {
+      "free": "Free",
+      "from": "From"
+    },
+    "details": {
+      "overview": "Overview",
+      "curriculum": "Curriculum",
+      "instructor": "Instructor",
+      "reviews": "Reviews",
+      "enroll": "Enroll",
+      "startLearning": "Start Learning",
+      "prerequisites": "Prerequisites",
+      "learningObjectives": "Learning Objectives",
+      "whatYouWillLearn": "What You'll Learn",
+      "courseContent": "Course Content",
+      "duration": "Total Duration",
+      "level": "Level",
+      "language": "Language",
+      "certificate": "Certificate included"
+    }
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "toggleTheme": "Toggle theme"
+  },
+  "meta": {
+    "title": "Afthonios - Online Learning Platform",
+    "description": "Discover over 250 online courses to develop your skills. Professional and personal training with experts.",
+    "keywords": "online learning, courses, training, skills, professional development"
+  },
+  "home": {
+    "hero": {
+      "title": "Develop your skills with our training",
+      "subtitle": "Over 250 courses created by experts for your professional and personal development",
+      "cta": "Discover our courses"
+    },
+    "features": {
+      "title": "Why choose Afthonios?",
+      "expert": {
+        "title": "Expert instructors",
+        "description": "Learn from recognized professionals in their field"
+      },
+      "flexible": {
+        "title": "Flexible learning",
+        "description": "Study at your own pace, wherever and whenever you want"
+      },
+      "certificate": {
+        "title": "Recognized certificates",
+        "description": "Get certificates to showcase your new skills"
+      }
+    }
+  },
+  "footer": {
+    "company": "Company",
+    "about": "About",
+    "careers": "Careers",
+    "contact": "Contact",
+    "support": "Support",
+    "help": "Help",
+    "faq": "FAQ",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "social": "Follow us",
+    "copyright": "© 2024 Afthonios. All rights reserved."
+  }
+}
