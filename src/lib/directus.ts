@@ -28,6 +28,7 @@ export const coursesApi = {
     const query: Record<string, unknown> = {
       fields: [
         'id',
+        'legacy_id',
         'status',
         'sort',
         'date_created',
@@ -65,10 +66,14 @@ export const coursesApi = {
 
   async getBySlug(slug: string) {
     try {
+      // First, try to get the course using legacy_id format (add "f-" prefix)
+      const legacyId = `f-${slug}`;
+      
       const response = await directus.request(
         readItems('courses', {
           fields: [
             'id',
+            'legacy_id',
             'status',
             'date_created',
             'date_updated',
@@ -77,13 +82,44 @@ export const coursesApi = {
             'translations.*',
           ],
           filter: {
-            'translations.slug': { _eq: slug },
+            legacy_id: { _eq: legacyId },
             status: { _eq: 'published' },
           },
         })
       );
 
-      return response[0] as DirectusCourse | undefined;
+      // If found by legacy_id, return it
+      if (response.length > 0) {
+        return response[0] as DirectusCourse;
+      }
+
+      // If not found by legacy_id, search through all courses to find matching translation slug
+      // This is a fallback for cases where legacy_id doesn't match the expected pattern
+      const allCourses = await directus.request(
+        readItems('courses', {
+          fields: [
+            'id',
+            'legacy_id',
+            'status',
+            'date_created',
+            'date_updated',
+            'duration',
+            'course_image',
+            'translations.*',
+          ],
+          filter: {
+            status: { _eq: 'published' },
+          },
+          limit: 100, // Reasonable limit for searching
+        })
+      );
+
+      // Find course with matching translation slug
+      const matchingCourse = allCourses.find((course: any) => 
+        course.translations?.some((translation: any) => translation.slug === slug)
+      );
+
+      return matchingCourse as DirectusCourse | undefined;
     } catch (error) {
       console.error('Error fetching course by slug:', error);
       throw new Error('Failed to fetch course');
@@ -96,6 +132,7 @@ export const coursesApi = {
         readItem('courses', id, {
           fields: [
             'id',
+            'legacy_id',
             'status',
             'date_created',
             'date_updated',
@@ -119,6 +156,7 @@ export const coursesApi = {
         readItems('courses', {
           fields: [
             'id',
+            'legacy_id',
             'status',
             'duration',
             'course_image',

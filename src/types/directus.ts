@@ -15,8 +15,8 @@ export interface DirectusItem {
 
 // Directus Courses collection
 export interface DirectusCourse extends DirectusItem {
-  slug: string;
-  cover_image?: string | DirectusFile;
+  legacy_id: string;
+  'Course Image'?: string | DirectusFile;
   gallery?: string[] | DirectusFile[];
   duration_minutes: number;
   level: 'beginner' | 'intermediate' | 'advanced';

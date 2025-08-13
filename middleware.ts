@@ -12,8 +12,8 @@ export default createMiddleware({
   // This ensures /fr and /en are always in the URL
   localePrefix: 'always',
   
-  // Redirect to default locale when user lands on `/`
-  localeDetection: true,
+  // Ensure paths without locale get redirected to default locale
+  defaultLocale,
   
   // Alternative domains for different locales (optional)
   // domains: [
@@ -34,12 +34,19 @@ export const config = {
     // Enable a redirect to a matching locale at the root
     '/',
     
+    // Explicitly handle common routes
+    '/courses',
+    '/cours-de-la-semaine',
+    '/gestion-de-projet',
+    '/nouvelle-offre',
+    '/auth/:path*',
+    
     // Set a cookie to remember the previous locale for
     // all requests that have a locale prefix
     '/(fr|en)/:path*',
     
     // Enable redirects that add missing locales
-    // (e.g. `/pathnames` -> `/en/pathnames`)
-    '/((?!_next|_vercel|.*\\..*).*)'
+    // (e.g. other paths without locale)
+    '/((?!api|_next|_vercel|favicon.ico|logo.svg|file.svg|globe.svg|next.svg|vercel.svg|window.svg|.*\\..*).*)'
   ]
 };

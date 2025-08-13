@@ -2,9 +2,9 @@ import { Suspense } from 'react';
 import { useTranslations } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
-import Image from 'next/image';
 
-import { coursesApi, getAssetUrlWithTransforms, formatDuration, filterTranslations } from '@/lib/directus';
+import { coursesApi } from '@/lib/directus';
+import CourseCard from '@/components/course/CourseCard';
 import type { DirectusCourse } from '@/types/directus';
 
 type Props = {
@@ -64,60 +64,6 @@ function CoursesList({ courses, locale }: { courses: DirectusCourse[]; locale: s
   );
 }
 
-function CourseCard({ course, locale }: { course: DirectusCourse; locale: string }) {
-  const translation = filterTranslations(course.translations, locale);
-  
-  if (!translation) {
-    return null;
-  }
-
-  const imageUrl = course.cover_image 
-    ? getAssetUrlWithTransforms(typeof course.cover_image === 'string' ? course.cover_image : course.cover_image?.id, {
-        width: 400,
-        height: 225,
-        fit: 'cover',
-        format: 'auto',
-        quality: 85
-      })
-    : '';
-
-  const duration = formatDuration(course.duration_minutes, locale);
-
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden border border-gray-200 dark:border-gray-700">
-      {imageUrl && (
-        <div className="relative aspect-video w-full">
-          <Image
-            src={imageUrl}
-            alt={translation.title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
-        </div>
-      )}
-      
-      <div className="p-6">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-          {translation.title}
-        </h3>
-        
-        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
-          {translation.description}
-        </p>
-        
-        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-          <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">
-            {duration}
-          </span>
-          <span className="capitalize">
-            {course.level}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function EmptyState() {
   return (
