@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { formatDuration, filterTranslations, getAssetUrlWithTransforms } from '@/lib/directus';
+import { formatDuration, filterTranslations, getAssetUrlWithTransforms, getParentCompetences } from '@/lib/directus';
 import type { DirectusCourse } from '@/types/directus';
+import CompetenceBadge from './CompetenceBadge';
 
 interface CourseCardProps {
   course: DirectusCourse;
@@ -31,6 +32,7 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
     : '/images/course-placeholder.svg';
   
   const duration = course.duration ? formatDuration(course.duration, locale) : null;
+  const parentCompetences = getParentCompetences(course, locale);
 
   return (
     <Link 
@@ -56,6 +58,19 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
         <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
           {translation.description}
         </p>
+        
+        {parentCompetences.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-4">
+            {parentCompetences.map((competence) => (
+              <CompetenceBadge
+                key={competence.id}
+                title={competence.title}
+                colorLight={competence.colorLight}
+                colorDark={competence.colorDark}
+              />
+            ))}
+          </div>
+        )}
         
         <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
           {duration && (

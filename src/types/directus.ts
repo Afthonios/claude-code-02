@@ -16,9 +16,9 @@ export interface DirectusItem {
 // Directus Courses collection
 export interface DirectusCourse extends DirectusItem {
   legacy_id: string;
-  'Course Image'?: string | DirectusFile;
+  course_image?: string | DirectusFile;
   gallery?: string[] | DirectusFile[];
-  duration_minutes: number;
+  duration?: number;
   level: 'beginner' | 'intermediate' | 'advanced';
   tags?: string;
   price_cents: number;
@@ -32,7 +32,7 @@ export interface DirectusCourse extends DirectusItem {
   // Translations are handled separately
   translations: DirectusCourseTranslation[];
   // Relations
-  competences?: DirectusCourseCompetence[];
+  competence?: DirectusCourseCompetence[];
   instructors?: DirectusCourseInstructor[];
 }
 
@@ -45,6 +45,7 @@ export interface DirectusCourseTranslation {
   subtitle?: string;
   summary: string;
   description: string;
+  slug: string;
   seo_title?: string;
   seo_description?: string;
 }
@@ -53,7 +54,10 @@ export interface DirectusCourseTranslation {
 export interface DirectusCompetence extends DirectusItem {
   icon?: string;
   color?: string;
+  color_light?: string;
+  color_dark?: string;
   category?: string;
+  parent_competence?: string | DirectusCompetence;
   translations: DirectusCompetenceTranslation[];
 }
 
@@ -63,6 +67,7 @@ export interface DirectusCompetenceTranslation {
   competences_id: string;
   languages_code: 'fr' | 'en';
   name: string;
+  title: string;
   description?: string;
 }
 
@@ -70,7 +75,7 @@ export interface DirectusCompetenceTranslation {
 export interface DirectusCourseCompetence {
   id: string;
   courses_id: string | DirectusCourse;
-  competences_id: string | DirectusCompetence;
+  competences_id: DirectusCompetence;
 }
 
 // Directus Instructors collection
