@@ -1,53 +1,65 @@
 @import "tailwindcss";
 
+html {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
 :root {
-  /* Brand colors */
-  --primary: #C2410C;
-  --secondary: #1E3A8A;
+  /* Afthonios brand colors */
+  --brand-primary: #C2410C;
+  --brand-secondary: #1E3A8A;
+  --brand-accent: #F2B705;
+  --brand-dark-bg: #1E4E79;
+  --brand-text-light: #1A1A1A;
+  --brand-text-dark: #FFFFFF;
   
   /* Light theme colors - Afthonios brand palette */
-  --background: 0 0% 100%;
-  --foreground: 0 0% 10%;         /* #1A1A1A */
-  --card: 0 0% 100%;
+  --background: 42 35% 94%;
+  --foreground: 0 0% 10%;
+  --card: 42 20% 95%;
   --card-foreground: 0 0% 10%;
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 10%;
-  --primary-hsl: 14 86% 41%;      /* #C2410C in HSL */
-  --primary-foreground: 0 0% 100%;/* white on primary */
-  --secondary-hsl: 221 83% 53%;   /* #1E3A8A in HSL */
+  --primary: 14 86% 41%;          /* #C2410C in HSL */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 221 83% 53%;       /* #1E3A8A in HSL */
   --secondary-foreground: 0 0% 100%;
-  --muted: 24 33% 95%;            /* neutral section bg */
+  --muted: 24 33% 95%;
   --muted-foreground: 0 0% 30%;
-  --accent: 47 95% 48%;           /* #F2B705 */
+  --accent: 47 95% 48%;           /* #F2B705 in HSL */
   --accent-foreground: 0 0% 10%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
   --border: 0 0% 90%;
   --input: 0 0% 90%;
-  --ring: 14 86% 41%;             /* match primary for focus */
+  --ring: 14 86% 41%;
   --chart-1: 14 86% 41%;
   --chart-2: 221 83% 53%;
   --chart-3: 47 95% 48%;
   --chart-4: 24 33% 95%;
   --chart-5: 0 0% 10%;
   --radius: 0.5rem;
+  
+  /* Competence default colors */
+  --competence-default-light: #E5E7EB;
+  --competence-default-dark: #9CA3AF;
 }
 
 .dark {
-  /* Brand colors */
-  --primary: #C2410C;
-  --secondary: #1E3A8A;
-  
   /* Dark theme colors - Afthonios brand palette */
-  --background: 221 83% 20%;      /* Darker version of secondary */
+  --background: 228 83% 10%;      /* Darker version of secondary */
   --foreground: 0 0% 100%;
-  --card: 221 83% 25%;
+  --card: 221 40% 25%;
   --card-foreground: 0 0% 100%;
   --popover: 221 83% 25%;
   --popover-foreground: 0 0% 100%;
-  --primary-hsl: 14 86% 41%;      /* Keep same primary */
+  --primary: 14 86% 41%;          /* Keep same primary */
   --primary-foreground: 0 0% 100%;
-  --secondary-hsl: 221 83% 53%;   /* Keep same secondary */
+  --secondary: 221 83% 53%;       /* Keep same secondary */
   --secondary-foreground: 0 0% 100%;
   --muted: 221 83% 15%;
   --muted-foreground: 0 0% 80%;
@@ -78,15 +90,11 @@ body {
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
-/* Apply Afthonios brand colors to body */
+/* Apply theme-aware colors to body */
 body {
-  background-color: white;
-  color: #1A1A1A; /* textlight */
-}
-
-.dark body {
-  background-color: #1E4E79; /* darkbg */
-  color: #FFFFFF; /* textdark */
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
 /* Custom scrollbar styles for better theming */

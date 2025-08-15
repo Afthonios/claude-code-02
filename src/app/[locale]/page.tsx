@@ -2,6 +2,9 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { BookOpen, Users, Award, Clock, Globe, Star } from "lucide-react";
+import { coursesApi } from '@/lib/directus';
+import CourseCard from '@/components/course/CourseCard';
+import type { DirectusCourse } from '@/types/directus';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -20,6 +23,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;
   const tHome = await getTranslations({ locale, namespace: 'home' });
+
+  // Fetch a few courses for the preview section
+  let featuredCourses: DirectusCourse[] = [];
+  try {
+    const allCourses = await coursesApi.getAll();
+    featuredCourses = allCourses.slice(0, 3); // Get first 3 courses
+  } catch (error) {
+    console.error('Error loading featured courses:', error);
+  }
 
   return (
     <div className="min-h-screen">
@@ -223,36 +235,43 @@ export default async function HomePage({ params }: Props) {
             </Link>
           </div>
           
-          {/* Course Cards Placeholder */}
+          {/* Featured Course Cards */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {[1, 2, 3].map((index) => (
-              <div key={index} className="bg-card rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                <div className="h-48 bg-gradient-to-br from-blue-400 to-purple-500"></div>
-                <div className="p-6">
-                  <div className="flex items-center mb-3">
-                    <span className="px-3 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-full">
-                      {tHome('courses.category')}
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-bold text-card-foreground mb-3">
-                    {tHome('courses.sampleTitle')} {index}
-                  </h3>
-                  <p className="text-muted-foreground mb-4 line-clamp-2">
-                    {tHome('courses.sampleDescription')}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 bg-muted rounded-full mr-2"></div>
-                      <span className="text-sm text-muted-foreground">{tHome('courses.instructor')}</span>
+            {featuredCourses.length > 0 ? (
+              featuredCourses.map((course) => (
+                <CourseCard key={course.id} course={course} locale={locale} />
+              ))
+            ) : (
+              // Fallback to placeholder cards if no courses available
+              [1, 2, 3].map((index) => (
+                <div key={index} className="bg-card rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                  <div className="h-48 bg-gradient-to-br from-blue-400 to-purple-500"></div>
+                  <div className="p-6">
+                    <div className="flex items-center mb-3">
+                      <span className="px-3 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-full">
+                        {tHome('courses.category')}
+                      </span>
                     </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-card-foreground">€49</div>
-                      <div className="text-sm text-muted-foreground">2h 30min</div>
+                    <h3 className="text-xl font-bold text-card-foreground mb-3">
+                      {tHome('courses.sampleTitle')} {index}
+                    </h3>
+                    <p className="text-muted-foreground mb-4 line-clamp-2">
+                      {tHome('courses.sampleDescription')}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-muted rounded-full mr-2"></div>
+                        <span className="text-sm text-muted-foreground">{tHome('courses.instructor')}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-card-foreground">€49</div>
+                        <div className="text-sm text-muted-foreground">2h 30min</div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </section>

@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { formatDuration, filterTranslations, getAssetUrlWithTransforms } from '@/lib/directus';
+import { formatDuration, filterTranslations, getAssetUrlWithTransforms, getParentCompetences } from '@/lib/directus';
 import type { DirectusCourse } from '@/types/directus';
+import CompetenceBadge from './CompetenceBadge';
 
 interface CourseDetailProps {
   course: DirectusCourse;
@@ -41,6 +42,7 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
     : '/images/course-placeholder.svg'; // Fallback to a local placeholder
   
   const duration = course.duration ? formatDuration(course.duration, locale) : null;
+  const parentCompetences = getParentCompetences(course, locale);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -95,6 +97,25 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
           </div>
         </div>
       </div>
+
+      {/* Competences */}
+      {parentCompetences.length > 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+            {locale === 'fr' ? 'Compétences développées' : 'Skills Developed'}
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {parentCompetences.map((competence) => (
+              <CompetenceBadge
+                key={competence.id}
+                title={competence.title}
+                colorLight={competence.colorLight}
+                colorDark={competence.colorDark}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Course Content */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">

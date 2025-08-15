@@ -1,0 +1,3 @@
+# Start simple with Semgrep’s recommended pack, then tune later.
+# You can add rule packs for javascript, react, security, etc.
+rules: []

@@ -30,43 +30,31 @@ export function ThemeToggle() {
     );
   }
 
-  const cycleTheme = () => {
-    if (theme === "light") {
-      setTheme("dark");
-    } else if (theme === "dark") {
-      setTheme("system");
-    } else {
-      setTheme("light");
-    }
+  const { resolvedTheme } = useTheme();
+  
+  const toggleTheme = () => {
+    // Simple toggle: light <-> dark
+    // When toggling, we override system preference
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
   const getIcon = () => {
-    switch (theme) {
-      case "light":
-        return <Sun className="h-4 w-4" />;
-      case "dark":
-        return <Moon className="h-4 w-4" />;
-      case "system":
-      default:
-        return <Monitor className="h-4 w-4" />;
-    }
+    // Show sun when it's currently dark (clicking will make it light)
+    // Show moon when it's currently light (clicking will make it dark)
+    return resolvedTheme === "dark" ? 
+      <Sun className="h-4 w-4" /> : 
+      <Moon className="h-4 w-4" />;
   };
 
   const getLabel = () => {
-    switch (theme) {
-      case "light":
-        return "Switch to dark mode";
-      case "dark":
-        return "Switch to system mode";
-      case "system":
-      default:
-        return "Switch to light mode";
-    }
+    return resolvedTheme === "dark" ? 
+      "Switch to light mode" : 
+      "Switch to dark mode";
   };
 
   return (
     <button
-      onClick={cycleTheme}
+      onClick={toggleTheme}
       className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 w-10"
       aria-label={getLabel()}
       title={getLabel()}

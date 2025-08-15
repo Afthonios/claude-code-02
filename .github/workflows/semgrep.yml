@@ -2,7 +2,7 @@ name: Semgrep
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" ]   # change if your default branch is different
   pull_request:
 
 jobs:
@@ -13,24 +13,44 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Install and run Semgrep; produce SARIF + JSON (don’t fail the job)
-      - name: Run Semgrep (p/ci)
+      - name: Install Semgrep + jq
         run: |
           pipx install semgrep || pip install --user semgrep
+          sudo apt-get update -y && sudo apt-get install -y jq
+
+      # Run once to produce JSON
+      - name: Run Semgrep (JSON)
+        run: |
           semgrep scan --config p/ci \
-            --sarif -o semgrep.sarif \
-            --json  -o semgrep.json \
+            --json -o semgrep.json \
             --exclude node_modules --exclude .next || true
 
-          echo "## Semgrep Summary" >> $GITHUB_STEP_SUMMARY
+      # Run again to produce SARIF (useful if you later enable Security tab)
+      - name: Run Semgrep (SARIF)
+        run: |
+          semgrep scan --config p/ci \
+            --sarif -o semgrep.sarif \
+            --exclude node_modules --exclude .next || true
+
+      # Human-readable summary in the job output
+      - name: Summarize findings
+        run: |
           COUNT=$(jq '.results | length' semgrep.json 2>/dev/null || echo 0)
+          echo "## Semgrep Summary" >> $GITHUB_STEP_SUMMARY
           echo "- Findings: $COUNT" >> $GITHUB_STEP_SUMMARY
-          echo "- Artifacts: semgrep.sarif, semgrep.json" >> $GITHUB_STEP_SUMMARY
+          if [ "$COUNT" -gt 0 ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Top results" >> $GITHUB_STEP_SUMMARY
+            jq -r '
+              .results[0:10][] |
+              "- \(.extra.severity) \(.check_id) — \(.path):\(.start.line)"
+            ' semgrep.json >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Upload Semgrep artifacts
         uses: actions/upload-artifact@v4
         with:
           name: semgrep-results
           path: |
-            semgrep.sarif
             semgrep.json
+            semgrep.sarif

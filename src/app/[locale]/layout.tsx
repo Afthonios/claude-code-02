@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 import { ReactNode } from "react";
 
 import { locales, type Locale } from "../../i18n";
-import ThemeProvider from "../../components/layout/ThemeProvider";
 import Header from "../../components/layout/Header";
 import LocaleHandler from "../../components/layout/LocaleHandler";
 
@@ -68,16 +67,14 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <ThemeProvider>
-      <NextIntlClientProvider messages={messages}>
-        <LocaleHandler />
-        <div className="relative flex min-h-screen flex-col">
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-        </div>
-      </NextIntlClientProvider>
-    </ThemeProvider>
+    <NextIntlClientProvider messages={messages}>
+      <LocaleHandler />
+      <div className="relative flex min-h-screen flex-col">
+        <Header />
+        <main className="flex-1">
+          {children}
+        </main>
+      </div>
+    </NextIntlClientProvider>
   );
 }

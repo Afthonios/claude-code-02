@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:directus": "vitest run src/__tests__/directus",
+    "test:coverage": "vitest run --coverage",
+    "semgrep": "semgrep scan --config p/ci --error --exclude node_modules --exclude .next",
+    "semgrep:json": "semgrep scan --config p/ci --json --exclude node_modules --exclude .next"
   },
   "dependencies": {
     "@directus/sdk": "^20.0.2",
@@ -28,9 +34,11 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^2.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^2.0.0"
   }
 }

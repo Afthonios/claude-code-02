@@ -1,0 +1,2 @@
+Always use Tailwind CSS color variables from `tailwind.config.ts` for all styling.
+Do not hardcode hex values for brand colors — use the theme color names instead, so changes in `tailwind.config.ts` automatically propagate.
