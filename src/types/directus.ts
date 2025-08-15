@@ -19,11 +19,10 @@ export interface DirectusCourse extends DirectusItem {
   course_image?: string | DirectusFile;
   gallery?: string[] | DirectusFile[];
   duration?: number;
-  level: 'beginner' | 'intermediate' | 'advanced';
+  course_type?: string;
   tags?: string;
   price_cents: number;
   currency: string;
-  availability: 'free' | 'paid' | 'subscription';
   // SEO fields
   seo_title?: string;
   seo_description?: string;
@@ -66,9 +65,13 @@ export interface DirectusCompetenceTranslation {
   id: string;
   competences_id: string;
   languages_code: 'fr' | 'en';
-  name: string;
   title: string;
   description?: string;
+  slug?: string;
+  seo_title?: string;
+  seo_description?: string;
+  card_title?: string;
+  meta_keywords?: string;
 }
 
 // Directus Course-Competence junction table

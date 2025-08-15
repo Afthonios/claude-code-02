@@ -1,5 +1,6 @@
 // Test setup file for Vitest
 import { beforeAll } from 'vitest';
+import '@testing-library/jest-dom';
 
 // Set up environment variables for testing
 beforeAll(() => {

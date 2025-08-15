@@ -10,7 +10,7 @@ import { Moon, Sun, Monitor } from "lucide-react";
  */
 export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
 
   // useEffect only runs on the client, so now we can safely show the UI
   useEffect(() => {
@@ -29,8 +29,6 @@ export function ThemeToggle() {
       </button>
     );
   }
-
-  const { resolvedTheme } = useTheme();
   
   const toggleTheme = () => {
     // Simple toggle: light <-> dark

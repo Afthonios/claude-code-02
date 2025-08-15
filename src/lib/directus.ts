@@ -5,6 +5,7 @@ import type {
   DirectusInstructor,
   DirectusCourseTranslation,
   DirectusCompetenceTranslation,
+  DirectusCourseCompetence,
 } from '@/types/directus';
 
 // Directus client configured for public access only
@@ -23,6 +24,7 @@ export const coursesApi = {
     filter?: Record<string, unknown>;
     sort?: string[];
   }) {
+    console.log('🔍 [coursesApi] getAll called with options:', options);
     const { limit = 50, page = 1, search, filter, sort } = options || {};
     
     const query: Record<string, unknown> = {
@@ -34,6 +36,7 @@ export const coursesApi = {
         'date_created',
         'date_updated',
         'duration',
+        'course_type',
         'course_image',
         'translations.*',
         'competence.competences_id.id',
@@ -58,14 +61,83 @@ export const coursesApi = {
       query.sort = sort;
     }
 
+    console.log('🔍 [coursesApi] Final query object:', JSON.stringify(query, null, 2));
+
     try {
+      console.log('🔍 [coursesApi] Making Directus SDK request...');
+      
+      // On client side, skip SDK and go directly to API route to avoid CORS issues
+      if (typeof window !== 'undefined') {
+        console.log('🔍 [coursesApi] Client-side detected, using API route directly');
+        throw new Error('Client-side - using fallback API route');
+      }
+      
       const response = await directus.request(
         readItems('courses', query)
       );
+      console.log('🔍 [coursesApi] Directus SDK response:', response);
+      console.log('🔍 [coursesApi] Number of courses from SDK:', response?.length || 0);
       return response as DirectusCourse[];
     } catch (error) {
-      console.error('Error fetching courses:', error);
-      throw new Error('Failed to fetch courses');
+      console.error('🔍 [coursesApi] Directus SDK failed. Error:', error);
+      // Fallback to our Next.js API route to avoid CORS issues
+      try {
+        const url = new URL('/api/courses', typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
+        
+        // Add parameters that will be forwarded to Directus
+        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_type,course_image,translations.*,competence.competences_id.*');
+        url.searchParams.set('filter[status][_eq]', 'published');
+        url.searchParams.set('limit', limit.toString());
+        url.searchParams.set('page', page.toString());
+        
+        // Add filter parameters if they exist
+        if (filter) {
+          // Flatten nested filter objects for Directus API
+          const flattenFilter = (obj: any, prefix = 'filter') => {
+            Object.entries(obj).forEach(([key, value]) => {
+              if (key === 'status') return; // status already added above
+              
+              const filterKey = `${prefix}[${key}]`;
+              if (value && typeof value === 'object' && !Array.isArray(value)) {
+                // Recursively flatten nested objects
+                flattenFilter(value, filterKey);
+              } else {
+                // Set the parameter with proper encoding
+                if (Array.isArray(value)) {
+                  url.searchParams.set(filterKey, value.join(','));
+                } else {
+                  url.searchParams.set(filterKey, String(value));
+                }
+              }
+            });
+          };
+          
+          flattenFilter(filter);
+        }
+        
+        if (search) {
+          url.searchParams.set('search', search);
+        }
+        
+        if (sort && sort.length > 0) {
+          url.searchParams.set('sort', sort.join(','));
+        }
+
+        console.log('🔍 [coursesApi] Fallback fetch URL:', url.toString());
+        const fetchResponse = await fetch(url.toString());
+        if (!fetchResponse.ok) {
+          console.error('🔍 [coursesApi] Fallback fetch failed with status:', fetchResponse.status);
+          throw new Error(`HTTP ${fetchResponse.status}: ${fetchResponse.statusText}`);
+        }
+        
+        const data = await fetchResponse.json();
+        console.log('🔍 [coursesApi] Fallback response success:', data?.data?.length || 0, 'courses');
+        return data.data as DirectusCourse[];
+      } catch (fallbackError) {
+        console.error('🔍 [coursesApi] All attempts failed:', fallbackError);
+        // Return empty array as final fallback to prevent app crash
+        return [];
+      }
     }
   },
 
@@ -135,9 +207,46 @@ export const coursesApi = {
       );
 
       return matchingCourse as DirectusCourse | undefined;
-    } catch (error) {
-      console.error('Error fetching course by slug:', error);
-      throw new Error('Failed to fetch course');
+    } catch {
+      // Fallback to direct fetch
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://api.afthonios.com';
+        const legacyId = `f-${slug}`;
+        
+        // Try legacy_id first
+        let url = new URL(`${baseUrl}/items/courses`);
+        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_image,translations.*');
+        url.searchParams.set('filter[legacy_id][_eq]', legacyId);
+        url.searchParams.set('filter[status][_eq]', 'published');
+
+        let fetchResponse = await fetch(url.toString());
+        if (fetchResponse.ok) {
+          const data = await fetchResponse.json();
+          if (data.data.length > 0) {
+            return data.data[0] as DirectusCourse;
+          }
+        }
+
+        // If not found by legacy_id, try searching all courses
+        url = new URL(`${baseUrl}/items/courses`);
+        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_image,translations.*');
+        url.searchParams.set('filter[status][_eq]', 'published');
+        url.searchParams.set('limit', '100');
+
+        fetchResponse = await fetch(url.toString());
+        if (!fetchResponse.ok) {
+          throw new Error(`HTTP ${fetchResponse.status}: ${fetchResponse.statusText}`);
+        }
+        
+        const data = await fetchResponse.json();
+        const matchingCourse = data.data.find((course: DirectusCourse) => 
+          course.translations?.some((translation: DirectusCourseTranslation) => translation.slug === slug)
+        );
+
+        return matchingCourse as DirectusCourse | undefined;
+      } catch {
+        return undefined;
+      }
     }
   },
 
@@ -206,28 +315,54 @@ export const coursesApi = {
 export const competencesApi = {
   async getAll() {
     try {
+      // On client side, skip SDK and go directly to API route to avoid CORS issues
+      if (typeof window !== 'undefined') {
+        console.log('🔍 [competencesApi] Client-side detected, using API route directly');
+        throw new Error('Client-side - using fallback API route');
+      }
+      
       const response = await directus.request(
         readItems('competences', {
           fields: [
             'id',
-            'slug',
-            'color',
             'icon',
-            'translations.name',
-            'translations.description',
-            'translations.languages_code',
+            'color_light',
+            'color_dark',
+            'competence_type',
+            'translations.*',
           ],
           filter: {
-            status: { _eq: 'published' },
+            competence_type: { _eq: 'main_competence' },
+            parent_competence: { _null: true },
           },
-          sort: ['sort'],
         })
       );
 
       return response as DirectusCompetence[];
     } catch (error) {
-      console.error('Error fetching competences:', error);
-      throw new Error('Failed to fetch competences');
+      console.error('🔍 [competencesApi] Directus SDK failed. Error:', error);
+      // Try API route fallback to avoid CORS issues
+      try {
+        const url = new URL('/api/competences', typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
+        url.searchParams.set('fields', 'id,icon,color_light,color_dark,competence_type,translations.*');
+        url.searchParams.set('filter[competence_type][_eq]', 'main_competence');
+        url.searchParams.set('filter[parent_competence][_null]', 'true');
+
+        console.log('🔍 [competencesApi] Fallback fetch URL:', url.toString());
+        const fetchResponse = await fetch(url.toString());
+        if (!fetchResponse.ok) {
+          console.error('🔍 [competencesApi] Fallback fetch failed with status:', fetchResponse.status);
+          throw new Error(`HTTP ${fetchResponse.status}: ${fetchResponse.statusText}`);
+        }
+        
+        const data = await fetchResponse.json();
+        console.log('🔍 [competencesApi] Fallback response success:', data?.data?.length || 0, 'competences');
+        return data.data as DirectusCompetence[];
+      } catch (fallbackError) {
+        console.error('🔍 [competencesApi] All attempts failed:', fallbackError);
+        // Return empty array as final fallback
+        return [];
+      }
     }
   },
 
@@ -425,7 +560,7 @@ export function getParentCompetences(course: DirectusCourse, locale: string) {
         if (translation && !parentCompetences.find(p => p.id === parentCompetence.id)) {
           parentCompetences.push({
             id: parentCompetence.id,
-            title: translation.title || translation.name,
+            title: translation.title,
             colorLight: parentCompetence.color_light,
             colorDark: parentCompetence.color_dark,
           });

@@ -67,11 +67,9 @@
     "title": "Our Courses",
     "searchPlaceholder": "Search courses...",
     "filters": {
-      "level": "Level",
+      "title": "Filters",
       "competences": "Skills",
-      "duration": "Duration",
-      "price": "Price",
-      "availability": "Availability"
+      "course_type": "Course Type"
     },
     "levels": {
       "beginner": "Beginner",

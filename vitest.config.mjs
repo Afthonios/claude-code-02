@@ -6,13 +6,19 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 export default defineConfig({
   test: {
-    environment: 'node',
+    environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/__tests__/setup.ts'],
+    css: false,
+    testTimeout: 10000,
   },
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
     },
+  },
+  css: {
+    preprocessorOptions: {},
+    postcss: false,
   },
 });

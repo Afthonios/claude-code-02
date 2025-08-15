@@ -67,11 +67,9 @@
     "title": "Nos Cours",
     "searchPlaceholder": "Rechercher des cours...",
     "filters": {
-      "level": "Niveau",
+      "title": "Filtres",
       "competences": "Compétences",
-      "duration": "Durée",
-      "price": "Prix",
-      "availability": "Disponibilité"
+      "course_type": "Type de cours"
     },
     "levels": {
       "beginner": "Débutant",
