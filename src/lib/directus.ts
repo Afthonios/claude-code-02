@@ -24,8 +24,7 @@ export const coursesApi = {
     filter?: Record<string, unknown>;
     sort?: string[];
   }) {
-    console.log('🔍 [coursesApi] getAll called with options:', options);
-    const { limit = 50, page = 1, search, filter, sort } = options || {};
+    const { limit = 1000, page = 1, search, filter, sort } = options || {};
     
     const query: Record<string, unknown> = {
       fields: [
@@ -61,25 +60,23 @@ export const coursesApi = {
       query.sort = sort;
     }
 
-    console.log('🔍 [coursesApi] Final query object:', JSON.stringify(query, null, 2));
 
     try {
-      console.log('🔍 [coursesApi] Making Directus SDK request...');
-      
       // On client side, skip SDK and go directly to API route to avoid CORS issues
       if (typeof window !== 'undefined') {
-        console.log('🔍 [coursesApi] Client-side detected, using API route directly');
-        throw new Error('Client-side - using fallback API route');
+        // Skip SDK and fall through to the catch block to use API route
+        throw new Error('CLIENT_SIDE_FALLBACK');
       }
       
       const response = await directus.request(
         readItems('courses', query)
       );
-      console.log('🔍 [coursesApi] Directus SDK response:', response);
-      console.log('🔍 [coursesApi] Number of courses from SDK:', response?.length || 0);
       return response as DirectusCourse[];
     } catch (error) {
-      console.error('🔍 [coursesApi] Directus SDK failed. Error:', error);
+      // Only log non-client-side fallback errors to avoid console noise
+      if (error instanceof Error && error.message !== 'CLIENT_SIDE_FALLBACK') {
+        console.error('🔍 [coursesApi] Directus SDK failed. Error:', error);
+      }
       // Fallback to our Next.js API route to avoid CORS issues
       try {
         const url = new URL('/api/courses', typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
@@ -93,7 +90,7 @@ export const coursesApi = {
         // Add filter parameters if they exist
         if (filter) {
           // Flatten nested filter objects for Directus API
-          const flattenFilter = (obj: any, prefix = 'filter') => {
+          const flattenFilter = (obj: Record<string, unknown>, prefix = 'filter') => {
             Object.entries(obj).forEach(([key, value]) => {
               if (key === 'status') return; // status already added above
               
@@ -123,7 +120,6 @@ export const coursesApi = {
           url.searchParams.set('sort', sort.join(','));
         }
 
-        console.log('🔍 [coursesApi] Fallback fetch URL:', url.toString());
         const fetchResponse = await fetch(url.toString());
         if (!fetchResponse.ok) {
           console.error('🔍 [coursesApi] Fallback fetch failed with status:', fetchResponse.status);
@@ -131,7 +127,6 @@ export const coursesApi = {
         }
         
         const data = await fetchResponse.json();
-        console.log('🔍 [coursesApi] Fallback response success:', data?.data?.length || 0, 'courses');
         return data.data as DirectusCourse[];
       } catch (fallbackError) {
         console.error('🔍 [coursesApi] All attempts failed:', fallbackError);
@@ -317,8 +312,8 @@ export const competencesApi = {
     try {
       // On client side, skip SDK and go directly to API route to avoid CORS issues
       if (typeof window !== 'undefined') {
-        console.log('🔍 [competencesApi] Client-side detected, using API route directly');
-        throw new Error('Client-side - using fallback API route');
+        // Skip SDK and fall through to the catch block to use API route
+        throw new Error('CLIENT_SIDE_FALLBACK');
       }
       
       const response = await directus.request(
@@ -340,7 +335,10 @@ export const competencesApi = {
 
       return response as DirectusCompetence[];
     } catch (error) {
-      console.error('🔍 [competencesApi] Directus SDK failed. Error:', error);
+      // Only log non-client-side fallback errors to avoid console noise
+      if (error instanceof Error && error.message !== 'CLIENT_SIDE_FALLBACK') {
+        console.error('🔍 [competencesApi] Directus SDK failed. Error:', error);
+      }
       // Try API route fallback to avoid CORS issues
       try {
         const url = new URL('/api/competences', typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
@@ -348,7 +346,6 @@ export const competencesApi = {
         url.searchParams.set('filter[competence_type][_eq]', 'main_competence');
         url.searchParams.set('filter[parent_competence][_null]', 'true');
 
-        console.log('🔍 [competencesApi] Fallback fetch URL:', url.toString());
         const fetchResponse = await fetch(url.toString());
         if (!fetchResponse.ok) {
           console.error('🔍 [competencesApi] Fallback fetch failed with status:', fetchResponse.status);
@@ -356,7 +353,6 @@ export const competencesApi = {
         }
         
         const data = await fetchResponse.json();
-        console.log('🔍 [competencesApi] Fallback response success:', data?.data?.length || 0, 'competences');
         return data.data as DirectusCompetence[];
       } catch (fallbackError) {
         console.error('🔍 [competencesApi] All attempts failed:', fallbackError);

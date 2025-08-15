@@ -17,11 +17,12 @@
     "home": "Accueil",
     "menu": "Menu",
     "language": "Langue",
-    "theme": "Thème"
+    "theme": "Thème",
+    "closeFilters": "Fermer les filtres"
   },
   "navigation": {
-    "courses": "Cours",
-    "courseOfTheWeek": "Cours de la semaine",
+    "courses": "Formations",
+    "courseOfTheWeek": "Formation de la semaine",
     "projectManagement": "Gestion de projet",
     "newOffer": "Nouvelle offre",
     "about": "À propos",
@@ -64,12 +65,15 @@
     }
   },
   "courses": {
-    "title": "Nos Cours",
-    "searchPlaceholder": "Rechercher des cours...",
+    "title": "Nos Formations",
+    "searchPlaceholder": "Rechercher des formations...",
     "filters": {
       "title": "Filtres",
       "competences": "Compétences",
-      "course_type": "Type de cours"
+      "course_type": "Type de formation",
+      "selectSkills": "Sélectionner les compétences",
+      "loadingSkills": "Chargement des compétences...",
+      "clearAllFilters": "Effacer tous les filtres"
     },
     "levels": {
       "beginner": "Débutant",
@@ -99,11 +103,22 @@
       "prerequisites": "Prérequis",
       "learningObjectives": "Objectifs d'apprentissage",
       "whatYouWillLearn": "Ce que vous allez apprendre",
-      "courseContent": "Contenu du cours",
+      "courseContent": "Contenu de la formation",
       "duration": "Durée totale",
       "level": "Niveau",
       "language": "Langue",
       "certificate": "Certificat inclus"
+    },
+    "resultsCount": {
+      "loading": "Chargement...",
+      "found": "{count, plural, =0 {Aucune formation trouvée} one {# formation trouvée} other {# formations trouvées}}"
+    },
+    "noResults": {
+      "title": "Aucune formation trouvée",
+      "withFilters": "Essayez d'ajuster vos critères de recherche ou d'effacer certains filtres.",
+      "withoutFilters": "Aucune formation n'est disponible pour le moment.",
+      "clearFilters": "Effacer tous les filtres",
+      "tryAgain": "Réessayer"
     }
   },
   "theme": {
@@ -114,20 +129,20 @@
   },
   "meta": {
     "title": "Afthonios - Plateforme d'apprentissage en ligne",
-    "description": "Découvrez plus de 250 cours en ligne pour développer vos compétences. Formation professionnelle et personnelle avec des experts.",
-    "keywords": "formation en ligne, cours, apprentissage, compétences, développement professionnel"
+    "description": "Découvrez plus de 250 formations en ligne pour développer vos compétences. Formation professionnelle et personnelle avec des experts.",
+    "keywords": "formation en ligne, formations, apprentissage, compétences, développement professionnel"
   },
   "home": {
     "hero": {
       "badge": "🌟 Plateforme d'apprentissage #1 en France",
       "title": "Développez vos compétences avec",
       "titleHighlight": "nos formations d'excellence",
-      "subtitle": "Plus de 250 cours créés par des experts pour accélérer votre développement professionnel et personnel. Rejoignez 50 000+ apprenants qui transforment déjà leur carrière.",
+      "subtitle": "Plus de 250 formations créées par des experts pour accélérer votre développement professionnel et personnel. Rejoignez 50 000+ apprenants qui transforment déjà leur carrière.",
       "cta": "Découvrir nos formations",
       "learnMore": "En savoir plus"
     },
     "stats": {
-      "courses": "Cours disponibles",
+      "courses": "Formations disponibles",
       "students": "Étudiants actifs",
       "satisfaction": "Satisfaction",
       "support": "Support"
@@ -149,7 +164,7 @@
       },
       "quality": {
         "title": "Contenu de qualité",
-        "description": "Des cours actualisés régulièrement avec les dernières tendances et meilleures pratiques du marché."
+        "description": "Des formations actualisées régulièrement avec les dernières tendances et meilleures pratiques du marché."
       },
       "global": {
         "title": "Accès mondial",
@@ -161,9 +176,9 @@
       }
     },
     "courses": {
-      "title": "Cours populaires",
+      "title": "Formations populaires",
       "subtitle": "Découvrez nos formations les plus appréciées par notre communauté d'apprenants.",
-      "viewAll": "Voir tous les cours",
+      "viewAll": "Voir toutes les formations",
       "category": "Développement",
       "sampleTitle": "Formation complète",
       "sampleDescription": "Maîtrisez les compétences essentielles avec cette formation pratique et interactive.",

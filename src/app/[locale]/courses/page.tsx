@@ -21,12 +21,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 async function CoursesContent({ locale }: { locale: string }) {
-  console.log('🔍 [CoursesPage] Loading initial courses for locale:', locale);
   
   try {
     // Load initial courses for SSR
-    const initialCourses = await coursesApi.getAll({ limit: 50 });
-    console.log('🔍 [CoursesPage] Initial courses loaded:', initialCourses?.length || 0);
+    const initialCourses = await coursesApi.getAll({ limit: 1000 });
     
     return (
       <CoursesPageClient locale={locale} initialCourses={initialCourses || []} />

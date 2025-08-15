@@ -28,15 +28,9 @@ export default function ActiveFilters({
   const getFilterLabel = (filterType: keyof FilterState, value: string): string => {
     switch (filterType) {
       case 'competences':
-        console.log('🔍 [ActiveFilters] Looking for competence with value:', value, typeof value);
-        console.log('🔍 [ActiveFilters] Available competence options count:', competenceOptions.length);
-        console.log('🔍 [ActiveFilters] Available competence options:', competenceOptions.map(opt => ({id: opt.value, label: opt.label})));
         // Ensure both values are strings for comparison
         const found = competenceOptions.find(opt => String(opt.value) === String(value));
-        console.log('🔍 [ActiveFilters] Found competence:', found);
-        const result = found?.label || `Competence ${value} (${competenceOptions.length} options available)`;
-        console.log('🔍 [ActiveFilters] Returning:', result);
-        return result;
+        return found?.label || `Competence ${value} (${competenceOptions.length} options available)`;
       default:
         return value;
     }

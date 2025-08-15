@@ -20,11 +20,6 @@ export function useSearchFilters() {
     const search = searchParams.get('search') || '';
     const competences = searchParams.get('competences')?.split(',').filter(Boolean) || [];
     
-    console.log('🔍 [useSearchFilters] Initializing from URL:', {
-      search,
-      competences,
-      allParams: Object.fromEntries(searchParams.entries())
-    });
     
     return {
       search,
@@ -55,18 +50,14 @@ export function useSearchFilters() {
 
   // Update search query
   const setSearch = useCallback((search: string) => {
-    console.log('🔍 [useSearchFilters] setSearch called with:', search);
     const newState = { ...state, search };
-    console.log('🔍 [useSearchFilters] New state after search update:', newState);
     setState(newState);
     updateURL(newState);
   }, [state, updateURL]);
 
   // Update filters
   const setFilters = useCallback((filters: FilterState) => {
-    console.log('🔍 [useSearchFilters] setFilters called with:', filters);
     const newState = { ...state, ...filters };
-    console.log('🔍 [useSearchFilters] New state after filters update:', newState);
     setState(newState);
     updateURL(newState);
   }, [state, updateURL]);
@@ -106,14 +97,10 @@ export function useSearchFilters() {
       competences: searchParams.get('competences')?.split(',').filter(Boolean) || [],
     };
 
-    console.log('🔍 [useSearchFilters] URL sync effect - newState:', newState);
-    console.log('🔍 [useSearchFilters] URL sync effect - currentState:', state);
-    console.log('🔍 [useSearchFilters] URL sync effect - isFirstLoad:', isFirstLoad);
 
     // Update state if it changed OR if this is the first load (to trigger effects)
     const hasChanged = JSON.stringify(state) !== JSON.stringify(newState);
     if (hasChanged || isFirstLoad) {
-      console.log('🔍 [useSearchFilters] Updating state, hasChanged:', hasChanged, 'isFirstLoad:', isFirstLoad);
       setState(newState);
       if (isFirstLoad) {
         setIsFirstLoad(false);
@@ -124,7 +111,6 @@ export function useSearchFilters() {
 
   // Generate Directus API filter object
   const getDirectusFilters = useCallback(() => {
-    console.log('🔍 [useSearchFilters] getDirectusFilters called with competences:', state.competences);
     
     const filters: Record<string, unknown> = {
       status: { _eq: 'published' },
@@ -132,7 +118,6 @@ export function useSearchFilters() {
 
     // Competences filter (filtering by parent competences)
     if (state.competences.length > 0) {
-      console.log('🔍 [useSearchFilters] Adding competences filter:', state.competences);
       // Filter courses that have any of the selected parent competences
       filters.competence = {
         competences_id: {
@@ -143,7 +128,6 @@ export function useSearchFilters() {
       };
     }
 
-    console.log('🔍 [useSearchFilters] Final generated filters:', JSON.stringify(filters, null, 2));
     return filters;
   }, [state.competences]); // Only depend on competences array, not entire state
 

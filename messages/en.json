@@ -17,7 +17,8 @@
     "home": "Home",
     "menu": "Menu",
     "language": "Language",
-    "theme": "Theme"
+    "theme": "Theme",
+    "closeFilters": "Close filters"
   },
   "navigation": {
     "courses": "Courses",
@@ -69,7 +70,10 @@
     "filters": {
       "title": "Filters",
       "competences": "Skills",
-      "course_type": "Course Type"
+      "course_type": "Course Type",
+      "selectSkills": "Select skills",
+      "loadingSkills": "Loading skills...",
+      "clearAllFilters": "Clear all filters"
     },
     "levels": {
       "beginner": "Beginner",
@@ -104,7 +108,19 @@
       "level": "Level",
       "language": "Language",
       "certificate": "Certificate included"
-    }
+    },
+    "resultsCount": {
+      "loading": "Loading...",
+      "found": "{count, plural, =0 {No courses found} one {# course found} other {# courses found}}"
+    },
+    "noResults": {
+      "title": "No courses found",
+      "withFilters": "Try adjusting your search criteria or clearing some filters.",
+      "withoutFilters": "No courses are available at the moment.",
+      "clearFilters": "Clear all filters",
+      "tryAgain": "Try again"
+    },
+    "viewAll": "View all courses"
   },
   "theme": {
     "light": "Light",

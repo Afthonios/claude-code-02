@@ -14,7 +14,6 @@ export async function GET(request: NextRequest) {
       directusUrl.searchParams.set(key, value);
     });
 
-    console.log('🔍 [API Route] Proxying competences request to:', directusUrl.toString());
 
     // Make the request to Directus with timeout
     const controller = new AbortController();
@@ -41,7 +40,6 @@ export async function GET(request: NextRequest) {
       }
 
       const data = await response.json();
-      console.log('🔍 [API Route] Directus competences response:', data?.data?.length || 0, 'competences');
 
       // Return the data with CORS headers
       return NextResponse.json(data, {
@@ -93,7 +91,6 @@ export async function GET(request: NextRequest) {
         ]
       };
 
-      console.log('🔍 [API Route] Returning mock competences data due to Directus failure');
       
       return NextResponse.json(mockData, {
         headers: {

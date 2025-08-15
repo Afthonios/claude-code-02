@@ -23,6 +23,7 @@ export default function FilterSidebar({
   onToggle,
 }: FilterSidebarProps) {
   const t = useTranslations('courses');
+  const tCommon = useTranslations('common');
 
   const handleFilterChange = (filterType: keyof FilterState, values: string[]) => {
     onFiltersChange({
@@ -65,7 +66,7 @@ export default function FilterSidebar({
               <button
                 onClick={onToggle}
                 className="lg:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                aria-label="Close filters"
+                aria-label={tCommon('closeFilters')}
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -79,7 +80,7 @@ export default function FilterSidebar({
                 onClick={clearAllFilters}
                 className="w-full mb-4 px-3 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
               >
-                Clear all filters
+                {t('filters.clearAllFilters')}
               </button>
             )}
 
@@ -95,7 +96,7 @@ export default function FilterSidebar({
                   value={filters.competences}
                   options={competenceOptions}
                   onChange={(values) => handleFilterChange('competences', values)}
-                  placeholder={competenceOptions.length === 0 ? "Loading skills..." : "Select skills"}
+                  placeholder={competenceOptions.length === 0 ? t('filters.loadingSkills') : t('filters.selectSkills')}
                 />
               </div>
 
