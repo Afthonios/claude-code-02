@@ -18,7 +18,7 @@ html {
   --brand-text-dark: #FFFFFF;
   
   /* Light theme colors - Afthonios brand palette */
-  --background: 42 35% 94%;
+  --background: 42 20% 97%;      /* Warm paper-like background */
   --foreground: 0 0% 10%;
   --card: 42 20% 95%;
   --card-foreground: 0 0% 10%;
@@ -50,31 +50,31 @@ html {
 }
 
 .dark {
-  /* Dark theme colors - Afthonios brand palette */
-  --background: 228 83% 10%;      /* Darker version of secondary */
-  --foreground: 0 0% 100%;
-  --card: 221 40% 25%;
-  --card-foreground: 0 0% 100%;
-  --popover: 221 83% 25%;
-  --popover-foreground: 0 0% 100%;
+  /* Dark theme colors - Lighter warm brownish approach for better readability */
+  --background: 24 12% 12%;       /* Lighter warm brown background */
+  --foreground: 43 8% 98%;        /* Brighter warm off-white */
+  --card: 20 14% 18%;             /* Lighter elevated warm brown */
+  --card-foreground: 43 8% 98%;
+  --popover: 20 14% 18%;
+  --popover-foreground: 43 8% 98%;
   --primary: 14 86% 41%;          /* Keep same primary */
   --primary-foreground: 0 0% 100%;
   --secondary: 221 83% 53%;       /* Keep same secondary */
   --secondary-foreground: 0 0% 100%;
-  --muted: 221 83% 15%;
-  --muted-foreground: 0 0% 80%;
+  --muted: 22 10% 15%;            /* Lighter warm muted brown */
+  --muted-foreground: 43 8% 85%;  /* Higher contrast for better readability */
   --accent: 47 95% 48%;
   --accent-foreground: 0 0% 10%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
-  --border: 221 83% 30%;
-  --input: 221 83% 30%;
+  --border: 20 14% 25%;           /* Lighter warm brown borders */
+  --input: 20 12% 20%;            /* Lighter warm brown input fields */
   --ring: 14 86% 41%;
   --chart-1: 14 86% 41%;
   --chart-2: 221 83% 53%;
   --chart-3: 47 95% 48%;
-  --chart-4: 221 83% 40%;
-  --chart-5: 0 0% 80%;
+  --chart-4: 20 14% 35%;
+  --chart-5: 43 8% 85%;
 }
 
 @theme inline {
@@ -108,12 +108,23 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.5);
+  background: hsl(var(--muted-foreground) / 0.4);
   border-radius: 4px;
+  transition: background-color 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.7);
+  background: hsl(var(--muted-foreground) / 0.6);
+}
+
+/* Dark mode specific scrollbar improvements */
+.dark ::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border: 1px solid hsl(var(--border));
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
 }
 
 /* Focus outline improvements */

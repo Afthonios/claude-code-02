@@ -56,16 +56,16 @@ export default function FilterSidebar({
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0 transition-transform duration-300 ease-in-out lg:transition-none`}
       >
-        <div className="h-full w-80 lg:w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
+        <div className="h-full w-80 lg:w-64 bg-card border-r border-border overflow-y-auto">
           <div className="p-4">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <h2 className="text-lg font-semibold text-card-foreground">
                 {t('filters.title', 'Filters')}
               </h2>
               <button
                 onClick={onToggle}
-                className="lg:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="lg:hidden p-2 text-muted-foreground hover:text-card-foreground"
                 aria-label={tCommon('closeFilters')}
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,7 +78,7 @@ export default function FilterSidebar({
             {hasActiveFilters && (
               <button
                 onClick={clearAllFilters}
-                className="w-full mb-4 px-3 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
+                className="w-full mb-4 px-3 py-2 text-sm text-primary hover:bg-muted rounded-md transition-colors"
               >
                 {t('filters.clearAllFilters')}
               </button>
@@ -88,7 +88,7 @@ export default function FilterSidebar({
             <div className="space-y-6">
               {/* Competences Filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-card-foreground mb-2">
                   {t('filters.competences')}
                 </label>
                 <FilterDropdown

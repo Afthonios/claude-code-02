@@ -65,11 +65,11 @@ export default function FilterDropdown({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+        className="w-full flex items-center justify-between px-3 py-2 border border-input rounded-md bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
-        <span className={value.length === 0 ? 'text-gray-500 dark:text-gray-400' : ''}>
+        <span className={value.length === 0 ? 'text-muted-foreground' : ''}>
           {getDisplayText()}
         </span>
         <svg
@@ -83,25 +83,25 @@ export default function FilterDropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-10 mt-1 w-full bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto">
           {options.map((option) => (
             <label
               key={option.value}
-              className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+              className="flex items-center px-3 py-2 hover:bg-muted cursor-pointer"
             >
               <input
                 type={multiple ? 'checkbox' : 'radio'}
                 checked={value.includes(option.value)}
                 onChange={() => handleOptionClick(option.value)}
-                className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
+                className="mr-2 h-4 w-4 text-primary focus:ring-ring border-input rounded"
               />
-              <span className="text-sm text-gray-900 dark:text-gray-100">
+              <span className="text-sm text-popover-foreground">
                 {option.label}
               </span>
             </label>
           ))}
           {options.length === 0 && (
-            <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+            <div className="px-3 py-2 text-sm text-muted-foreground">
               No options available
             </div>
           )}

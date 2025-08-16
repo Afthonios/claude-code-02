@@ -226,12 +226,12 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-[hsl(var(--background))] dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
         
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             {t('title')}
           </h1>
         </div>
@@ -251,21 +251,21 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
             {/* Filter Toggle Button (Mobile) */}
             <button
               onClick={toggleFilterSidebar}
-              className="lg:hidden flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="lg:hidden flex items-center px-4 py-2 border border-input rounded-md bg-background text-foreground hover:bg-muted"
             >
               <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
               {t('filters.title')}
               {hasActiveFilters && (
-                <span className="ml-2 px-2 py-1 text-xs bg-blue-500 text-white rounded-full">
+                <span className="ml-2 px-2 py-1 text-xs bg-primary text-primary-foreground rounded-full">
                   {Object.values(filters).flat().length + (search ? 1 : 0)}
                 </span>
               )}
             </button>
 
             {/* Results Count */}
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="text-sm text-muted-foreground">
               {isLoading ? (
                 t('resultsCount.loading')
               ) : (
@@ -300,10 +300,10 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
           <div className="flex-1 lg:ml-0">
             {error && (
               <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-                <p className="text-red-600 dark:text-red-400">{error}</p>
+                <p className="text-destructive">{error}</p>
                 <button
                   onClick={fetchCourses}
-                  className="mt-2 text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 underline"
+                  className="mt-2 text-sm text-destructive hover:text-destructive/80 underline"
                 >
                   {t('noResults.tryAgain')}
                 </button>
@@ -344,10 +344,10 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
                 ) : (
                   <div className="text-center py-12">
                     <div className="text-gray-400 dark:text-gray-600 text-6xl mb-4">🔍</div>
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    <h3 className="text-lg font-medium text-foreground mb-2">
                       {t('noResults.title')}
                     </h3>
-                    <p className="text-gray-500 dark:text-gray-400 mb-4">
+                    <p className="text-muted-foreground mb-4">
                       {hasActiveFilters
                         ? t('noResults.withFilters')
                         : t('noResults.withoutFilters')}
@@ -355,7 +355,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
                     {hasActiveFilters && (
                       <button
                         onClick={handleClearAllFilters}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                        className="text-primary hover:text-primary/80 underline"
                       >
                         {t('noResults.clearFilters')}
                       </button>
