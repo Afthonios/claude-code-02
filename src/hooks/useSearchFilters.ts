@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 export interface FilterState {
   competences: string[];
+  showBookmarked: boolean;
 }
 
 export interface SearchFiltersState extends FilterState {
@@ -19,11 +20,13 @@ export function useSearchFilters() {
   const [state, setState] = useState<SearchFiltersState>(() => {
     const search = searchParams.get('search') || '';
     const competences = searchParams.get('competences')?.split(',').filter(Boolean) || [];
+    const showBookmarked = searchParams.get('showBookmarked') === 'true';
     
     
     return {
       search,
       competences,
+      showBookmarked,
     };
   });
 
@@ -35,17 +38,25 @@ export function useSearchFilters() {
       params.set('search', newState.search);
     }
     
+    if (newState.showBookmarked) {
+      params.set('showBookmarked', 'true');
+    }
+    
     Object.entries(newState).forEach(([key, value]) => {
-      if (key !== 'search' && Array.isArray(value) && value.length > 0) {
+      if (key !== 'search' && key !== 'showBookmarked' && Array.isArray(value) && value.length > 0) {
         params.set(key, value.join(','));
       }
     });
 
     const queryString = params.toString();
-    const newURL = queryString ? `?${queryString}` : window.location.pathname;
     
     // Use replace to avoid cluttering browser history
-    router.replace(newURL, { scroll: false });
+    // Only pass the query string, let Next.js handle the pathname
+    if (typeof window !== 'undefined') {
+      const currentPath = window.location.pathname;
+      const newURL = queryString ? `${currentPath}?${queryString}` : currentPath;
+      router.replace(newURL, { scroll: false });
+    }
   }, [router]);
 
   // Update search query
@@ -77,6 +88,7 @@ export function useSearchFilters() {
     const newState: SearchFiltersState = {
       search: '',
       competences: [],
+      showBookmarked: false,
     };
     setState(newState);
     updateURL(newState);
@@ -95,6 +107,7 @@ export function useSearchFilters() {
     const newState: SearchFiltersState = {
       search: searchParams.get('search') || '',
       competences: searchParams.get('competences')?.split(',').filter(Boolean) || [],
+      showBookmarked: searchParams.get('showBookmarked') === 'true',
     };
 
 
@@ -133,14 +146,15 @@ export function useSearchFilters() {
 
   // Stable hasActiveFilters computation
   const hasActiveFilters = useMemo(() => {
-    return state.search || state.competences.length > 0;
-  }, [state.search, state.competences]);
+    return state.search || state.competences.length > 0 || state.showBookmarked;
+  }, [state.search, state.competences, state.showBookmarked]);
 
   return {
     // State
     search: state.search,
     filters: {
       competences: state.competences,
+      showBookmarked: state.showBookmarked,
     },
     
     // Actions

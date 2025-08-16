@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import LanguageSwitcher from "@/components/i18n/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import Image from "next/image";
+import { getCoursesListUrl } from "@/lib/directus";
 import type { Locale } from "@/i18n";
 
 /**
@@ -43,7 +44,7 @@ export default function Header() {
         {/* Main Navigation - Hidden on mobile, shown on larger screens */}
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
           <Link
-            href={`/${currentLocale}/courses`}
+            href={getCoursesListUrl(currentLocale)}
             className="transition-colors text-secondary hover:underline dark:text-accent dark:hover:underline focus:outline-none focus:ring-2 focus:ring-accent"
           >
             {t('courses')}

@@ -73,7 +73,12 @@
       "course_type": "Course Type",
       "selectSkills": "Select skills",
       "loadingSkills": "Loading skills...",
-      "clearAllFilters": "Clear all filters"
+      "clearAllFilters": "Clear all filters",
+      "showBookmarked": "Show my bookmarks only"
+    },
+    "bookmark": {
+      "add": "Add to bookmarks",
+      "remove": "Remove from bookmarks"
     },
     "levels": {
       "beginner": "Beginner",

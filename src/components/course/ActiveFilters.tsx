@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 
 interface FilterState {
   competences: string[];
+  showBookmarked: boolean;
 }
 
 interface ActiveFiltersProps {
@@ -31,6 +32,8 @@ export default function ActiveFilters({
         // Ensure both values are strings for comparison
         const found = competenceOptions.find(opt => String(opt.value) === String(value));
         return found?.label || `Competence ${value} (${competenceOptions.length} options available)`;
+      case 'showBookmarked':
+        return t('filters.showBookmarked');
       default:
         return value;
     }
@@ -54,20 +57,39 @@ export default function ActiveFilters({
     switch (filterType) {
       case 'competences':
         return t('filters.competences');
+      case 'showBookmarked':
+        return t('filters.showBookmarked');
       default:
         return filterType;
     }
   };
 
-  const activeFilterItems = Object.entries(filters).flatMap(([filterType, values]) =>
-    values.map(value => ({
-      type: filterType as keyof FilterState,
-      value,
-      label: getFilterLabel(filterType as keyof FilterState, value),
-      typeLabel: getFilterTypeLabel(filterType as keyof FilterState),
-      color: getFilterColor(filterType as keyof FilterState, value),
-    }))
-  );
+  const activeFilterItems = Object.entries(filters).flatMap(([filterType, values]) => {
+    // Handle boolean filters (like showBookmarked)
+    if (typeof values === 'boolean') {
+      if (!values) return []; // Don't show inactive boolean filters
+      return [{
+        type: filterType as keyof FilterState,
+        value: 'true',
+        label: getFilterLabel(filterType as keyof FilterState, 'true'),
+        typeLabel: getFilterTypeLabel(filterType as keyof FilterState),
+        color: getFilterColor(filterType as keyof FilterState, 'true'),
+      }];
+    }
+    
+    // Handle array filters (like competences)
+    if (Array.isArray(values)) {
+      return values.map(value => ({
+        type: filterType as keyof FilterState,
+        value,
+        label: getFilterLabel(filterType as keyof FilterState, value),
+        typeLabel: getFilterTypeLabel(filterType as keyof FilterState),
+        color: getFilterColor(filterType as keyof FilterState, value),
+      }));
+    }
+    
+    return [];
+  });
 
   const hasActiveItems = activeFilterItems.length > 0 || searchQuery;
 
@@ -133,7 +155,14 @@ export default function ActiveFilters({
               )}
               <span className="font-medium">{item.label}</span>
               <button
-                onClick={() => onFilterRemove(item.type, item.value)}
+                onClick={() => {
+                  // For boolean filters, we pass a special value to indicate toggling off
+                  if (item.type === 'showBookmarked') {
+                    onFilterRemove(item.type, 'false');
+                  } else {
+                    onFilterRemove(item.type, item.value);
+                  }
+                }}
                 className="ml-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 aria-label={`Remove ${item.typeLabel} filter`}
               >

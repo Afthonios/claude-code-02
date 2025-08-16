@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { getCoursesListUrl } from '@/lib/directus';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -75,7 +76,7 @@ export default async function NewOfferPage({ params }: Props) {
                 </div>
 
                 <Link
-                  href={`/${locale}/courses`}
+                  href={getCoursesListUrl(locale)}
                   className="inline-flex items-center px-8 py-4 bg-white text-primary text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   {locale === 'fr' ? 'Commencer maintenant' : 'Start Now'}
@@ -202,7 +203,7 @@ export default async function NewOfferPage({ params }: Props) {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href={`/${locale}/courses`}
+                href={getCoursesListUrl(locale)}
                 className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               >
                 {locale === 'fr' ? 'Découvrir les cours' : 'Discover Courses'}

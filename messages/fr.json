@@ -73,7 +73,12 @@
       "course_type": "Type de formation",
       "selectSkills": "Sélectionner les compétences",
       "loadingSkills": "Chargement des compétences...",
-      "clearAllFilters": "Effacer tous les filtres"
+      "clearAllFilters": "Effacer tous les filtres",
+      "showBookmarked": "Afficher seulement mes favoris"
+    },
+    "bookmark": {
+      "add": "Ajouter aux favoris",
+      "remove": "Retirer des favoris"
     },
     "levels": {
       "beginner": "Débutant",

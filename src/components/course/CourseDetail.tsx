@@ -1,8 +1,13 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
-import { formatDuration, filterTranslations, getAssetUrlWithTransforms, getParentCompetences } from '@/lib/directus';
+import { formatDuration, filterTranslations, getAssetUrlWithTransforms, getParentCompetences, getCoursesListUrl } from '@/lib/directus';
+import { getCourseGradientStyles, cn } from '@/lib/utils';
 import type { DirectusCourse } from '@/types/directus';
 import CompetenceBadge from './CompetenceBadge';
+import BookmarkButton from './BookmarkButton';
+import { Clock } from 'lucide-react';
 
 interface CourseDetailProps {
   course: DirectusCourse;
@@ -44,29 +49,91 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
   const duration = course.duration ? formatDuration(course.duration, locale) : null;
   const parentCompetences = getParentCompetences(course, locale);
 
+  // Get gradient styles for the course detail
+  const gradientStyles = getCourseGradientStyles({
+    gradient_from_light: course.gradient_from_light,
+    gradient_to_light: course.gradient_to_light,
+    gradient_from_dark: course.gradient_from_dark,
+    gradient_to_dark: course.gradient_to_dark,
+    on_light: course.on_light,
+    on_dark: course.on_dark,
+  });
+
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-3xl mx-auto">
+      {/* Inject CSS for gradient styling */}
+      {gradientStyles.hasGradient && (
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            .course-detail-${course.id} {
+              background: ${course.gradient_from_light && course.gradient_to_light 
+                ? `linear-gradient(135deg, ${course.gradient_from_light} 0%, ${course.gradient_to_light} 100%)`
+                : 'transparent'} !important;
+            }
+            .dark .course-detail-${course.id} {
+              background: ${course.gradient_from_dark && course.gradient_to_dark 
+                ? `linear-gradient(135deg, ${course.gradient_from_dark} 0%, ${course.gradient_to_dark} 100%)`
+                : 'transparent'} !important;
+            }
+            .course-detail-${course.id}-text {
+              color: ${course.on_light || '#000000'} !important;
+            }
+            .dark .course-detail-${course.id}-text {
+              color: ${course.on_dark || '#ffffff'} !important;
+            }
+          `
+        }} />
+      )}
+      
       {/* Breadcrumb */}
       <nav className="mb-6 text-sm">
         <Link 
-          href={`/${locale}/courses`}
-          className="text-blue-600 dark:text-blue-400 hover:underline"
+          href={getCoursesListUrl(locale)}
+          className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 font-medium"
         >
-          {locale === 'fr' ? '← Retour aux cours' : '← Back to courses'}
+          <span className="mr-1">←</span>
+          <span>{locale === 'fr' ? 'Retour aux cours' : 'Back to courses'}</span>
         </Link>
       </nav>
 
-      {/* Hero Section */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden mb-8">
-        <div className="relative aspect-[2/1] w-full">
+      {/* Combined Hero and Course Information */}
+      <div className={cn(
+        "rounded-lg shadow-lg overflow-hidden mb-8",
+        gradientStyles.hasGradient 
+          ? `course-detail-${course.id}` 
+          : "bg-white dark:bg-gray-800"
+      )}>
+        {/* Image Section */}
+        <div className="relative w-full max-h-80 overflow-hidden">
           <Image
             src={imageUrl}
             alt={translation.title}
-            fill
-            className="object-cover"
+            width={800}
+            height={400}
+            className="w-full h-auto object-contain"
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          
+          {/* Bookmark button positioned in top-right corner */}
+          <div className="absolute top-4 right-4 z-10">
+            <BookmarkButton 
+              courseId={course.id} 
+              size="md"
+              className="bg-white/20 dark:bg-black/20 backdrop-blur-sm rounded-full hover:bg-white/30 dark:hover:bg-black/30"
+            />
+          </div>
+          
+          {/* Duration positioned in bottom-right corner */}
+          {duration && (
+            <div className="absolute bottom-4 right-4 z-10">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-white/80 dark:bg-black/80 backdrop-blur-sm text-gray-900 dark:text-white">
+                <Clock className="w-4 h-4 mr-1" />
+                {duration}
+              </span>
+            </div>
+          )}
+          
           <div className="absolute bottom-6 left-6 right-6 text-white">
             <h1 className="text-3xl md:text-4xl font-bold mb-2">
               {translation.title}
@@ -79,54 +146,46 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
           </div>
         </div>
         
-        <div className="p-6">
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-            {duration && (
-              <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-3 py-1 rounded-full">
-                <span className="mr-1">⏱️</span>
-                {duration}
-              </span>
+        {/* Course Information - No gap */}
+        <div className="p-4">
+
+          {/* Description */}
+          <div 
+            className={cn(
+              "prose max-w-none mb-3 text-sm",
+              gradientStyles.hasGradient 
+                ? `course-detail-${course.id}-text prose-headings:course-detail-${course.id}-text prose-p:course-detail-${course.id}-text`
+                : "prose-gray dark:prose-invert"
             )}
-            <span className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
-              <span className="mr-1">📚</span>
-              {course.status === 'published' 
-                ? (locale === 'fr' ? 'Publié' : 'Published')
-                : course.status
-              }
-            </span>
+            dangerouslySetInnerHTML={{ __html: translation.description }}
+          />
+
+          {/* Launch Course Button - moved to bottom */}
+          <div className="mt-4">
+            <button
+              className="max-w-xs mx-auto block px-6 py-3 rounded-lg font-bold text-base transition-all duration-200 hover:scale-105 bg-primary hover:bg-primary/90 text-primary-foreground border border-primary"
+              style={{
+                backgroundColor: 'hsl(var(--primary))',
+                borderColor: 'hsl(var(--primary))',
+                color: 'hsl(var(--primary-foreground))'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'hsl(var(--primary) / 0.9)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'hsl(var(--primary))';
+              }}
+              onClick={() => {
+                // TODO: Implement course launch functionality
+                console.log('Launch course:', course.id);
+              }}
+            >
+              {locale === 'fr' ? 'Lancer le cours' : 'Launch Course'}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Competences */}
-      {parentCompetences.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            {locale === 'fr' ? 'Compétences développées' : 'Skills Developed'}
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {parentCompetences.map((competence) => (
-              <CompetenceBadge
-                key={competence.id}
-                title={competence.title}
-                colorLight={competence.colorLight}
-                colorDark={competence.colorDark}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Course Content */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-          {locale === 'fr' ? 'Description' : 'Description'}
-        </h2>
-        <div 
-          className="prose prose-gray dark:prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: translation.description }}
-        />
-      </div>
 
       {/* Objectives */}
       {translation.objectives && (
@@ -191,7 +250,7 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
       {/* Back to courses */}
       <div className="text-center">
         <Link 
-          href={`/${locale}/courses`}
+          href={getCoursesListUrl(locale)}
           className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
         >
           {locale === 'fr' ? '← Voir tous les cours' : '← View all courses'}

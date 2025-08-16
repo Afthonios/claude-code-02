@@ -26,8 +26,7 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   
-  // Enable static exports for ISG/SSG
-  output: 'standalone',
+  
   
   // Headers for security and performance
   async headers() {

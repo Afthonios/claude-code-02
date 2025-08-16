@@ -15,15 +15,15 @@ export async function generateStaticParams(): Promise<{ locale: string; slug: st
     
     const params: { locale: string; slug: string }[] = [];
     
-    // Only generate for English locale since this is the English route
+    // Only generate for French locale since this is the French route
     for (const course of courses) {
-      const slug = getCourseSlug(course, 'en');
-      params.push({ locale: 'en', slug });
+      const slug = getCourseSlug(course, 'fr');
+      params.push({ locale: 'fr', slug });
     }
     
     return params;
   } catch (error) {
-    console.error('Error generating static params for English courses:', error);
+    console.error('Error generating static params for French courses:', error);
     return [];
   }
 }

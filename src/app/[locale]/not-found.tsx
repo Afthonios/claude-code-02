@@ -1,11 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 import Link from "next/link";
+import { getCoursesListUrl } from "@/lib/directus";
 
 export default function NotFoundPage() {
   const t = useTranslations('common');
   const tNav = useTranslations('navigation');
+  const params = useParams();
+  const locale = params.locale as string;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
@@ -34,7 +38,7 @@ export default function NotFoundPage() {
           </Link>
           
           <Link
-            href="/courses"
+            href={getCoursesListUrl(locale)}
             className="inline-flex items-center justify-center w-full px-6 py-3 text-base font-medium text-blue-600 bg-white border border-blue-600 rounded-md hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors dark:bg-gray-800 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-gray-700"
           >
             {tNav('courses')}

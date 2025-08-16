@@ -191,6 +191,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
   useEffect(() => {
     const currentFilters = JSON.stringify(filters.competences);
     const currentSearch = search;
+    const currentShowBookmarked = filters.showBookmarked;
     
     // Check if filters or search actually changed
     const filtersChanged = currentFilters !== previousFilters.current;
@@ -209,7 +210,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
       previousFilters.current = '';
       previousSearch.current = '';
     }
-  }, [search, filters.competences, hasActiveFilters, fetchCourses, initialCourses]); // Include fetchCourses and initialCourses
+  }, [search, filters.competences, filters.showBookmarked, hasActiveFilters, fetchCourses, initialCourses]); // Include fetchCourses and initialCourses
   
 
   const handleClearAllFilters = () => {
@@ -218,12 +219,31 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
   };
 
   const handleFilterRemove = (filterType: keyof typeof filters, value: string) => {
-    removeFilter(filterType, value);
+    // Handle boolean filters differently
+    if (filterType === 'showBookmarked' && value === 'false') {
+      setFilters({
+        ...filters,
+        showBookmarked: false,
+      });
+    } else {
+      removeFilter(filterType, value);
+    }
   };
 
   const toggleFilterSidebar = () => {
     setIsFilterSidebarOpen(!isFilterSidebarOpen);
   };
+
+  // Filter courses based on bookmarks (client-side filtering)
+  const filteredCourses = useMemo(() => {
+    if (!filters.showBookmarked) {
+      return courses;
+    }
+    
+    // Get bookmarked course IDs from localStorage
+    const bookmarks = JSON.parse(localStorage.getItem('courseBookmarks') || '[]');
+    return courses.filter(course => bookmarks.includes(course.id));
+  }, [courses, filters.showBookmarked]);
 
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] dark:bg-gray-900">
@@ -269,7 +289,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
               {isLoading ? (
                 t('resultsCount.loading')
               ) : (
-                t('resultsCount.found', { count: courses.length })
+                t('resultsCount.found', { count: filteredCourses.length })
               )}
             </div>
           </div>
@@ -335,9 +355,9 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
             {/* Course Results */}
             {!isLoading && !error && (
               <>
-                {courses.length > 0 ? (
+                {filteredCourses.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {courses.map((course) => (
+                    {filteredCourses.map((course) => (
                       <CourseCard key={course.id} course={course} locale={locale} />
                     ))}
                   </div>

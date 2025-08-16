@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { BookOpen, Users, Award, Clock, Globe, Star } from "lucide-react";
-import { coursesApi } from '@/lib/directus';
+import { coursesApi, getCoursesListUrl } from '@/lib/directus';
 import CourseCard from '@/components/course/CourseCard';
 import type { DirectusCourse } from '@/types/directus';
 
@@ -68,7 +68,7 @@ export default async function HomePage({ params }: Props) {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Link 
-                href="/courses"
+                href={getCoursesListUrl(locale)}
                 className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 dark:hover:bg-primary/80 rounded-md transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 <BookOpen className="w-5 h-5 mr-2" />
@@ -228,7 +228,7 @@ export default async function HomePage({ params }: Props) {
               {tHome('courses.subtitle')}
             </p>
             <Link
-              href="/courses"
+              href={getCoursesListUrl(locale)}
               className="inline-flex items-center justify-center px-6 py-3 text-lg font-semibold rounded-xl text-primary bg-background border-2 border-border hover:bg-muted transition-all duration-200"
             >
               {tHome('courses.viewAll')}
@@ -287,7 +287,7 @@ export default async function HomePage({ params }: Props) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/courses"
+              href={getCoursesListUrl(locale)}
               className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-xl text-primary bg-background hover:bg-muted transition-all duration-200 transform hover:scale-105"
             >
               {tHome('cta.start')}

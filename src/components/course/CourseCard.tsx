@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { formatDuration, filterTranslations, getAssetUrlWithTransforms, getCourseUrl } from '@/lib/directus';
 import { getCourseGradientStyles, cn } from '@/lib/utils';
+import BookmarkButton from './BookmarkButton';
 import type { DirectusCourse } from '@/types/directus';
 
 interface CourseCardProps {
@@ -88,6 +89,15 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
+          
+          {/* Bookmark button positioned in top-right corner */}
+          <div className="absolute top-2 right-2 z-10">
+            <BookmarkButton 
+              courseId={course.id} 
+              size="sm"
+              className="bg-white/20 dark:bg-black/20 backdrop-blur-sm rounded-full hover:bg-white/30 dark:hover:bg-black/30"
+            />
+          </div>
         </div>
         
         <div className="p-6">

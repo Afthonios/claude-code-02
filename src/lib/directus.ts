@@ -85,7 +85,7 @@ export const coursesApi = {
       }
       // Fallback to our Next.js API route to avoid CORS issues
       try {
-        const url = new URL('/api/courses', typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
+        const url = new URL('/api/courses', typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
         
         // Add parameters that will be forwarded to Directus
         url.searchParams.set('fields', 'id,legacy_id,status,duration,course_type,course_image,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*,competence.competences_id.*');
@@ -315,7 +315,7 @@ export const competencesApi = {
       }
       // Try API route fallback to avoid CORS issues
       try {
-        const url = new URL('/api/competences', typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
+        const url = new URL('/api/competences', typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
         url.searchParams.set('fields', 'id,icon,color_light,color_dark,competence_type,translations.*');
         url.searchParams.set('filter[competence_type][_eq]', 'main_competence');
         url.searchParams.set('filter[parent_competence][_null]', 'true');
@@ -550,7 +550,13 @@ export function getCourseSlug(course: DirectusCourse, locale: string): string {
 
 export function getCourseUrl(course: DirectusCourse, locale: string): string {
   const slug = getCourseSlug(course, locale);
-  return `/${locale}/courses/${slug}`;
+  const coursePath = locale === 'fr' ? 'cours' : 'courses';
+  return `/${locale}/${coursePath}/${slug}`;
+}
+
+export function getCoursesListUrl(locale: string): string {
+  const coursePath = locale === 'fr' ? 'cours' : 'courses';
+  return `/${locale}/${coursePath}`;
 }
 
 export function generateMetadata(

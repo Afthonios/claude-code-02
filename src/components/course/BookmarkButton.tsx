@@ -69,35 +69,38 @@ export default function BookmarkButton({ courseId, size = 'md', className = '' }
       disabled={isLoading}
       className={`
         ${paddingClasses[size]} 
-        rounded-full transition-colors duration-200 
-        ${isBookmarked 
-          ? 'text-red-500 hover:text-red-600 bg-red-50 dark:bg-red-900/20' 
-          : 'text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20'
-        }
+        transition-colors duration-200 
         ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         ${className}
       `}
+      style={{
+        color: isBookmarked 
+          ? 'hsl(var(--primary))' 
+          : 'hsl(var(--primary))',
+      }}
       title={isBookmarked ? t('bookmark.remove', 'Remove from bookmarks') : t('bookmark.add', 'Add to bookmarks')}
       aria-label={isBookmarked ? t('bookmark.remove', 'Remove from bookmarks') : t('bookmark.add', 'Add to bookmarks')}
     >
       {isBookmarked ? (
         <svg
-          className={`${sizeClasses[size]} fill-current`}
-          viewBox="0 0 20 20"
+          className={`${sizeClasses[size]}`}
+          viewBox="0 0 24 24"
+          fill="currentColor"
         >
-          <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
         </svg>
       ) : (
         <svg
-          className={`${sizeClasses[size]} stroke-current`}
+          className={`${sizeClasses[size]}`}
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={2}
+          stroke="currentColor"
         >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
           />
         </svg>
       )}

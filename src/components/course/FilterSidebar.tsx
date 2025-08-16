@@ -5,6 +5,7 @@ import FilterDropdown from './FilterDropdown';
 
 interface FilterState {
   competences: string[];
+  showBookmarked: boolean;
 }
 
 interface FilterSidebarProps {
@@ -25,7 +26,7 @@ export default function FilterSidebar({
   const t = useTranslations('courses');
   const tCommon = useTranslations('common');
 
-  const handleFilterChange = (filterType: keyof FilterState, values: string[]) => {
+  const handleFilterChange = (filterType: keyof FilterState, values: string[] | boolean) => {
     onFiltersChange({
       ...filters,
       [filterType]: values,
@@ -35,10 +36,11 @@ export default function FilterSidebar({
   const clearAllFilters = () => {
     onFiltersChange({
       competences: [],
+      showBookmarked: false,
     });
   };
 
-  const hasActiveFilters = Object.values(filters).some(arr => arr.length > 0);
+  const hasActiveFilters = filters.competences.length > 0 || filters.showBookmarked;
 
   return (
     <>
@@ -86,6 +88,21 @@ export default function FilterSidebar({
 
             {/* Filter sections */}
             <div className="space-y-6">
+              {/* Bookmarks Filter */}
+              <div>
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={filters.showBookmarked}
+                    onChange={(e) => handleFilterChange('showBookmarked', e.target.checked)}
+                    className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
+                  />
+                  <span className="text-sm font-medium text-card-foreground">
+                    {t('filters.showBookmarked')}
+                  </span>
+                </label>
+              </div>
+
               {/* Competences Filter */}
               <div>
                 <label className="block text-sm font-medium text-card-foreground mb-2">
