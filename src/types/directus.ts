@@ -23,6 +23,13 @@ export interface DirectusCourse extends DirectusItem {
   tags?: string;
   price_cents: number;
   currency: string;
+  // Gradient background fields
+  gradient_from_light?: string;
+  gradient_to_light?: string;
+  gradient_from_dark?: string;
+  gradient_to_dark?: string;
+  on_light?: string;
+  on_dark?: string;
   // SEO fields
   seo_title?: string;
   seo_description?: string;

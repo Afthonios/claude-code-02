@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { formatDuration, filterTranslations, getAssetUrlWithTransforms } from '@/lib/directus';
+import { getCourseGradientStyles, cn } from '@/lib/utils';
 import type { DirectusCourse } from '@/types/directus';
 
 interface CourseCardProps {
@@ -32,42 +33,118 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
   
   const duration = course.duration ? formatDuration(course.duration, locale) : null;
 
+  // Get gradient styles for the course card
+  const gradientStyles = getCourseGradientStyles({
+    gradient_from_light: course.gradient_from_light,
+    gradient_to_light: course.gradient_to_light,
+    gradient_from_dark: course.gradient_from_dark,
+    gradient_to_dark: course.gradient_to_dark,
+    on_light: course.on_light,
+    on_dark: course.on_dark,
+  });
+
   return (
-    <Link 
-      href={`/${locale}/courses/${translation.slug}`}
-      className="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden border border-gray-200 dark:border-gray-700 group"
-    >
-      <div className="relative aspect-video w-full overflow-hidden">
-        <Image
-          src={imageUrl}
-          alt={translation.title}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-200"
-          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
-      </div>
+    <>
+      {/* Inject CSS for this specific card */}
+      {gradientStyles.hasGradient && (
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            .course-card-${course.id} {
+              background: ${course.gradient_from_light && course.gradient_to_light 
+                ? `linear-gradient(135deg, ${course.gradient_from_light} 0%, ${course.gradient_to_light} 100%)`
+                : 'transparent'} !important;
+            }
+            .dark .course-card-${course.id} {
+              background: ${course.gradient_from_dark && course.gradient_to_dark 
+                ? `linear-gradient(135deg, ${course.gradient_from_dark} 0%, ${course.gradient_to_dark} 100%)`
+                : 'transparent'} !important;
+            }
+            .course-card-${course.id}-text {
+              color: ${course.on_light || '#000000'} !important;
+            }
+            .dark .course-card-${course.id}-text {
+              color: ${course.on_dark || '#ffffff'} !important;
+            }
+          `
+        }} />
+      )}
       
-      <div className="p-6">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
-          {translation.title}
-        </h3>
+      <Link 
+        href={`/${locale}/courses/${translation.slug}`}
+        className={cn(
+          "block rounded-lg shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border group relative",
+          gradientStyles.hasGradient 
+            ? `border-transparent course-card-${course.id}` 
+            : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+        )}
+      >
+      <div className="relative z-10">
+        <div className="relative aspect-video w-full overflow-hidden">
+          <Image
+            src={imageUrl}
+            alt={translation.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-200"
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
+        </div>
         
-        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
-          {translation.description}
-        </p>
-        
-        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-          {duration && (
-            <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">
-              {duration}
+        <div className="p-6">
+          <h3 
+            className={cn(
+              "text-xl font-semibold mb-2 group-hover:opacity-80 transition-all duration-200",
+              gradientStyles.hasGradient 
+                ? `course-card-${course.id}-text`
+                : "text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400"
+            )}
+          >
+            {translation.title}
+          </h3>
+          
+          <p 
+            className={cn(
+              "text-sm mb-4 line-clamp-3 opacity-90",
+              gradientStyles.hasGradient 
+                ? `course-card-${course.id}-text`
+                : "text-gray-600 dark:text-gray-400"
+            )}
+          >
+            {translation.description}
+          </p>
+          
+          <div 
+            className={cn(
+              "flex items-center justify-between text-sm",
+              gradientStyles.hasGradient 
+                ? `course-card-${course.id}-text`
+                : "text-gray-500 dark:text-gray-400"
+            )}
+          >
+            {duration && (
+              <span className={cn(
+                "px-2 py-1 rounded text-xs",
+                gradientStyles.hasGradient 
+                  ? "bg-white/20 backdrop-blur-sm"
+                  : "bg-gray-100 dark:bg-gray-700"
+              )}>
+                {duration}
+              </span>
+            )}
+            <span 
+              className={cn(
+                "font-medium group-hover:translate-x-1 transition-transform duration-200",
+                gradientStyles.hasGradient 
+                  ? `course-card-${course.id}-text`
+                  : "text-blue-600 dark:text-blue-400"
+              )}
+            >
+              {locale === 'fr' ? 'Voir le cours →' : 'View course →'}
             </span>
-          )}
-          <span className="text-blue-600 dark:text-blue-400 font-medium group-hover:translate-x-1 transition-transform duration-200">
-            {locale === 'fr' ? 'Voir le cours →' : 'View course →'}
-          </span>
+          </div>
         </div>
       </div>
     </Link>
+    </>
   );
 }

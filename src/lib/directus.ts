@@ -37,6 +37,12 @@ export const coursesApi = {
         'duration',
         'course_type',
         'course_image',
+        'gradient_from_light',
+        'gradient_to_light',
+        'gradient_from_dark',
+        'gradient_to_dark',
+        'on_light',
+        'on_dark',
         'translations.*',
         'competence.competences_id.id',
         'competence.competences_id.parent_competence.id',
@@ -82,7 +88,7 @@ export const coursesApi = {
         const url = new URL('/api/courses', typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
         
         // Add parameters that will be forwarded to Directus
-        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_type,course_image,translations.*,competence.competences_id.*');
+        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_type,course_image,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*,competence.competences_id.*');
         url.searchParams.set('filter[status][_eq]', 'published');
         url.searchParams.set('limit', limit.toString());
         url.searchParams.set('page', page.toString());
@@ -151,6 +157,12 @@ export const coursesApi = {
             'date_updated',
             'duration',
             'course_image',
+            'gradient_from_light',
+            'gradient_to_light',
+            'gradient_from_dark',
+            'gradient_to_dark',
+            'on_light',
+            'on_dark',
             'translations.*',
             'competence.competences_id.id',
             'competence.competences_id.parent_competence.id',
@@ -182,6 +194,12 @@ export const coursesApi = {
             'date_updated',
             'duration',
             'course_image',
+            'gradient_from_light',
+            'gradient_to_light',
+            'gradient_from_dark',
+            'gradient_to_dark',
+            'on_light',
+            'on_dark',
             'translations.*',
             'competence.competences_id.id',
             'competence.competences_id.parent_competence.id',
@@ -210,7 +228,7 @@ export const coursesApi = {
         
         // Try legacy_id first
         let url = new URL(`${baseUrl}/items/courses`);
-        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_image,translations.*');
+        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_image,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*');
         url.searchParams.set('filter[legacy_id][_eq]', legacyId);
         url.searchParams.set('filter[status][_eq]', 'published');
 
@@ -224,7 +242,7 @@ export const coursesApi = {
 
         // If not found by legacy_id, try searching all courses
         url = new URL(`${baseUrl}/items/courses`);
-        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_image,translations.*');
+        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_image,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*');
         url.searchParams.set('filter[status][_eq]', 'published');
         url.searchParams.set('limit', '100');
 
@@ -257,6 +275,12 @@ export const coursesApi = {
             'date_updated',
             'duration',
             'course_image',
+            'gradient_from_light',
+            'gradient_to_light',
+            'gradient_from_dark',
+            'gradient_to_dark',
+            'on_light',
+            'on_dark',
             'translations.*',
             'competence.competences_id.id',
             'competence.competences_id.parent_competence.id',
@@ -284,6 +308,12 @@ export const coursesApi = {
             'status',
             'duration',
             'course_image',
+            'gradient_from_light',
+            'gradient_to_light',
+            'gradient_from_dark',
+            'gradient_to_dark',
+            'on_light',
+            'on_dark',
             'translations.*',
             'competence.competences_id.id',
             'competence.competences_id.parent_competence.id',

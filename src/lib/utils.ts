@@ -277,3 +277,62 @@ export function shuffle<T>(array: T[]): T[] {
   }
   return shuffled
 }
+
+export interface CourseGradientData {
+  gradient_from_light?: string;
+  gradient_to_light?: string;
+  gradient_from_dark?: string;
+  gradient_to_dark?: string;
+  on_light?: string;
+  on_dark?: string;
+}
+
+export function getCourseGradientStyles(courseData: CourseGradientData) {
+  const hasLightGradient = courseData.gradient_from_light && courseData.gradient_to_light;
+  const hasDarkGradient = courseData.gradient_from_dark && courseData.gradient_to_dark;
+  
+  if (!hasLightGradient && !hasDarkGradient) {
+    return {
+      backgroundStyle: {},
+      textColorClasses: '',
+      hasGradient: false
+    };
+  }
+
+  const lightGradient = hasLightGradient 
+    ? `linear-gradient(135deg, ${courseData.gradient_from_light} 0%, ${courseData.gradient_to_light} 100%)`
+    : '';
+    
+  const darkGradient = hasDarkGradient
+    ? `linear-gradient(135deg, ${courseData.gradient_from_dark} 0%, ${courseData.gradient_to_dark} 100%)`
+    : '';
+
+  const backgroundStyle: React.CSSProperties = {
+    ...(hasLightGradient && {
+      '--gradient-light': lightGradient,
+    }),
+    ...(hasDarkGradient && {
+      '--gradient-dark': darkGradient,
+    }),
+  };
+
+  const lightTextColor = courseData.on_light || '';
+  const darkTextColor = courseData.on_dark || '';
+  
+  const textColorClasses = [
+    lightTextColor ? `[color:${lightTextColor}]` : '',
+    darkTextColor ? `dark:[color:${darkTextColor}]` : ''
+  ].filter(Boolean).join(' ');
+
+  return {
+    backgroundStyle,
+    textColorClasses,
+    hasGradient: true,
+    lightGradient: hasLightGradient,
+    darkGradient: hasDarkGradient
+  };
+}
+
+export function isValidHexColor(color: string): boolean {
+  return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color);
+}
