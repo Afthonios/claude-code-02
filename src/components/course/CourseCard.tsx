@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { formatDuration, filterTranslations, getAssetUrlWithTransforms } from '@/lib/directus';
+import { formatDuration, filterTranslations, getAssetUrlWithTransforms, getCourseUrl } from '@/lib/directus';
 import { getCourseGradientStyles, cn } from '@/lib/utils';
 import type { DirectusCourse } from '@/types/directus';
 
@@ -70,7 +70,7 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
       )}
       
       <Link 
-        href={`/${locale}/courses/${translation.slug}`}
+        href={getCourseUrl(course, locale)}
         className={cn(
           "block rounded-lg shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border group relative",
           gradientStyles.hasGradient 

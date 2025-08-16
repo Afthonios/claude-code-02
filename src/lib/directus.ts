@@ -144,9 +144,7 @@ export const coursesApi = {
 
   async getBySlug(slug: string) {
     try {
-      // First, try to get the course using legacy_id format (add "f-" prefix)
-      const legacyId = `f-${slug}`;
-      
+      // Search through all courses to find matching translation slug
       const response = await directus.request(
         readItems('courses', {
           fields: [
@@ -171,92 +169,38 @@ export const coursesApi = {
             'competence.competences_id.parent_competence.translations.*',
           ],
           filter: {
-            legacy_id: { _eq: legacyId },
             status: { _eq: 'published' },
+            translations: {
+              slug: { _eq: slug }
+            }
           },
         })
       );
 
-      // If found by legacy_id, return it
+      // Return the first matching course
       if (response.length > 0) {
         return response[0] as DirectusCourse;
       }
 
-      // If not found by legacy_id, search through all courses to find matching translation slug
-      // This is a fallback for cases where legacy_id doesn't match the expected pattern
-      const allCourses = await directus.request(
-        readItems('courses', {
-          fields: [
-            'id',
-            'legacy_id',
-            'status',
-            'date_created',
-            'date_updated',
-            'duration',
-            'course_image',
-            'gradient_from_light',
-            'gradient_to_light',
-            'gradient_from_dark',
-            'gradient_to_dark',
-            'on_light',
-            'on_dark',
-            'translations.*',
-            'competence.competences_id.id',
-            'competence.competences_id.parent_competence.id',
-            'competence.competences_id.parent_competence.color_light',
-            'competence.competences_id.parent_competence.color_dark',
-            'competence.competences_id.parent_competence.translations.*',
-          ],
-          filter: {
-            status: { _eq: 'published' },
-          },
-          limit: 100, // Reasonable limit for searching
-        })
-      );
-
-      // Find course with matching translation slug
-      const matchingCourse = allCourses.find((course: DirectusCourse) => 
-        course.translations?.some((translation: DirectusCourseTranslation) => translation.slug === slug)
-      );
-
-      return matchingCourse as DirectusCourse | undefined;
+      return undefined;
     } catch {
       // Fallback to direct fetch
       try {
         const baseUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://api.afthonios.com';
-        const legacyId = `f-${slug}`;
         
-        // Try legacy_id first
-        let url = new URL(`${baseUrl}/items/courses`);
-        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_image,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*');
-        url.searchParams.set('filter[legacy_id][_eq]', legacyId);
+        // Search by translation slug
+        const url = new URL(`${baseUrl}/items/courses`);
+        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_image,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*,competence.competences_id.id,competence.competences_id.parent_competence.id,competence.competences_id.parent_competence.color_light,competence.competences_id.parent_competence.color_dark,competence.competences_id.parent_competence.translations.*');
         url.searchParams.set('filter[status][_eq]', 'published');
+        url.searchParams.set('filter[translations][slug][_eq]', slug);
 
-        let fetchResponse = await fetch(url.toString());
-        if (fetchResponse.ok) {
-          const data = await fetchResponse.json();
-          if (data.data.length > 0) {
-            return data.data[0] as DirectusCourse;
-          }
-        }
-
-        // If not found by legacy_id, try searching all courses
-        url = new URL(`${baseUrl}/items/courses`);
-        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_image,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*');
-        url.searchParams.set('filter[status][_eq]', 'published');
-        url.searchParams.set('limit', '100');
-
-        fetchResponse = await fetch(url.toString());
+        const fetchResponse = await fetch(url.toString());
         if (!fetchResponse.ok) {
           throw new Error(`HTTP ${fetchResponse.status}: ${fetchResponse.statusText}`);
         }
         
         const data = await fetchResponse.json();
-        const matchingCourse = data.data.find((course: DirectusCourse) => 
-          course.translations?.some((translation: DirectusCourseTranslation) => translation.slug === slug)
-        );
-
-        return matchingCourse as DirectusCourse | undefined;
+        return data.data.length > 0 ? data.data[0] as DirectusCourse : undefined;
       } catch {
         return undefined;
       }
@@ -597,6 +541,16 @@ export function getParentCompetences(course: DirectusCourse, locale: string) {
 
   // Limit to 3 competences as specified
   return parentCompetences.slice(0, 3);
+}
+
+export function getCourseSlug(course: DirectusCourse, locale: string): string {
+  const translation = filterTranslations(course.translations, locale);
+  return translation?.slug || course.legacy_id || course.id;
+}
+
+export function getCourseUrl(course: DirectusCourse, locale: string): string {
+  const slug = getCourseSlug(course, locale);
+  return `/${locale}/courses/${slug}`;
 }
 
 export function generateMetadata(

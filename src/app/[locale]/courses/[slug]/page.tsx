@@ -2,12 +2,33 @@ import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
-import { coursesApi, filterTranslations, generateMetadata as generateCourseMetadata } from '@/lib/directus';
+import { coursesApi, filterTranslations, generateMetadata as generateCourseMetadata, getCourseSlug } from '@/lib/directus';
 import CourseDetail from '@/components/course/CourseDetail';
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
 };
+
+export async function generateStaticParams(): Promise<{ locale: string; slug: string }[]> {
+  try {
+    const courses = await coursesApi.getAll({ limit: 100 });
+    const locales = ['fr', 'en'];
+    
+    const params: { locale: string; slug: string }[] = [];
+    
+    for (const course of courses) {
+      for (const locale of locales) {
+        const slug = getCourseSlug(course, locale);
+        params.push({ locale, slug });
+      }
+    }
+    
+    return params;
+  } catch (error) {
+    console.error('Error generating static params for courses:', error);
+    return [];
+  }
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
