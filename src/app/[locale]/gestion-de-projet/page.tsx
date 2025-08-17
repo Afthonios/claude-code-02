@@ -38,38 +38,72 @@ export default async function ProjectManagementPage({ params }: Props) {
             </p>
           </div>
 
-          {/* Hero Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden mb-16">
-            <div className="grid lg:grid-cols-2 gap-0">
-              <div className="p-8 lg:p-12">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                  {locale === 'fr' 
-                    ? 'Formations en Gestion de Projet'
-                    : 'Project Management Training'
-                  }
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-8 text-lg">
-                  {locale === 'fr' 
-                    ? 'Développez vos compétences en gestion de projet avec nos formations certifiantes. De la méthodologie Agile aux outils collaboratifs, découvrez tout ce qu\'il faut savoir pour réussir vos projets.'
-                    : 'Develop your project management skills with our certified training. From Agile methodology to collaborative tools, discover everything you need to know to succeed in your projects.'
-                  }
-                </p>
-                <Link
-                  href={getCoursesListUrl(locale)}
-                  className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                >
-                  {locale === 'fr' ? 'Voir les formations' : 'View Training Courses'}
-                </Link>
-              </div>
-              <div className="bg-gradient-to-br from-primary/10 to-primary/30 flex items-center justify-center p-8">
-                <div className="text-center text-primary">
-                  <div className="text-8xl mb-4">📊</div>
-                  <p className="text-lg font-medium">
-                    {locale === 'fr' ? 'Gestion de Projet' : 'Project Management'}
-                  </p>
-                </div>
-              </div>
+          {/* Hero Section - No Box Styling - UPDATED VERSION */}
+          <div className="mb-16">
+            <div className="bg-green-100 dark:bg-green-900 p-2 mb-4 rounded text-center">
+              <strong>🚀 UPDATED: Bullet points version (no box styling)</strong>
             </div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+              {locale === 'fr' 
+                ? 'Dans cette formation en ligne, vous découvrirez comment :'
+                : 'In this online training, you will discover how to:'
+              }
+            </h2>
+            <div className="space-y-4 text-lg text-gray-700 dark:text-gray-300 mb-8">
+              {locale === 'fr' ? (
+                <ul className="space-y-3">
+                  <li className="flex items-start">
+                    <span className="text-primary mr-3 mt-1">•</span>
+                    <span>Co-décider, co-créer et co-construire des projets ensemble grâce à des réunions hautement collaboratives/créatives.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-primary mr-3 mt-1">•</span>
+                    <span>Faire émerger le meilleur de l'intelligence collective en animant des réunions en mode collaboratif.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-primary mr-3 mt-1">•</span>
+                    <span>Créer un engagement plus fort de l&apos;équipe envers les sujets abordés : changements, nouveaux projets,...</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-primary mr-3 mt-1">•</span>
+                    <span>Stimuler la motivation et la créativité de son équipe et renforcer la cohésion.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-primary mr-3 mt-1">•</span>
+                    <span>Développer des qualités humaines de toute l&apos;équipe : écoute, ouverture d&apos;esprit, sens de l&apos;initiative, audace.</span>
+                  </li>
+                </ul>
+              ) : (
+                <ul className="space-y-3">
+                  <li className="flex items-start">
+                    <span className="text-primary mr-3 mt-1">•</span>
+                    <span>Co-decide, co-create and co-build projects together through highly collaborative/creative meetings.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-primary mr-3 mt-1">•</span>
+                    <span>Bring out the best of collective intelligence by facilitating meetings in collaborative mode.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-primary mr-3 mt-1">•</span>
+                    <span>Create stronger team engagement with topics addressed: changes, new projects, etc.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-primary mr-3 mt-1">•</span>
+                    <span>Stimulate your team's motivation and creativity and strengthen cohesion.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-primary mr-3 mt-1">•</span>
+                    <span>Develop human qualities throughout the team: listening, open-mindedness, sense of initiative, boldness.</span>
+                  </li>
+                </ul>
+              )}
+            </div>
+            <Link
+              href={getCoursesListUrl(locale)}
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+            >
+              {locale === 'fr' ? 'Voir les formations' : 'View Training Courses'}
+            </Link>
           </div>
 
           {/* Methodologies Section */}
@@ -123,6 +157,7 @@ export default async function ProjectManagementPage({ params }: Props) {
               ))}
             </div>
           </div>
+
 
           {/* Benefits Section */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 lg:p-12">

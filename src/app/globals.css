@@ -143,6 +143,17 @@ body {
   }
 }
 
+@keyframes fadeInItem {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes slideUp {
   from {
     transform: translateY(10px);
@@ -155,7 +166,12 @@ body {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-in-out;
+  animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+.animate-fade-in-item {
+  opacity: 0;
+  animation: fadeInItem 0.6s ease-out forwards;
 }
 
 .animate-slide-up {

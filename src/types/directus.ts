@@ -54,6 +54,13 @@ export interface DirectusCourseTranslation {
   slug: string;
   seo_title?: string;
   seo_description?: string;
+  objectives?: string;
+  objectives_json?: string[];
+  objectives_label?: string;
+  plan?: string;
+  public?: string;
+  quote?: string;
+  long_description?: string;
 }
 
 // Directus Competences collection

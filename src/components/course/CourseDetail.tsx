@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
 import { formatDuration, filterTranslations, getAssetUrlWithTransforms, getParentCompetences, getCoursesListUrl } from '@/lib/directus';
 import { getCourseGradientStyles, cn } from '@/lib/utils';
 import type { DirectusCourse } from '@/types/directus';
@@ -16,6 +17,32 @@ interface CourseDetailProps {
 
 export default function CourseDetail({ course, locale }: CourseDetailProps) {
   const translation = filterTranslations(course.translations, locale);
+  const objectivesRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      {
+        threshold: 0.2, // Trigger when 20% of the element is visible
+        rootMargin: '0px 0px 20px 0px' // Start animation 20px before the element is fully in view
+      }
+    );
+
+    if (objectivesRef.current) {
+      observer.observe(objectivesRef.current);
+    }
+
+    return () => {
+      if (objectivesRef.current) {
+        observer.unobserve(objectivesRef.current);
+      }
+    };
+  }, []);
   
   if (!translation) {
     return (
@@ -187,35 +214,50 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
       </div>
 
 
-      {/* Objectives */}
-      {translation.objectives && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+      {/* Objectives - No Box Styling */}
+      {translation.objectives_json && translation.objectives_json.length > 0 && (
+        <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             {translation.objectives_label || (locale === 'fr' ? 'Objectifs pédagogiques' : 'Learning Objectives')}
           </h2>
-          <div 
-            className="prose prose-gray dark:prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: translation.objectives }}
-          />
+          <ul ref={objectivesRef} className="space-y-3">
+            {translation.objectives_json.map((objective, index) => (
+              <li 
+                key={index} 
+                className={cn(
+                  "flex transition-all duration-500",
+                  isVisible 
+                    ? "opacity-100 translate-y-0" 
+                    : "opacity-0 translate-y-4"
+                )}
+                style={{ 
+                  transitionDelay: isVisible ? `${(index + 1) * 200}ms` : '0ms'
+                }}
+              >
+                <span className="text-primary mr-3 mt-0.5 text-lg leading-none flex-shrink-0">•</span>
+                <span className="text-gray-700 dark:text-gray-300 leading-relaxed">{objective}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
-      {/* Course Plan */}
+      {/* Course Plan - No Box Styling */}
       {translation.plan && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+        <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             {locale === 'fr' ? 'Programme du cours' : 'Course Plan'}
           </h2>
           <div 
-            className="prose prose-gray dark:prose-invert max-w-none"
+            className="prose prose-gray dark:prose-invert max-w-none prose-ul:list-none prose-li:flex prose-li:items-start prose-li:mb-2 prose-li:before:content-['•'] prose-li:before:text-primary prose-li:before:mr-3 prose-li:before:mt-1"
             dangerouslySetInnerHTML={{ __html: translation.plan }}
           />
         </div>
       )}
 
-      {/* Target Audience */}
+      {/* Target Audience - No Box Styling */}
       {translation.public && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+        <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             {locale === 'fr' ? 'Public cible' : 'Target Audience'}
           </h2>
@@ -234,14 +276,14 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
         </div>
       )}
 
-      {/* Long Description */}
+      {/* Long Description - No Box Styling */}
       {translation.long_description && translation.long_description !== translation.description && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+        <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             {locale === 'fr' ? 'Présentation détaillée' : 'Detailed Presentation'}
           </h2>
           <div 
-            className="prose prose-gray dark:prose-invert max-w-none"
+            className="prose prose-gray dark:prose-invert max-w-none prose-ul:list-none prose-li:flex prose-li:items-start prose-li:mb-2 prose-li:before:content-['•'] prose-li:before:text-primary prose-li:before:mr-3 prose-li:before:mt-1"
             dangerouslySetInnerHTML={{ __html: translation.long_description }}
           />
         </div>
