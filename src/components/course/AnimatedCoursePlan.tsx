@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Eye, Zap, BookOpen, Anchor, Plus } from 'lucide-react';
+import { Eye, Zap, BookOpen, Anchor, Plus, PlayCircle, Video, Youtube, FileText, Download } from 'lucide-react';
 
 interface AnimatedCoursePlanProps {
   plan: string;
@@ -230,87 +230,180 @@ export default function AnimatedCoursePlan({
     return title;
   };
 
-  // Helper function to format section content with proper line breaks for a) b) c) and <br>
+  // Helper function to detect trigger words and add icons after them
+  const addIconsToText = (text: string, hasGradient: boolean, courseId: string) => {
+    const triggerWords = [
+      { word: /(vidéo|video)/gi, icon: Video },
+      { word: /(youtube|ted)/gi, icon: Youtube },
+      { word: /(quiz)/gi, icon: PlayCircle },
+      { word: /(exercice[s]?)/gi, icon: PlayCircle },
+      { word: /(vrai\/faux|true\/false)/gi, icon: PlayCircle },
+      { word: /(pdf)/gi, icon: Download },
+      { word: /(téléchargeable[s]?|document[s]?)/gi, icon: Download },
+      { word: /(diaporama|fiche)/gi, icon: FileText },
+    ];
+
+    let processedText = text;
+    const iconElements: { position: number; icon: any; id: string }[] = [];
+    
+    triggerWords.forEach((trigger, triggerIndex) => {
+      let match;
+      while ((match = trigger.word.exec(processedText)) !== null) {
+        const IconComponent = trigger.icon;
+        const iconId = `icon-${triggerIndex}-${match.index}`;
+        
+        iconElements.push({
+          position: match.index + match[0].length,
+          icon: IconComponent,
+          id: iconId
+        });
+      }
+    });
+
+    // Sort icons by position (reverse order to insert from end to start)
+    iconElements.sort((a, b) => b.position - a.position);
+
+    return { text: processedText, iconElements };
+  };
+
+  // Helper function to format section content with proper list structure
   const formatSectionContent = (content: string, hasGradient: boolean, courseId: string) => {
     if (!content || !content.trim()) return null;
     
-    // Step 1: Convert HTML to text while preserving critical structure
-    let processedContent = content
-      // First, convert <br> to line breaks
-      .replace(/<br\s*\/?>/gi, '\n')
-      .replace(/<\/li>/gi, '\n')
-      .replace(/<li[^>]*>/gi, '')
-      .replace(/<\/ul>/gi, '\n')
-      .replace(/<ul[^>]*>/gi, '')
-      .replace(/<\/p>/gi, '\n')
-      .replace(/<p[^>]*>/gi, '')
-      // Remove all other HTML tags
-      .replace(/<[^>]*>/g, '')
-      // Decode HTML entities
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/&eacute;/gi, 'é')
-      .replace(/&Eacute;/gi, 'É')
-      .replace(/&egrave;/gi, 'è')
-      .replace(/&Egrave;/gi, 'È')
-      .replace(/&agrave;/gi, 'à')
-      .replace(/&Agrave;/gi, 'À')
-      .replace(/&acirc;/gi, 'â')
-      .replace(/&Acirc;/gi, 'Â')
-      .replace(/&ccedil;/gi, 'ç')
-      .replace(/&Ccedil;/gi, 'Ç')
-      .replace(/&ucirc;/gi, 'û')
-      .replace(/&Ucirc;/gi, 'Û')
-      .trim();
+    // Step 1: Extract each <li> item as a complete unit
+    const liMatches = content.match(/<li[^>]*>.*?<\/li>/gis);
+    
+    if (!liMatches) {
+      // Fallback for non-list content
+      return <div className="text-sm text-gray-700 dark:text-gray-300">{content}</div>;
+    }
 
-    // Step 2: Add line breaks BEFORE each a), b), c), d) pattern
-    processedContent = processedContent
-      .replace(/([^a-z]\s*)([a-z]\))/g, '$1\n$2') // Add newline before a), b), c), etc.
-      .replace(/^([a-z]\))/, '$1') // Don't add newline at the very beginning
-      .trim();
-
-    // Step 3: Split into lines and process each one
-    const allLines = processedContent.split('\n');
-    const finalLines: string[] = [];
-    
-    allLines.forEach(line => {
-      const trimmed = line.trim();
-      if (trimmed) {
-        finalLines.push(trimmed);
-      }
-    });
-    
-    if (finalLines.length === 0) return null;
-    
-    // Step 4: Create JSX elements for each line
     const elements: JSX.Element[] = [];
     
-    finalLines.forEach((line, index) => {
-      const trimmedLine = line.trim();
-      if (!trimmedLine) return;
+    liMatches.forEach((liItem, index) => {
+      // Clean up this <li> item
+      let itemContent = liItem
+        .replace(/<\/?li[^>]*>/gi, '')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<[^>]*>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&eacute;/gi, 'é')
+        .replace(/&Eacute;/gi, 'É')
+        .replace(/&egrave;/gi, 'è')
+        .replace(/&Egrave;/gi, 'È')
+        .replace(/&agrave;/gi, 'à')
+        .replace(/&Agrave;/gi, 'À')
+        .replace(/&acirc;/gi, 'â')
+        .replace(/&Acirc;/gi, 'Â')
+        .replace(/&ccedil;/gi, 'ç')
+        .replace(/&Ccedil;/gi, 'Ç')
+        .replace(/&ucirc;/gi, 'û')
+        .replace(/&Ucirc;/gi, 'Û')
+        .trim();
       
-      // Check if this line starts with a letter followed by )
-      const isMainPoint = /^[a-z]\)/.test(trimmedLine);
+      // Split into lines (br breaks)
+      const lines = itemContent.split('\n').map(line => line.trim()).filter(line => line);
+      
+      if (lines.length === 0) return;
+      
+      // Check if this is a main point (starts with letter+))
+      const isMainPoint = /^[a-z]\)\s+/.test(lines[0]);
       
       elements.push(
-        <div key={`line-${index}`} className={cn(
-          "leading-relaxed",
-          isMainPoint ? "mb-2 mt-3" : "mb-1"
-        )}>
-          <span className={cn(
-            hasGradient 
-              ? `plan-text-${courseId}`
-              : isMainPoint 
-                ? "text-gray-900 dark:text-gray-100 font-semibold"
-                : "text-gray-700 dark:text-gray-300",
-            isMainPoint ? "text-base" : "text-sm"
-          )}>
-            {trimmedLine}
-          </span>
+        <div key={`li-${index}`} className="mb-4">
+          {lines.map((line, lineIndex) => {
+            const isFirstLine = lineIndex === 0;
+            const shouldShowBullet = isMainPoint && isFirstLine;
+            
+            // Process the line to add icons after trigger words
+            const { text, iconElements } = addIconsToText(line, hasGradient, courseId);
+            
+            // Create text segments with icons
+            const createTextWithIcons = () => {
+              if (iconElements.length === 0) {
+                return <span>{text}</span>;
+              }
+
+              const segments = [];
+              let lastPosition = 0;
+
+              // Sort icons by position (forward order for rendering)
+              const sortedIcons = [...iconElements].sort((a, b) => a.position - b.position);
+
+              sortedIcons.forEach((iconData, iconIndex) => {
+                // Add text before icon
+                if (iconData.position > lastPosition) {
+                  segments.push(
+                    <span key={`text-${iconIndex}`}>
+                      {text.substring(lastPosition, iconData.position)}
+                    </span>
+                  );
+                }
+
+                // Add icon
+                const IconComponent = iconData.icon;
+                segments.push(
+                  <IconComponent
+                    key={iconData.id}
+                    size={14}
+                    className={cn(
+                      "inline mx-1",
+                      hasGradient 
+                        ? `plan-text-${courseId}`
+                        : "text-blue-600 dark:text-blue-400"
+                    )}
+                  />
+                );
+
+                lastPosition = iconData.position;
+              });
+
+              // Add remaining text after last icon
+              if (lastPosition < text.length) {
+                segments.push(
+                  <span key="text-final">
+                    {text.substring(lastPosition)}
+                  </span>
+                );
+              }
+
+              return <>{segments}</>;
+            };
+            
+            return (
+              <div key={`line-${lineIndex}`} className={cn(
+                "flex items-start gap-2 leading-relaxed",
+                isFirstLine ? "mb-1" : "mb-0.5",
+                !isFirstLine && "ml-6" // Indent continuation lines
+              )}>
+                {shouldShowBullet && (
+                  <span className={cn(
+                    "flex-shrink-0 mt-1",
+                    hasGradient 
+                      ? `plan-text-${courseId}`
+                      : "text-gray-600 dark:text-gray-400"
+                  )}>
+                    •
+                  </span>
+                )}
+                <span className={cn(
+                  hasGradient 
+                    ? `plan-text-${courseId}`
+                    : isFirstLine && isMainPoint
+                      ? "text-gray-900 dark:text-gray-100 font-semibold"
+                      : "text-gray-700 dark:text-gray-300",
+                  isFirstLine && isMainPoint ? "text-base" : "text-sm"
+                )}>
+                  {createTextWithIcons()}
+                </span>
+              </div>
+            );
+          })}
         </div>
       );
     });
@@ -484,6 +577,21 @@ export default function AnimatedCoursePlan({
               0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.3); }
               50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); }
             }
+            @keyframes icon-float {
+              0%, 100% { transform: translateY(0px) rotate(0deg); }
+              25% { transform: translateY(-2px) rotate(1deg); }
+              75% { transform: translateY(2px) rotate(-1deg); }
+            }
+            @keyframes content-reveal {
+              from {
+                opacity: 0;
+                transform: translateY(10px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
           `
         }} />
       )}
@@ -563,7 +671,8 @@ export default function AnimatedCoursePlan({
                 isAnimated 
                   ? "opacity-100 translate-y-0 scale-100" 
                   : "opacity-0 translate-y-8 scale-95",
-                "hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98]"
+                "hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98]",
+                "backdrop-blur-sm"
               )}
               role="article"
               aria-label={getSectionDescription(section.title)}
@@ -574,45 +683,62 @@ export default function AnimatedCoursePlan({
             >
               {/* Section Number or Symbol - positioned at bottom left */}
               <div className={cn(
-                "absolute bottom-4 left-4 w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold shadow-lg z-10",
+                "absolute bottom-4 left-4 w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold shadow-lg z-10 transition-all duration-500",
                 hasGradient 
                   ? `plan-text-${courseId} bg-white/20 dark:bg-black/20 backdrop-blur-sm`
-                  : "bg-blue-600 dark:bg-blue-500 text-white"
-              )}>
+                  : "bg-blue-600 dark:bg-blue-500 text-white",
+                "group-hover:scale-110 group-hover:shadow-xl",
+                isAnimated ? "animate-[content-reveal_0.5s_ease-out]" : ""
+              )}
+              style={{
+                animationDelay: isAnimated ? `${delay + 100}ms` : '0ms',
+              }}>
                 {isNumbered ? sectionNumber : '⟡'}
               </div>
               
               {/* Section Title */}
               <h3 className={cn(
-                "text-base sm:text-lg font-bold mb-2 sm:mb-3 uppercase tracking-wide pr-8 sm:pr-12",
+                "text-base sm:text-lg font-bold mb-2 sm:mb-3 uppercase tracking-wide pr-8 sm:pr-12 transition-all duration-500",
                 hasGradient 
                   ? `plan-text-${courseId}`
-                  : "text-blue-900 dark:text-blue-100"
-              )}>
+                  : "text-blue-900 dark:text-blue-100",
+                isAnimated ? "animate-[content-reveal_0.6s_ease-out]" : ""
+              )}
+              style={{
+                animationDelay: isAnimated ? `${delay + 200}ms` : '0ms',
+              }}>
                 {section.title}
               </h3>
               
               {/* Section Content */}
               <div className={cn(
-                "text-sm leading-relaxed pr-16 sm:pr-20 mb-16",
+                "text-sm leading-relaxed pr-16 sm:pr-20 mb-16 transition-all duration-500",
                 hasGradient 
                   ? `plan-text-${courseId} opacity-90`
-                  : "text-gray-700 dark:text-gray-300"
-              )}>
+                  : "text-gray-700 dark:text-gray-300",
+                isAnimated ? "animate-[content-reveal_0.6s_ease-out]" : ""
+              )}
+              style={{
+                animationDelay: isAnimated ? `${delay + 300}ms` : '0ms',
+              }}>
                 {formatSectionContent(section.content, hasGradient, courseId)}
               </div>
               
               {/* Large Icon in right side - overlapping text */}
               <div className={cn(
-                "absolute top-6 right-6 opacity-20 transition-all duration-300",
-                "group-hover:opacity-30 group-hover:scale-110",
+                "absolute top-6 right-6 opacity-20 transition-all duration-500",
+                "group-hover:opacity-30 group-hover:scale-110 group-hover:animate-[icon-float_3s_ease-in-out_infinite]",
                 hasGradient 
                   ? `plan-text-${courseId}`
-                  : "text-blue-600 dark:text-blue-400"
-              )}>
+                  : "text-blue-600 dark:text-blue-400",
+                isAnimated ? "animate-[content-reveal_0.8s_ease-out]" : ""
+              )}
+              style={{
+                animationDelay: isAnimated ? `${delay + 500}ms` : '0ms',
+              }}>
                 <IconComponent 
                   size={64} 
-                  className="sm:w-20 sm:h-20"
+                  className="sm:w-20 sm:h-20 transition-transform duration-300"
                   aria-label={`${locale === 'fr' ? 'Icône de section' : 'Section icon'}: ${getSectionDescription(section.title)}`}
                 />
               </div>
