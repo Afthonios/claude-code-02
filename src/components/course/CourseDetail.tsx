@@ -3,11 +3,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { formatDuration, filterTranslations, getAssetUrlWithTransforms, getParentCompetences, getCoursesListUrl } from '@/lib/directus';
+import { formatDuration, filterTranslations, getAssetUrlWithTransforms, getCoursesListUrl } from '@/lib/directus';
 import { getCourseGradientStyles, cn } from '@/lib/utils';
 import type { DirectusCourse } from '@/types/directus';
-import CompetenceBadge from './CompetenceBadge';
 import BookmarkButton from './BookmarkButton';
+import AnimatedCoursePlan from './AnimatedCoursePlan';
 import { Clock } from 'lucide-react';
 
 interface CourseDetailProps {
@@ -74,7 +74,6 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
     : '/images/course-placeholder.svg'; // Fallback to a local placeholder
   
   const duration = course.duration ? formatDuration(course.duration, locale) : null;
-  const parentCompetences = getParentCompetences(course, locale);
 
   // Get gradient styles for the course detail
   const gradientStyles = getCourseGradientStyles({
@@ -242,15 +241,19 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
         </div>
       )}
 
-      {/* Course Plan - No Box Styling */}
+      {/* Course Plan - Animated Cards */}
       {translation.plan && (
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            {locale === 'fr' ? 'Programme du cours' : 'Course Plan'}
-          </h2>
-          <div 
-            className="prose prose-gray dark:prose-invert max-w-none prose-ul:list-none prose-li:flex prose-li:items-start prose-li:mb-2 prose-li:before:content-['•'] prose-li:before:text-primary prose-li:before:mr-3 prose-li:before:mt-1"
-            dangerouslySetInnerHTML={{ __html: translation.plan }}
+          <AnimatedCoursePlan
+            plan={translation.plan}
+            locale={locale}
+            courseId={course.id}
+            gradientFromLight={course.gradient_from_light}
+            gradientToLight={course.gradient_to_light}
+            gradientFromDark={course.gradient_from_dark}
+            gradientToDark={course.gradient_to_dark}
+            onLight={course.on_light}
+            onDark={course.on_dark}
           />
         </div>
       )}
