@@ -230,20 +230,20 @@ export default function AnimatedCoursePlan({
     return title;
   };
 
-  // Helper function to format section content with proper hierarchy
+  // Helper function to format section content with proper line breaks for a) b) c) and <br>
   const formatSectionContent = (content: string, hasGradient: boolean, courseId: string) => {
-    // First convert HTML to text and handle the structure properly
-    const processedContent = content
-      // Convert HTML line breaks to newlines first
+    if (!content || !content.trim()) return null;
+    
+    // Step 1: Convert HTML to text while preserving critical structure
+    let processedContent = content
+      // First, convert <br> to line breaks
       .replace(/<br\s*\/?>/gi, '\n')
-      .replace(/<\/p>/gi, '\n')
-      .replace(/<p[^>]*>/gi, '')
-      .replace(/<\/h[1-6]>/gi, '\n')
-      .replace(/<h[1-6][^>]*>/gi, '\n')
       .replace(/<\/li>/gi, '\n')
       .replace(/<li[^>]*>/gi, '')
       .replace(/<\/ul>/gi, '\n')
-      .replace(/<ul[^>]*>/gi, '\n')
+      .replace(/<ul[^>]*>/gi, '')
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<p[^>]*>/gi, '')
       // Remove all other HTML tags
       .replace(/<[^>]*>/g, '')
       // Decode HTML entities
@@ -265,65 +265,57 @@ export default function AnimatedCoursePlan({
       .replace(/&Ccedil;/gi, 'Ç')
       .replace(/&ucirc;/gi, 'û')
       .replace(/&Ucirc;/gi, 'Û')
-      // Clean up whitespace
-      .replace(/\s+/g, ' ')
-      .replace(/\n\s+/g, '\n')
-      .replace(/\s+\n/g, '\n')
-      .replace(/\n+/g, '\n')
       .trim();
 
-    const lines = processedContent.split('\n').filter(line => line.trim());
+    // Step 2: Add line breaks BEFORE each a), b), c), d) pattern
+    processedContent = processedContent
+      .replace(/([^a-z]\s*)([a-z]\))/g, '$1\n$2') // Add newline before a), b), c), etc.
+      .replace(/^([a-z]\))/, '$1') // Don't add newline at the very beginning
+      .trim();
+
+    // Step 3: Split into lines and process each one
+    const allLines = processedContent.split('\n');
+    const finalLines: string[] = [];
     
-    return lines.map((line, lineIndex) => {
+    allLines.forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed) {
+        finalLines.push(trimmed);
+      }
+    });
+    
+    if (finalLines.length === 0) return null;
+    
+    // Step 4: Create JSX elements for each line
+    const elements: JSX.Element[] = [];
+    
+    finalLines.forEach((line, index) => {
       const trimmedLine = line.trim();
-      if (!trimmedLine) return null;
+      if (!trimmedLine) return;
       
-      // Check if this is a main point (starts with a), b), c), etc.)
+      // Check if this line starts with a letter followed by )
       const isMainPoint = /^[a-z]\)/.test(trimmedLine);
       
-      // Sub-points are lines that don't start with a letter followed by )
-      // and are not section titles (which would be handled elsewhere)
-      const isSubPoint = !isMainPoint && !trimmedLine.match(/^(DISCOVER|SHAKING UP|LEARN|ANCHOR|ADDITIONAL RESOURCES|DÉCOUVRIR|SECOUER|APPRENDRE|ANCRER|RESSOURCES)/i);
-      
-      return (
-        <div key={lineIndex} className={cn(
-          isMainPoint ? "mb-3 mt-2" : isSubPoint ? "mb-1 ml-6 text-sm" : "mb-1", 
-          "last:mb-0"
+      elements.push(
+        <div key={`line-${index}`} className={cn(
+          "leading-relaxed",
+          isMainPoint ? "mb-2 mt-3" : "mb-1"
         )}>
-          {isMainPoint ? (
-            // Main point - show the a), b), c) as is with bold styling
-            <div className={cn(
-              "font-semibold leading-relaxed",
-              hasGradient 
-                ? `plan-text-${courseId}`
-                : "text-gray-900 dark:text-gray-100"
-            )}>
-              {trimmedLine}
-            </div>
-          ) : isSubPoint ? (
-            // Sub-point - indented and slightly less prominent
-            <div className={cn(
-              "opacity-85 leading-relaxed pl-2 border-l-2 border-opacity-30",
-              hasGradient 
-                ? `plan-text-${courseId} border-current`
-                : "text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600"
-            )}>
-              {trimmedLine}
-            </div>
-          ) : (
-            // Regular content
-            <div className={cn(
-              "leading-relaxed",
-              hasGradient 
-                ? `plan-text-${courseId}`
-                : "text-gray-700 dark:text-gray-300"
-            )}>
-              {trimmedLine}
-            </div>
-          )}
+          <span className={cn(
+            hasGradient 
+              ? `plan-text-${courseId}`
+              : isMainPoint 
+                ? "text-gray-900 dark:text-gray-100 font-semibold"
+                : "text-gray-700 dark:text-gray-300",
+            isMainPoint ? "text-base" : "text-sm"
+          )}>
+            {trimmedLine}
+          </span>
         </div>
       );
-    }).filter(Boolean);
+    });
+    
+    return elements.length > 0 ? <div>{elements}</div> : null;
   };
 
   const sections = parsePlanSections(plan);
