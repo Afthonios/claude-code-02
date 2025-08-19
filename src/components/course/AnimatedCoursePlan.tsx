@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Eye, Zap, BookOpen, Anchor, Plus, PlayCircle, Video, Youtube, FileText, Download } from 'lucide-react';
+import { Eye, Zap, BookOpen, Anchor, Plus, PlayCircle, Video, Youtube, FileText, Download, Clock, CheckSquare, XSquare } from 'lucide-react';
 
 interface AnimatedCoursePlanProps {
   plan_md: string;
@@ -322,7 +322,7 @@ export default function AnimatedCoursePlan({
                 : isMainPoint
                   ? "text-gray-900 dark:text-gray-100 font-semibold"
                   : "text-gray-700 dark:text-gray-300",
-              isMainPoint ? "text-base" : "text-sm"
+              "text-base"
             )}>
               {formatLineWithIcons(mainLine, hasGradient, courseId)}
             </span>
@@ -385,24 +385,266 @@ export default function AnimatedCoursePlan({
     return elements.length > 0 ? <div>{elements}</div> : null;
   };
 
-  // Helper function to format a line with specific symbols
+  // Helper function to format a line with specific icons
   const formatLineWithIcons = (line: string, hasGradient: boolean, courseId: string) => {
-    // Simple pattern replacement approach
-    let processedText = line;
+    const elements: React.ReactElement[] = [];
+    let remainingText = line;
+    let keyIndex = 0;
     
-    // Pattern 1: Add camera symbol after "Vidéo d'expert"
-    processedText = processedText.replace(
-      /(Vid[eé]o d'expert)/gi, 
-      '$1 📹'
-    );
+    // Pattern 1: Add video icon after video-related content
+    const videoExpertRegex = /(Vid[eé]o d'expert|Expert video|Storytelling\s*:\s*Vid[eé]o)/gi;
+    let match;
+    let lastIndex = 0;
     
-    // Pattern 2: Add clock symbol before time duration (like 4'31, 5'04, etc.)
-    processedText = processedText.replace(
-      /(\d+'\d+)/g,
-      '🕐 $1'
-    );
+    while ((match = videoExpertRegex.exec(line)) !== null) {
+      // Add text before match
+      if (match.index > lastIndex) {
+        elements.push(
+          <span key={`text-${keyIndex++}`}>
+            {line.substring(lastIndex, match.index)}
+          </span>
+        );
+      }
+      
+      // Add the matched text
+      elements.push(
+        <span key={`video-text-${keyIndex++}`}>
+          {match[0]}
+        </span>
+      );
+      
+      // Add video icon
+      elements.push(
+        <Video
+          key={`video-icon-${keyIndex++}`}
+          className={cn(
+            "inline w-4 h-4 mx-1 align-text-bottom",
+            hasGradient 
+              ? `plan-text-${courseId}`
+              : "text-blue-600 dark:text-blue-400"
+          )}
+        />
+      );
+      
+      lastIndex = match.index + match[0].length;
+    }
     
-    return <span>{processedText}</span>;
+    // Pattern for downloadable documents
+    const downloadRegex = /(Documents t[eé]l[eé]chargeables|Downloadable documents)/gi;
+    let downloadMatch;
+    let downloadLastIndex = lastIndex;
+    
+    while ((downloadMatch = downloadRegex.exec(line.substring(lastIndex))) !== null) {
+      const actualIndex = lastIndex + downloadMatch.index;
+      const actualEnd = actualIndex + downloadMatch[0].length;
+      
+      // Add text before download match
+      if (actualIndex > downloadLastIndex) {
+        elements.push(
+          <span key={`download-text-before-${keyIndex++}`}>
+            {line.substring(downloadLastIndex, actualIndex)}
+          </span>
+        );
+      }
+      
+      // Add the matched text
+      elements.push(
+        <span key={`download-text-${keyIndex++}`}>
+          {downloadMatch[0]}
+        </span>
+      );
+      
+      // Add download icon
+      elements.push(
+        <Download
+          key={`download-icon-${keyIndex++}`}
+          className={cn(
+            "inline w-4 h-4 mx-1 align-text-bottom",
+            hasGradient 
+              ? `plan-text-${courseId}`
+              : "text-blue-600 dark:text-blue-400"
+          )}
+        />
+      );
+      
+      downloadLastIndex = actualEnd;
+    }
+    
+    // Update lastIndex to include download processing
+    if (downloadLastIndex > lastIndex) {
+      lastIndex = downloadLastIndex;
+    }
+    
+    // Pattern for VRAI/FAUX or TRUE/FALSE
+    const trueFalseRegex = /(VRAI\/FAUX|TRUE\/FALSE)/gi;
+    let trueFalseMatch;
+    let trueFalseLastIndex = lastIndex;
+    
+    while ((trueFalseMatch = trueFalseRegex.exec(line.substring(lastIndex))) !== null) {
+      const actualIndex = lastIndex + trueFalseMatch.index;
+      const actualEnd = actualIndex + trueFalseMatch[0].length;
+      
+      // Add text before true/false match
+      if (actualIndex > trueFalseLastIndex) {
+        elements.push(
+          <span key={`truefalse-text-before-${keyIndex++}`}>
+            {line.substring(trueFalseLastIndex, actualIndex)}
+          </span>
+        );
+      }
+      
+      // Add the matched text
+      elements.push(
+        <span key={`truefalse-text-${keyIndex++}`}>
+          {trueFalseMatch[0]}
+        </span>
+      );
+      
+      // Add boxed check and X icons
+      elements.push(
+        <CheckSquare
+          key={`check-icon-${keyIndex++}`}
+          className={cn(
+            "inline w-4 h-4 mx-0.5 align-text-bottom",
+            hasGradient 
+              ? `plan-text-${courseId}`
+              : "text-green-600 dark:text-green-400"
+          )}
+        />
+      );
+      
+      elements.push(
+        <XSquare
+          key={`x-icon-${keyIndex++}`}
+          className={cn(
+            "inline w-4 h-4 ml-0.5 mr-1 align-text-bottom",
+            hasGradient 
+              ? `plan-text-${courseId}`
+              : "text-red-600 dark:text-red-400"
+          )}
+        />
+      );
+      
+      trueFalseLastIndex = actualEnd;
+    }
+    
+    // Update lastIndex to include true/false processing
+    if (trueFalseLastIndex > lastIndex) {
+      lastIndex = trueFalseLastIndex;
+    }
+    
+    // Pattern for YouTube
+    const youtubeRegex = /(Youtube|YouTube)/gi;
+    let youtubeMatch;
+    let youtubeLastIndex = lastIndex;
+    
+    while ((youtubeMatch = youtubeRegex.exec(line.substring(lastIndex))) !== null) {
+      const actualIndex = lastIndex + youtubeMatch.index;
+      const actualEnd = actualIndex + youtubeMatch[0].length;
+      
+      // Add text before youtube match
+      if (actualIndex > youtubeLastIndex) {
+        elements.push(
+          <span key={`youtube-text-before-${keyIndex++}`}>
+            {line.substring(youtubeLastIndex, actualIndex)}
+          </span>
+        );
+      }
+      
+      // Add the matched text
+      elements.push(
+        <span key={`youtube-text-${keyIndex++}`}>
+          {youtubeMatch[0]}
+        </span>
+      );
+      
+      // Add YouTube icon
+      elements.push(
+        <Youtube
+          key={`youtube-icon-${keyIndex++}`}
+          className={cn(
+            "inline w-4 h-4 mx-1 align-text-bottom",
+            hasGradient 
+              ? `plan-text-${courseId}`
+              : "text-red-600 dark:text-red-400"
+          )}
+        />
+      );
+      
+      youtubeLastIndex = actualEnd;
+    }
+    
+    // Update lastIndex to include youtube processing
+    if (youtubeLastIndex > lastIndex) {
+      lastIndex = youtubeLastIndex;
+    }
+    
+    // Reset for time pattern
+    videoExpertRegex.lastIndex = 0;
+    
+    // Pattern 2: Add clock icon before time duration
+    const timeRegex = /(\d+'\d+)/g;
+    let timeMatch;
+    let processedLine = lastIndex > 0 ? line.substring(lastIndex) : line;
+    let timeElements: React.ReactElement[] = [];
+    let timeLastIndex = 0;
+    let timeKeyIndex = 0;
+    
+    while ((timeMatch = timeRegex.exec(processedLine)) !== null) {
+      // Add text before match
+      if (timeMatch.index > timeLastIndex) {
+        timeElements.push(
+          <span key={`time-text-${timeKeyIndex++}`}>
+            {processedLine.substring(timeLastIndex, timeMatch.index)}
+          </span>
+        );
+      }
+      
+      // Add clock icon
+      timeElements.push(
+        <Clock
+          key={`clock-icon-${timeKeyIndex++}`}
+          className={cn(
+            "inline w-4 h-4 mr-1 align-text-bottom",
+            hasGradient 
+              ? `plan-text-${courseId}`
+              : "text-blue-600 dark:text-blue-400"
+          )}
+        />
+      );
+      
+      // Add the time text
+      timeElements.push(
+        <span key={`time-duration-${timeKeyIndex++}`}>
+          {timeMatch[0]}
+        </span>
+      );
+      
+      timeLastIndex = timeMatch.index + timeMatch[0].length;
+    }
+    
+    // Add remaining text after time matches
+    if (timeLastIndex < processedLine.length) {
+      timeElements.push(
+        <span key={`remaining-time-text-${timeKeyIndex++}`}>
+          {processedLine.substring(timeLastIndex)}
+        </span>
+      );
+    }
+    
+    // Combine all elements
+    if (lastIndex > 0) {
+      // Had video matches, add time processing to remaining text
+      elements.push(...timeElements);
+    } else if (timeElements.length > 0) {
+      // Only had time matches
+      return <>{timeElements}</>;
+    } else {
+      // No matches, return plain text
+      return <span>{line}</span>;
+    }
+    
+    return elements.length > 0 ? <>{elements}</> : <span>{line}</span>;
   };
 
   const sections = parsePlanSections(plan_md);
@@ -737,9 +979,9 @@ export default function AnimatedCoursePlan({
                 {isNumbered ? sectionNumber : '⟡'}
               </div>
               
-              {/* Section Title */}
+              {/* Section Title with Icon */}
               <h3 className={cn(
-                "text-base sm:text-lg font-bold mb-2 sm:mb-3 uppercase tracking-wide pr-8 sm:pr-12 transition-all duration-500",
+                "flex items-center gap-3 text-base sm:text-lg font-bold mb-2 sm:mb-3 uppercase tracking-wide transition-all duration-500",
                 hasGradient 
                   ? `plan-text-${courseId}`
                   : "text-blue-900 dark:text-blue-100",
@@ -748,12 +990,22 @@ export default function AnimatedCoursePlan({
               style={{
                 animationDelay: isAnimated ? `${delay + 200}ms` : '0ms',
               }}>
-                {section.title}
+                <span>{section.title}</span>
+                <IconComponent 
+                  size={24} 
+                  className={cn(
+                    "transition-transform duration-300 opacity-60",
+                    hasGradient 
+                      ? `plan-text-${courseId}`
+                      : "text-blue-600 dark:text-blue-400"
+                  )}
+                  aria-label={`${locale === 'fr' ? 'Icône de section' : 'Section icon'}: ${getSectionDescription(section.title)}`}
+                />
               </h3>
               
               {/* Section Content */}
               <div className={cn(
-                "text-sm leading-relaxed pr-16 sm:pr-20 mb-16 transition-all duration-500",
+                "text-base leading-relaxed mb-16 transition-all duration-500",
                 hasGradient 
                   ? `plan-text-${courseId} opacity-90`
                   : "text-gray-700 dark:text-gray-300",
@@ -763,25 +1015,6 @@ export default function AnimatedCoursePlan({
                 animationDelay: isAnimated ? `${delay + 300}ms` : '0ms',
               }}>
                 {formatSectionContent(section.content, !!hasGradient, courseId)}
-              </div>
-              
-              {/* Large Icon in right side - overlapping text */}
-              <div className={cn(
-                "absolute top-6 right-6 opacity-20 transition-all duration-500",
-                "group-hover:opacity-30 group-hover:scale-110 group-hover:animate-[icon-float_3s_ease-in-out_infinite]",
-                hasGradient 
-                  ? `plan-text-${courseId}`
-                  : "text-blue-600 dark:text-blue-400",
-                isAnimated ? "animate-[content-reveal_0.8s_ease-out]" : ""
-              )}
-              style={{
-                animationDelay: isAnimated ? `${delay + 500}ms` : '0ms',
-              }}>
-                <IconComponent 
-                  size={64} 
-                  className="sm:w-20 sm:h-20 transition-transform duration-300"
-                  aria-label={`${locale === 'fr' ? 'Icône de section' : 'Section icon'}: ${getSectionDescription(section.title)}`}
-                />
               </div>
             </div>
           );
