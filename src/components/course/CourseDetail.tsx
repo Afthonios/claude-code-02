@@ -186,32 +186,53 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
             dangerouslySetInnerHTML={{ __html: translation.description }}
           />
 
-          {/* Launch Course Button - moved to bottom */}
-          <div className="mt-4">
-            <button
-              className="max-w-xs mx-auto block px-6 py-3 rounded-lg font-bold text-base transition-all duration-200 hover:scale-105 bg-primary hover:bg-primary/90 text-primary-foreground border border-primary"
-              style={{
-                backgroundColor: 'hsl(var(--primary))',
-                borderColor: 'hsl(var(--primary))',
-                color: 'hsl(var(--primary-foreground))'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'hsl(var(--primary) / 0.9)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'hsl(var(--primary))';
-              }}
-              onClick={() => {
-                // TODO: Implement course launch functionality
-                console.log('Launch course:', course.id);
-              }}
-            >
-              {locale === 'fr' ? 'Lancer le cours' : 'Launch Course'}
-            </button>
-          </div>
+          {/* Target Audience - moved here from later in the component */}
+          {translation.public && (
+            <div className="mt-4">
+              <h3 className={cn(
+                "text-lg font-semibold mb-2",
+                gradientStyles.hasGradient 
+                  ? `course-detail-${course.id}-text`
+                  : "text-gray-900 dark:text-gray-100"
+              )}>
+                {locale === 'fr' ? 'Public cible' : 'Target Audience'}
+              </h3>
+              <p className={cn(
+                "text-sm",
+                gradientStyles.hasGradient 
+                  ? `course-detail-${course.id}-text`
+                  : "text-gray-700 dark:text-gray-300"
+              )}>
+                {translation.public}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
+      {/* Launch Course Button - standalone section */}
+      <div className="mb-8 text-center">
+        <button
+          className="px-8 py-4 rounded-lg font-bold text-lg transition-all duration-200 hover:scale-105 bg-primary hover:bg-primary/90 text-primary-foreground border border-primary shadow-lg"
+          style={{
+            backgroundColor: 'hsl(var(--primary))',
+            borderColor: 'hsl(var(--primary))',
+            color: 'hsl(var(--primary-foreground))'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'hsl(var(--primary) / 0.9)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'hsl(var(--primary))';
+          }}
+          onClick={() => {
+            // TODO: Implement course launch functionality
+            console.log('Launch course:', course.id);
+          }}
+        >
+          {locale === 'fr' ? 'Lancer le cours' : 'Launch Course'}
+        </button>
+      </div>
 
       {/* Objectives - No Box Styling */}
       {translation.objectives_json && translation.objectives_json.length > 0 && (
@@ -258,24 +279,19 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
         </div>
       )}
 
-      {/* Target Audience - No Box Styling */}
-      {translation.public && (
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            {locale === 'fr' ? 'Public cible' : 'Target Audience'}
-          </h2>
-          <p className="text-gray-700 dark:text-gray-300">
-            {translation.public}
-          </p>
-        </div>
-      )}
-
-      {/* Quote */}
+      {/* Quote - Enhanced with author attribution */}
       {translation.quote && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 mb-8 border-l-4 border-blue-500">
-          <blockquote className="text-lg italic text-gray-700 dark:text-gray-300">
-            &ldquo;{translation.quote}&rdquo;
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-8 mb-8 border border-blue-200 dark:border-blue-800 shadow-sm">
+          <blockquote className="text-xl italic text-gray-800 dark:text-gray-200 leading-relaxed">
+            <span className="text-3xl text-blue-500 dark:text-blue-400 leading-none">&ldquo;</span>
+            {translation.quote}
+            <span className="text-3xl text-blue-500 dark:text-blue-400 leading-none">&rdquo;</span>
           </blockquote>
+          {translation.quote_author && (
+            <cite className="block mt-4 text-right text-base font-medium text-gray-600 dark:text-gray-400 not-italic">
+              &mdash; {translation.quote_author}
+            </cite>
+          )}
         </div>
       )}
 

@@ -61,6 +61,7 @@ export interface DirectusCourseTranslation {
   plan_md?: string;
   public?: string;
   quote?: string;
+  quote_author?: string;
   long_description?: string;
 }
 
