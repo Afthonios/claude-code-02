@@ -242,10 +242,10 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
       )}
 
       {/* Course Plan - Animated Cards */}
-      {translation.plan && (
+      {translation.plan_md && (
         <div className="mb-8">
           <AnimatedCoursePlan
-            plan={translation.plan}
+            plan_md={translation.plan_md}
             locale={locale}
             courseId={course.id}
             {...(course.gradient_from_light && { gradientFromLight: course.gradient_from_light })}

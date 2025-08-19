@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { Eye, Zap, BookOpen, Anchor, Plus, PlayCircle, Video, Youtube, FileText, Download } from 'lucide-react';
 
 interface AnimatedCoursePlanProps {
-  plan: string;
+  plan_md: string;
   locale: string;
   courseId: string;
   gradientFromLight?: string;
@@ -44,7 +44,7 @@ interface PlanSection {
 
 
 export default function AnimatedCoursePlan({
-  plan,
+  plan_md,
   locale,
   courseId,
   gradientFromLight,
@@ -59,15 +59,46 @@ export default function AnimatedCoursePlan({
   const containerRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Parse HTML plan content into structured sections
-  const parsePlanSections = (htmlContent: string): PlanSection[] => {
-    // Always use plain text parsing to avoid hydration issues
-    return parsePlainTextSections(htmlContent);
+  // Parse markdown plan content into structured sections
+  const parsePlanSections = (markdownContent: string): PlanSection[] => {
+    return parseMarkdownSections(markdownContent);
   };
   
   
-  // Fallback function for plain text parsing
-  const parsePlainTextSections = (htmlContent: string): PlanSection[] => {
+  // Parse markdown content into sections using H3 headers as section markers
+  const parseMarkdownSections = (markdownContent: string): PlanSection[] => {
+    const sections: PlanSection[] = [];
+    
+    // Split by H3 headers (### SECTION_NAME)
+    const h3Regex = /^### (.+)$/gm;
+    const parts = markdownContent.split(h3Regex);
+    
+    // The first part before any H3 is ignored (it's the intro text)
+    // Then we have alternating section titles and content
+    for (let i = 1; i < parts.length; i += 2) {
+      const title = parts[i]?.trim();
+      const content = parts[i + 1]?.trim();
+      
+      if (title && content) {
+        sections.push({
+          id: `section-${Math.floor(i / 2)}`,
+          title: title,
+          content: content,
+          index: Math.floor(i / 2)
+        });
+      }
+    }
+    
+    // If no H3 sections found, fall back to the old parsing method
+    if (sections.length === 0) {
+      return parseLegacyTextSections(markdownContent);
+    }
+    
+    return sections;
+  };
+  
+  // Fallback function for legacy text parsing (kept for compatibility)
+  const parseLegacyTextSections = (htmlContent: string): PlanSection[] => {
     // Always use server-side parsing to avoid hydration issues
     const textContent = htmlContent
       // Convert HTML line breaks to newlines first
@@ -232,15 +263,8 @@ export default function AnimatedCoursePlan({
 
   // Helper function to detect trigger words and add icons after them
   const addIconsToText = (text: string, _hasGradient: boolean, _courseId: string) => {
-    const triggerWords = [
-      { word: /(vidéo|video)/gi, icon: Video },
-      { word: /(youtube|ted)/gi, icon: Youtube },
-      { word: /(quiz)/gi, icon: PlayCircle },
-      { word: /(exercice[s]?)/gi, icon: PlayCircle },
-      { word: /(vrai\/faux|true\/false)/gi, icon: PlayCircle },
-      { word: /(pdf)/gi, icon: Download },
-      { word: /(téléchargeable[s]?|document[s]?)/gi, icon: Download },
-      { word: /(diaporama|fiche)/gi, icon: FileText },
+    const triggerWords: { word: RegExp; icon: React.ComponentType<{ className?: string; width?: number; height?: number }> }[] = [
+      // No trigger words - all icons disabled
     ];
 
     const processedText = text;
@@ -266,153 +290,161 @@ export default function AnimatedCoursePlan({
     return { text: processedText, iconElements };
   };
 
-  // Helper function to format section content with proper list structure
+  // Helper function to format markdown section content
   const formatSectionContent = (content: string, hasGradient: boolean, courseId: string) => {
     if (!content || !content.trim()) return null;
     
-    // Step 1: Extract each <li> item as a complete unit
-    const liMatches = content.match(/<li[^>]*>[\s\S]*?<\/li>/gi);
+    // Split content into lines
+    const lines = content.split('\n').map(line => line.trim()).filter(line => line);
     
-    if (!liMatches) {
-      // Fallback for non-list content
-      return <div className="text-sm text-gray-700 dark:text-gray-300">{content}</div>;
-    }
+    if (lines.length === 0) return null;
 
     const elements: React.ReactElement[] = [];
+    let currentGroup: string[] = [];
+    let groupIndex = 0;
     
-    liMatches.forEach((liItem, index) => {
-      // Clean up this <li> item
-      const itemContent = liItem
-        .replace(/<\/?li[^>]*>/gi, '')
-        .replace(/<br\s*\/?>/gi, '\n')
-        .replace(/<[^>]*>/g, '')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'")
-        .replace(/&eacute;/gi, 'é')
-        .replace(/&Eacute;/gi, 'É')
-        .replace(/&egrave;/gi, 'è')
-        .replace(/&Egrave;/gi, 'È')
-        .replace(/&agrave;/gi, 'à')
-        .replace(/&Agrave;/gi, 'À')
-        .replace(/&acirc;/gi, 'â')
-        .replace(/&Acirc;/gi, 'Â')
-        .replace(/&ccedil;/gi, 'ç')
-        .replace(/&Ccedil;/gi, 'Ç')
-        .replace(/&ucirc;/gi, 'û')
-        .replace(/&Ucirc;/gi, 'Û')
-        .trim();
+    const processGroup = (group: string[], index: number) => {
+      if (group.length === 0) return null;
       
-      // Split into lines (br breaks)
-      const lines = itemContent.split('\n').map(line => line.trim()).filter(line => line);
-      
-      if (lines.length === 0) return;
+      const mainLine = group[0];
+      const subLines = group.slice(1);
       
       // Check if this is a main point (starts with letter+))
-      const isMainPoint = lines[0] ? /^[a-z]\)\s+/.test(lines[0]) : false;
+      const isMainPoint = /^[a-z]\)\s+/.test(mainLine);
       
-      elements.push(
-        <div key={`li-${index}`} className="mb-4">
-          {lines.map((line, lineIndex) => {
-            const isFirstLine = lineIndex === 0;
-            const shouldShowBullet = isMainPoint && isFirstLine;
-            
-            // Process the line to add icons after trigger words
-            const { text, iconElements } = addIconsToText(line, hasGradient, courseId);
-            
-            // Create text segments with icons
-            const createTextWithIcons = () => {
-              if (iconElements.length === 0) {
-                return <span>{text}</span>;
-              }
-
-              const segments = [];
-              let lastPosition = 0;
-
-              // Sort icons by position (forward order for rendering)
-              const sortedIcons = [...iconElements].sort((a, b) => a.position - b.position);
-
-              sortedIcons.forEach((iconData, iconIndex) => {
-                // Add text before icon
-                if (iconData.position > lastPosition) {
-                  segments.push(
-                    <span key={`text-${iconIndex}`}>
-                      {text.substring(lastPosition, iconData.position)}
-                    </span>
-                  );
-                }
-
-                // Add icon
-                const IconComponent = iconData.icon;
-                segments.push(
-                  <IconComponent
-                    key={iconData.id}
-                    width={14}
-                    height={14}
-                    className={cn(
-                      "inline mx-1",
-                      hasGradient 
-                        ? `plan-text-${courseId}`
-                        : "text-blue-600 dark:text-blue-400"
-                    )}
-                  />
-                );
-
-                lastPosition = iconData.position;
-              });
-
-              // Add remaining text after last icon
-              if (lastPosition < text.length) {
-                segments.push(
-                  <span key="text-final">
-                    {text.substring(lastPosition)}
-                  </span>
-                );
-              }
-
-              return <>{segments}</>;
-            };
-            
-            return (
-              <div key={`line-${lineIndex}`} className={cn(
-                "flex items-start gap-2 leading-relaxed",
-                isFirstLine ? "mb-1" : "mb-0.5",
-                !isFirstLine && "ml-6" // Indent continuation lines
-              )}>
-                {shouldShowBullet && (
-                  <span className={cn(
-                    "flex-shrink-0 mt-1",
-                    hasGradient 
-                      ? `plan-text-${courseId}`
-                      : "text-gray-600 dark:text-gray-400"
-                  )}>
-                    •
-                  </span>
-                )}
+      return (
+        <div key={`group-${index}`} className="mb-4">
+          {/* Main line - no bullet point for a), b), c) items */}
+          <div className="flex items-start gap-2 leading-relaxed mb-1">
+            <span className={cn(
+              hasGradient 
+                ? `plan-text-${courseId}`
+                : isMainPoint
+                  ? "text-gray-900 dark:text-gray-100 font-semibold"
+                  : "text-gray-700 dark:text-gray-300",
+              isMainPoint ? "text-base" : "text-sm"
+            )}>
+              {formatLineWithIcons(mainLine, hasGradient, courseId)}
+            </span>
+          </div>
+          
+          {/* Sub-lines (use bullet points instead of dashes) */}
+          {subLines.map((line, lineIndex) => (
+            <div key={`sub-${lineIndex}`} className="flex items-baseline gap-2 leading-relaxed mb-0.5 ml-6">
+              {line.startsWith('-') && (
                 <span className={cn(
+                  "flex-shrink-0",
                   hasGradient 
                     ? `plan-text-${courseId}`
-                    : isFirstLine && isMainPoint
-                      ? "text-gray-900 dark:text-gray-100 font-semibold"
-                      : "text-gray-700 dark:text-gray-300",
-                  isFirstLine && isMainPoint ? "text-base" : "text-sm"
+                    : "text-gray-500 dark:text-gray-500"
                 )}>
-                  {createTextWithIcons()}
+                  •
                 </span>
-              </div>
-            );
-          })}
+              )}
+              <span className={cn(
+                "text-sm",
+                hasGradient 
+                  ? `plan-text-${courseId}`
+                  : "text-gray-700 dark:text-gray-300"
+              )}>
+                {formatLineWithIcons(line.replace(/^-\s*/, ''), hasGradient, courseId)}
+              </span>
+            </div>
+          ))}
         </div>
       );
-    });
+    };
+    
+    // Group lines by main points and their sub-items
+    for (const line of lines) {
+      // If it's a new main point (starts with letter+)), process previous group
+      if (/^[a-z]\)\s+/.test(line)) {
+        if (currentGroup.length > 0) {
+          const groupElement = processGroup(currentGroup, groupIndex);
+          if (groupElement) {
+            elements.push(groupElement);
+            groupIndex++;
+          }
+          currentGroup = [];
+        }
+        currentGroup.push(line);
+      } else {
+        // It's a continuation or sub-item
+        currentGroup.push(line);
+      }
+    }
+    
+    // Process the last group
+    if (currentGroup.length > 0) {
+      const groupElement = processGroup(currentGroup, groupIndex);
+      if (groupElement) {
+        elements.push(groupElement);
+      }
+    }
     
     return elements.length > 0 ? <div>{elements}</div> : null;
   };
 
-  const sections = parsePlanSections(plan);
+  // Helper function to format a line with specific symbols
+  const formatLineWithIcons = (line: string, hasGradient: boolean, courseId: string) => {
+    // Simple pattern replacement approach
+    let processedText = line;
+    
+    // Pattern 1: Add camera symbol after "Vidéo d'expert"
+    processedText = processedText.replace(
+      /(Vid[eé]o d'expert)/gi, 
+      '$1 📹'
+    );
+    
+    // Pattern 2: Add clock symbol before time duration (like 4'31, 5'04, etc.)
+    processedText = processedText.replace(
+      /(\d+'\d+)/g,
+      '🕐 $1'
+    );
+    
+    return <span>{processedText}</span>;
+  };
+
+  const sections = parsePlanSections(plan_md);
+  
+  // Extract the first line of plan_md for the subtitle (before any ### headers)
+  const getFirstLine = (content: string): string => {
+    // Split by H3 headers to get the intro part
+    const h3Regex = /^### (.+)$/gm;
+    const parts = content.split(h3Regex);
+    
+    // The first part is the intro text before any H3 headers
+    const introText = parts[0] || '';
+    
+    // Clean and extract first meaningful line from intro
+    const cleanText = introText
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&eacute;/gi, 'é')
+      .replace(/&Eacute;/gi, 'É')
+      .replace(/&egrave;/gi, 'è')
+      .replace(/&Egrave;/gi, 'È')
+      .replace(/&agrave;/gi, 'à')
+      .replace(/&Agrave;/gi, 'À')
+      .replace(/&acirc;/gi, 'â')
+      .replace(/&Acirc;/gi, 'Â')
+      .replace(/&ccedil;/gi, 'ç')
+      .replace(/&Ccedil;/gi, 'Ç')
+      .replace(/&ucirc;/gi, 'û')
+      .replace(/&Ucirc;/gi, 'Û')
+      .replace(/\s+/g, ' ')
+      .trim();
+    
+    const lines = cleanText.split('\n').map(line => line.trim()).filter(line => line);
+    return lines.length > 0 ? lines[0] : '';
+  };
+  
+  const firstLineSubtitle = getFirstLine(plan_md);
 
   // Helper function to get section icon component
   const getSectionIcon = (sectionTitle: string) => {
@@ -612,9 +644,17 @@ export default function AnimatedCoursePlan({
         }} />
       )}
       
-      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 sm:mb-8">
-        {locale === 'fr' ? 'Ce module contient 4 parties :' : 'This module contains 4 parts:'}
+      {/* Main title */}
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+        {locale === 'fr' ? 'Programme de la formation' : 'Course Curriculum'}
       </h2>
+      
+      {/* Subtitle with first line of plan_md */}
+      {firstLineSubtitle && (
+        <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 mb-6 sm:mb-8">
+          {firstLineSubtitle}
+        </p>
+      )}
       
       <div className="space-y-6">
         {sections.map((section, index) => {

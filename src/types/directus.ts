@@ -58,6 +58,7 @@ export interface DirectusCourseTranslation {
   objectives_json?: string[];
   objectives_label?: string;
   plan?: string;
+  plan_md?: string;
   public?: string;
   quote?: string;
   long_description?: string;
