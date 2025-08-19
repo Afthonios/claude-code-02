@@ -944,7 +944,7 @@ export default function AnimatedCoursePlan({
         </p>
       )}
       
-      <div className="space-y-6">
+      <div className="space-y-8 sm:space-y-10">
         {sections.map((section, index) => {
           const isAnimated = isVisible && visibleSections.has(section.id);
           const delay = index * 200;
@@ -993,15 +993,10 @@ export default function AnimatedCoursePlan({
                 }
               }}
               className={cn(
-                "group relative rounded-xl p-6 sm:p-8 transition-all duration-700 transform cursor-default overflow-visible",
-                hasGradient 
-                  ? `plan-gradient-${courseId} shadow-lg hover:shadow-xl`
-                  : `plan-section-${courseId} bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800`,
+                "group relative transition-all duration-700 transform cursor-default",
                 isAnimated 
                   ? "opacity-100 translate-y-0 scale-100" 
-                  : "opacity-0 translate-y-8 scale-95",
-                "hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98]",
-                "backdrop-blur-sm"
+                  : "opacity-0 translate-y-8 scale-95"
               )}
               role="article"
               aria-label={getSectionDescription(section.title)}
@@ -1010,13 +1005,12 @@ export default function AnimatedCoursePlan({
                 animationDelay: isAnimated ? `${delay}ms` : '0ms',
               }}
             >
-              {/* Section Number or Symbol - positioned at bottom left */}
+              {/* Large Circle with Number - positioned outside/overlapping top-left corner */}
               <div className={cn(
-                "absolute bottom-4 left-4 w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold shadow-lg z-10 transition-all duration-500",
+                "absolute -top-6 -left-6 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-lg sm:text-2xl font-bold shadow-lg z-30 transition-all duration-500",
                 hasGradient 
-                  ? `plan-text-${courseId} bg-white/20 dark:bg-black/20 backdrop-blur-sm`
-                  : "bg-blue-600 dark:bg-blue-500 text-white",
-                "group-hover:scale-110 group-hover:shadow-xl",
+                  ? `plan-text-${courseId} bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm`
+                  : "bg-gray-200/80 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200 backdrop-blur-sm",
                 isAnimated ? "animate-[content-reveal_0.5s_ease-out]" : ""
               )}
               style={{
@@ -1025,42 +1019,65 @@ export default function AnimatedCoursePlan({
                 {isNumbered ? sectionNumber : '⟡'}
               </div>
               
-              {/* Section Title with Icon */}
-              <h3 className={cn(
-                "flex items-center gap-3 text-base sm:text-lg font-bold mb-2 sm:mb-3 uppercase tracking-wide transition-all duration-500",
-                hasGradient 
-                  ? `plan-text-${courseId}`
-                  : "text-blue-900 dark:text-blue-100",
-                isAnimated ? "animate-[content-reveal_0.6s_ease-out]" : ""
-              )}
-              style={{
-                animationDelay: isAnimated ? `${delay + 200}ms` : '0ms',
-              }}>
-                <span>{section.title}</span>
-                <IconComponent 
-                  size={24} 
-                  className={cn(
-                    "transition-transform duration-300 opacity-60",
-                    hasGradient 
-                      ? `plan-text-${courseId}`
-                      : "text-blue-600 dark:text-blue-400"
-                  )}
-                  aria-label={`${locale === 'fr' ? 'Icône de section' : 'Section icon'}: ${getSectionDescription(section.title)}`}
-                />
-              </h3>
-              
-              {/* Section Content */}
+              {/* Content Area */}
               <div className={cn(
-                "text-base leading-relaxed mb-16 transition-all duration-500",
+                "rounded-xl p-6 sm:p-8 pl-10 sm:pl-12 pt-10 sm:pt-12 transition-all duration-700 transform cursor-default overflow-visible relative",
                 hasGradient 
-                  ? `plan-text-${courseId} opacity-90`
-                  : "text-gray-700 dark:text-gray-300",
-                isAnimated ? "animate-[content-reveal_0.6s_ease-out]" : ""
-              )}
-              style={{
-                animationDelay: isAnimated ? `${delay + 300}ms` : '0ms',
-              }}>
-                {formatSectionContent(section.content, !!hasGradient, courseId)}
+                  ? `plan-gradient-${courseId} shadow-lg hover:shadow-xl`
+                  : `plan-section-${courseId} bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800`,
+                "hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98]",
+                "backdrop-blur-sm"
+              )}>
+                
+                {/* Horizontal Line extending from circle */}
+                <div className={cn(
+                  "absolute -top-3 left-6 sm:left-8 right-6 h-0.5 transition-all duration-500",
+                  hasGradient 
+                    ? "bg-white/30 dark:bg-gray-600/30"
+                    : "bg-gray-300 dark:bg-gray-600",
+                  isAnimated ? "animate-[content-reveal_0.6s_ease-out]" : ""
+                )}
+                style={{
+                  animationDelay: isAnimated ? `${delay + 200}ms` : '0ms',
+                }} />
+                
+                {/* Section Title with Icon */}
+                <h3 className={cn(
+                  "flex items-center gap-3 text-base sm:text-lg font-bold mb-2 sm:mb-3 uppercase tracking-wide transition-all duration-500",
+                  hasGradient 
+                    ? `plan-text-${courseId}`
+                    : "text-blue-900 dark:text-blue-100",
+                  isAnimated ? "animate-[content-reveal_0.6s_ease-out]" : ""
+                )}
+                style={{
+                  animationDelay: isAnimated ? `${delay + 300}ms` : '0ms',
+                }}>
+                  <span>{section.title}</span>
+                  <IconComponent 
+                    size={24} 
+                    className={cn(
+                      "transition-transform duration-300 opacity-60",
+                      hasGradient 
+                        ? `plan-text-${courseId}`
+                        : "text-blue-600 dark:text-blue-400"
+                    )}
+                    aria-label={`${locale === 'fr' ? 'Icône de section' : 'Section icon'}: ${getSectionDescription(section.title)}`}
+                  />
+                </h3>
+                
+                {/* Section Content */}
+                <div className={cn(
+                  "text-base leading-relaxed transition-all duration-500",
+                  hasGradient 
+                    ? `plan-text-${courseId} opacity-90`
+                    : "text-gray-700 dark:text-gray-300",
+                  isAnimated ? "animate-[content-reveal_0.6s_ease-out]" : ""
+                )}
+                style={{
+                  animationDelay: isAnimated ? `${delay + 400}ms` : '0ms',
+                }}>
+                  {formatSectionContent(section.content, !!hasGradient, courseId)}
+                </div>
               </div>
             </div>
           );
