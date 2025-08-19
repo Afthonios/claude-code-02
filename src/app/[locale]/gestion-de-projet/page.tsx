@@ -58,7 +58,7 @@ export default async function ProjectManagementPage({ params }: Props) {
                   </li>
                   <li className="flex items-start">
                     <span className="text-primary mr-3 mt-1">•</span>
-                    <span>Faire émerger le meilleur de l'intelligence collective en animant des réunions en mode collaboratif.</span>
+                    <span>Faire émerger le meilleur de l&apos;intelligence collective en animant des réunions en mode collaboratif.</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-primary mr-3 mt-1">•</span>
@@ -89,7 +89,7 @@ export default async function ProjectManagementPage({ params }: Props) {
                   </li>
                   <li className="flex items-start">
                     <span className="text-primary mr-3 mt-1">•</span>
-                    <span>Stimulate your team's motivation and creativity and strengthen cohesion.</span>
+                    <span>Stimulate your team&apos;s motivation and creativity and strengthen cohesion.</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-primary mr-3 mt-1">•</span>

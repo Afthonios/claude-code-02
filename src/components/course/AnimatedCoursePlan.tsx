@@ -231,7 +231,7 @@ export default function AnimatedCoursePlan({
   };
 
   // Helper function to detect trigger words and add icons after them
-  const addIconsToText = (text: string, hasGradient: boolean, courseId: string) => {
+  const addIconsToText = (text: string, _hasGradient: boolean, _courseId: string) => {
     const triggerWords = [
       { word: /(vidéo|video)/gi, icon: Video },
       { word: /(youtube|ted)/gi, icon: Youtube },
@@ -243,8 +243,8 @@ export default function AnimatedCoursePlan({
       { word: /(diaporama|fiche)/gi, icon: FileText },
     ];
 
-    let processedText = text;
-    const iconElements: { position: number; icon: any; id: string }[] = [];
+    const processedText = text;
+    const iconElements: { position: number; icon: React.ComponentType<{ className?: string; width?: number; height?: number }>; id: string }[] = [];
     
     triggerWords.forEach((trigger, triggerIndex) => {
       let match;
@@ -271,18 +271,18 @@ export default function AnimatedCoursePlan({
     if (!content || !content.trim()) return null;
     
     // Step 1: Extract each <li> item as a complete unit
-    const liMatches = content.match(/<li[^>]*>.*?<\/li>/gis);
+    const liMatches = content.match(/<li[^>]*>[\s\S]*?<\/li>/gi);
     
     if (!liMatches) {
       // Fallback for non-list content
       return <div className="text-sm text-gray-700 dark:text-gray-300">{content}</div>;
     }
 
-    const elements: JSX.Element[] = [];
+    const elements: React.ReactElement[] = [];
     
     liMatches.forEach((liItem, index) => {
       // Clean up this <li> item
-      let itemContent = liItem
+      const itemContent = liItem
         .replace(/<\/?li[^>]*>/gi, '')
         .replace(/<br\s*\/?>/gi, '\n')
         .replace(/<[^>]*>/g, '')
@@ -312,7 +312,7 @@ export default function AnimatedCoursePlan({
       if (lines.length === 0) return;
       
       // Check if this is a main point (starts with letter+))
-      const isMainPoint = /^[a-z]\)\s+/.test(lines[0]);
+      const isMainPoint = lines[0] ? /^[a-z]\)\s+/.test(lines[0]) : false;
       
       elements.push(
         <div key={`li-${index}`} className="mb-4">
@@ -350,7 +350,8 @@ export default function AnimatedCoursePlan({
                 segments.push(
                   <IconComponent
                     key={iconData.id}
-                    size={14}
+                    width={14}
+                    height={14}
                     className={cn(
                       "inline mx-1",
                       hasGradient 
@@ -460,7 +461,7 @@ export default function AnimatedCoursePlan({
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           setIsVisible(true);
         }
       },
@@ -489,7 +490,7 @@ export default function AnimatedCoursePlan({
     sections.forEach((section) => {
       const observer = new IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting) {
+          if (entry?.isIntersecting) {
             setVisibleSections(prev => new Set([...prev, section.id]));
           }
         },
@@ -721,7 +722,7 @@ export default function AnimatedCoursePlan({
               style={{
                 animationDelay: isAnimated ? `${delay + 300}ms` : '0ms',
               }}>
-                {formatSectionContent(section.content, hasGradient, courseId)}
+                {formatSectionContent(section.content, !!hasGradient, courseId)}
               </div>
               
               {/* Large Icon in right side - overlapping text */}

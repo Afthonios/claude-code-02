@@ -60,11 +60,11 @@ export default function Pagination({
       {/* Results info and page size selector */}
       <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
         <span>
-          {t('pagination.showing', 'Showing')} {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, totalItems)} {t('pagination.of', 'of')} {totalItems}
+          {t('pagination.showing')} {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, totalItems)} {t('pagination.of')} {totalItems}
         </span>
         <div className="flex items-center gap-2">
           <label htmlFor="page-size" className="text-sm">
-            {t('pagination.perPage', 'Per page')}:
+            {t('pagination.perPage')}:
           </label>
           <select
             id="page-size"
@@ -80,7 +80,7 @@ export default function Pagination({
       </div>
 
       {/* Pagination controls */}
-      <nav className="flex items-center gap-1" aria-label={t('pagination.navigation', 'Pagination navigation')}>
+      <nav className="flex items-center gap-1" aria-label={t('pagination.navigation')}>
         {/* Previous button */}
         <button
           onClick={() => onPageChange(currentPage - 1)}
@@ -90,7 +90,7 @@ export default function Pagination({
               ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
               : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
-          aria-label={t('pagination.previous', 'Previous page')}
+          aria-label={t('pagination.previous')}
         >
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -110,7 +110,7 @@ export default function Pagination({
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
-                aria-label={t('pagination.page', 'Page {page}', { page })}
+                aria-label={t('pagination.page', { page })}
                 aria-current={page === currentPage ? 'page' : undefined}
               >
                 {page}
@@ -128,7 +128,7 @@ export default function Pagination({
               ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
               : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
-          aria-label={t('pagination.next', 'Next page')}
+          aria-label={t('pagination.next')}
         >
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

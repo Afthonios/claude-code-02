@@ -44,10 +44,10 @@ export default function ActiveFilters({
       case 'competences':
         // Ensure both values are strings for comparison
         const competence = competenceOptions.find(opt => String(opt.value) === String(value));
-        return {
-          light: competence?.colorLight,
-          dark: competence?.colorDark
-        };
+        const result: { light?: string; dark?: string } = {};
+        if (competence?.colorLight) result.light = competence.colorLight;
+        if (competence?.colorDark) result.dark = competence.colorDark;
+        return result;
       default:
         return {};
     }

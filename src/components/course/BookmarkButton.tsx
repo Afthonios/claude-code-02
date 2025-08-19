@@ -78,8 +78,8 @@ export default function BookmarkButton({ courseId, size = 'md', className = '' }
           ? 'hsl(var(--primary))' 
           : 'hsl(var(--primary))',
       }}
-      title={isBookmarked ? t('bookmark.remove', 'Remove from bookmarks') : t('bookmark.add', 'Add to bookmarks')}
-      aria-label={isBookmarked ? t('bookmark.remove', 'Remove from bookmarks') : t('bookmark.add', 'Add to bookmarks')}
+      title={isBookmarked ? t('bookmark.remove') : t('bookmark.add')}
+      aria-label={isBookmarked ? t('bookmark.remove') : t('bookmark.add')}
     >
       {isBookmarked ? (
         <svg

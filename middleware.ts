@@ -10,10 +10,7 @@ export default createMiddleware({
   
   // Always use locale prefix for all routes
   // This ensures /fr and /en are always in the URL
-  localePrefix: 'always',
-  
-  // Ensure paths without locale get redirected to default locale
-  defaultLocale,
+  localePrefix: 'always'
   
   // Alternative domains for different locales (optional)
   // domains: [

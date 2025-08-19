@@ -103,7 +103,7 @@ export const coursesApi = {
               const filterKey = `${prefix}[${key}]`;
               if (value && typeof value === 'object' && !Array.isArray(value)) {
                 // Recursively flatten nested objects
-                flattenFilter(value, filterKey);
+                flattenFilter(value as Record<string, unknown>, filterKey);
               } else {
                 // Set the parameter with proper encoding
                 if (Array.isArray(value)) {
@@ -528,12 +528,13 @@ export function getParentCompetences(course: DirectusCourse, locale: string) {
         const translation = filterTranslations(parentCompetence.translations, locale);
         
         if (translation && !parentCompetences.find(p => p.id === parentCompetence.id)) {
-          parentCompetences.push({
+          const parent: { id: string; title: string; colorLight?: string; colorDark?: string } = {
             id: parentCompetence.id,
             title: translation.title,
-            colorLight: parentCompetence.color_light,
-            colorDark: parentCompetence.color_dark,
-          });
+          };
+          if (parentCompetence.color_light) parent.colorLight = parentCompetence.color_light;
+          if (parentCompetence.color_dark) parent.colorDark = parentCompetence.color_dark;
+          parentCompetences.push(parent);
         }
       }
     }
@@ -560,14 +561,14 @@ export function getCoursesListUrl(locale: string): string {
 }
 
 export function generateMetadata(
-  courseTranslation: Record<string, unknown>,
+  courseTranslation: DirectusCourseTranslation | Record<string, unknown>,
   locale: string,
   baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://afthonios.com'
 ) {
-  const title = courseTranslation?.seo_title || courseTranslation?.title;
-  const description = courseTranslation?.seo_description || courseTranslation?.summary;
-  const ogImage = courseTranslation?.og_image 
-    ? getAssetUrl(courseTranslation.og_image as string)
+  const title = (courseTranslation?.seo_title || courseTranslation?.title) as string;
+  const description = (courseTranslation?.seo_description || courseTranslation?.summary) as string;
+  const ogImage = (courseTranslation as Record<string, unknown>)?.og_image 
+    ? getAssetUrl((courseTranslation as Record<string, unknown>).og_image as string)
     : `${baseUrl}/og-default.png`;
 
   return {

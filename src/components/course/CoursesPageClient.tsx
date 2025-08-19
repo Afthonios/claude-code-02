@@ -83,12 +83,13 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
           .filter(competence => competence.translations && competence.translations.length > 0)
           .map((competence: DirectusCompetence) => {
             const translation = filterTranslations(competence.translations, locale);
-            return {
+            const option: { value: string; label: string; colorLight?: string; colorDark?: string } = {
               value: String(competence.id), // Ensure ID is always a string
               label: translation?.title || `Competence ${competence.id}`,
-              colorLight: competence.color_light,
-              colorDark: competence.color_dark,
             };
+            if (competence.color_light) option.colorLight = competence.color_light;
+            if (competence.color_dark) option.colorDark = competence.color_dark;
+            return option;
           });
         
         setCompetenceOptions(options);
@@ -191,7 +192,6 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
   useEffect(() => {
     const currentFilters = JSON.stringify(filters.competences);
     const currentSearch = search;
-    const currentShowBookmarked = filters.showBookmarked;
     
     // Check if filters or search actually changed
     const filtersChanged = currentFilters !== previousFilters.current;
@@ -322,7 +322,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
               <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
                 <p className="text-destructive">{error}</p>
                 <button
-                  onClick={fetchCourses}
+                  onClick={() => fetchCourses()}
                   className="mt-2 text-sm text-destructive hover:text-destructive/80 underline"
                 >
                   {t('noResults.tryAgain')}

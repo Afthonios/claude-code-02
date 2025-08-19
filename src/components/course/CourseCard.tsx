@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { formatDuration, filterTranslations, getAssetUrlWithTransforms, getCourseUrl } from '@/lib/directus';
-import { getCourseGradientStyles, cn } from '@/lib/utils';
+import { getCourseGradientStyles, cn, type CourseGradientData } from '@/lib/utils';
 import BookmarkButton from './BookmarkButton';
 import type { DirectusCourse } from '@/types/directus';
 
@@ -35,14 +35,14 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
   const duration = course.duration ? formatDuration(course.duration, locale) : null;
 
   // Get gradient styles for the course card
-  const gradientStyles = getCourseGradientStyles({
-    gradient_from_light: course.gradient_from_light,
-    gradient_to_light: course.gradient_to_light,
-    gradient_from_dark: course.gradient_from_dark,
-    gradient_to_dark: course.gradient_to_dark,
-    on_light: course.on_light,
-    on_dark: course.on_dark,
-  });
+  const gradientData: CourseGradientData = {};
+  if (course.gradient_from_light) gradientData.gradient_from_light = course.gradient_from_light;
+  if (course.gradient_to_light) gradientData.gradient_to_light = course.gradient_to_light;
+  if (course.gradient_from_dark) gradientData.gradient_from_dark = course.gradient_from_dark;
+  if (course.gradient_to_dark) gradientData.gradient_to_dark = course.gradient_to_dark;
+  if (course.on_light) gradientData.on_light = course.on_light;
+  if (course.on_dark) gradientData.on_dark = course.on_dark;
+  const gradientStyles = getCourseGradientStyles(gradientData);
 
   return (
     <>

@@ -15,7 +15,7 @@ export default function DurationSlider({ value, onChange, className = '' }: Dura
 
   // Convert minutes to hours for display
   const formatDuration = useCallback((minutes: number): string => {
-    if (minutes === 0) return t('filters.duration.any', 'Any duration');
+    if (minutes === 0) return t('filters.duration.any');
     if (minutes < 60) return `${minutes}min`;
     if (minutes < 120) return `${Math.floor(minutes / 60)}h ${minutes % 60}min`;
     return `${Math.floor(minutes / 60)}h`;
@@ -29,7 +29,7 @@ export default function DurationSlider({ value, onChange, className = '' }: Dura
   const valueToStep = useCallback((minutes: number): number => {
     if (minutes === 0) return 0;
     for (let i = 1; i < sliderSteps.length; i++) {
-      if (minutes <= sliderSteps[i]) return i;
+      if (sliderSteps[i] !== undefined && minutes <= sliderSteps[i]!) return i;
     }
     return maxStep;
   }, [maxStep]);
@@ -55,14 +55,14 @@ export default function DurationSlider({ value, onChange, className = '' }: Dura
     <div className={`space-y-3 ${className}`}>
       <div className="flex items-center justify-between">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          {t('filters.maxDuration', 'Maximum Duration')}
+          {t('filters.maxDuration')}
         </label>
         {value > 0 && (
           <button
             onClick={handleClear}
             className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
           >
-            {t('filters.clearDuration', 'Clear')}
+            {t('filters.clearDuration')}
           </button>
         )}
       </div>

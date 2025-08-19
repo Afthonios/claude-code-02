@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { coursesApi } from '@/lib/directus';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {

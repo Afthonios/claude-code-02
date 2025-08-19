@@ -6,6 +6,7 @@ import { locales, type Locale } from "../../i18n";
 import { useTransition, useEffect, useState } from "react";
 import { Globe } from "lucide-react";
 import { getCourseUrl } from "../../lib/directus";
+import type { DirectusCourse } from "../../types/directus";
 
 /**
  * LanguageSwitcher component for switching between supported locales
@@ -49,7 +50,7 @@ export default function LanguageSwitcher() {
             id: course.id,
             legacy_id: course.legacy_id,
             translationsCount: course.translations?.length || 0,
-            translations: course.translations?.map((t: any) => ({ 
+            translations: course.translations?.map((t: { languages_code: string; slug: string; title: string }) => ({ 
               language: t.languages_code, 
               slug: t.slug,
               title: t.title 
@@ -83,7 +84,7 @@ export default function LanguageSwitcher() {
         };
         
         // Generate the proper localized course URL
-        const newPath = getCourseUrl(courseForUrl as any, locale);
+        const newPath = getCourseUrl(courseForUrl as DirectusCourse, locale);
         console.log('🔄 LanguageSwitcher: Switching from', currentLocale, 'to', locale);
         console.log('📍 LanguageSwitcher: Generated URL:', newPath);
         console.log('🗂️ LanguageSwitcher: Course translations:', courseData.translations?.map(t => ({ 

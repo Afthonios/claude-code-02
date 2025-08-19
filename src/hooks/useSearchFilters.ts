@@ -75,10 +75,13 @@ export function useSearchFilters() {
 
   // Remove specific filter value
   const removeFilter = useCallback((filterType: keyof FilterState, value: string) => {
-    const newFilters = {
-      ...state,
-      [filterType]: state[filterType].filter(v => v !== value),
-    };
+    const newFilters = { ...state };
+    
+    // Only handle competences array - showBookmarked is a boolean
+    if (filterType === 'competences' && Array.isArray(state[filterType])) {
+      newFilters[filterType] = state[filterType].filter(v => v !== value);
+    }
+    
     setState(newFilters);
     updateURL(newFilters);
   }, [state, updateURL]);

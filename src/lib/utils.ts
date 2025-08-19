@@ -307,7 +307,7 @@ export function getCourseGradientStyles(courseData: CourseGradientData) {
     ? `linear-gradient(135deg, ${courseData.gradient_from_dark} 0%, ${courseData.gradient_to_dark} 100%)`
     : '';
 
-  const backgroundStyle: React.CSSProperties = {
+  const backgroundStyle: React.CSSProperties & Record<string, string> = {
     ...(hasLightGradient && {
       '--gradient-light': lightGradient,
     }),

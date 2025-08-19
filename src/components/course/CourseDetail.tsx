@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { formatDuration, filterTranslations, getAssetUrlWithTransforms, getCoursesListUrl } from '@/lib/directus';
-import { getCourseGradientStyles, cn } from '@/lib/utils';
+import { getCourseGradientStyles, cn, type CourseGradientData } from '@/lib/utils';
 import type { DirectusCourse } from '@/types/directus';
 import BookmarkButton from './BookmarkButton';
 import AnimatedCoursePlan from './AnimatedCoursePlan';
@@ -17,13 +17,13 @@ interface CourseDetailProps {
 
 export default function CourseDetail({ course, locale }: CourseDetailProps) {
   const translation = filterTranslations(course.translations, locale);
-  const objectivesRef = useRef<HTMLDivElement>(null);
+  const objectivesRef = useRef<HTMLUListElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           setIsVisible(true);
         }
       },
@@ -76,14 +76,14 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
   const duration = course.duration ? formatDuration(course.duration, locale) : null;
 
   // Get gradient styles for the course detail
-  const gradientStyles = getCourseGradientStyles({
-    gradient_from_light: course.gradient_from_light,
-    gradient_to_light: course.gradient_to_light,
-    gradient_from_dark: course.gradient_from_dark,
-    gradient_to_dark: course.gradient_to_dark,
-    on_light: course.on_light,
-    on_dark: course.on_dark,
-  });
+  const gradientData: CourseGradientData = {};
+  if (course.gradient_from_light) gradientData.gradient_from_light = course.gradient_from_light;
+  if (course.gradient_to_light) gradientData.gradient_to_light = course.gradient_to_light;
+  if (course.gradient_from_dark) gradientData.gradient_from_dark = course.gradient_from_dark;
+  if (course.gradient_to_dark) gradientData.gradient_to_dark = course.gradient_to_dark;
+  if (course.on_light) gradientData.on_light = course.on_light;
+  if (course.on_dark) gradientData.on_dark = course.on_dark;
+  const gradientStyles = getCourseGradientStyles(gradientData);
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -248,12 +248,12 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
             plan={translation.plan}
             locale={locale}
             courseId={course.id}
-            gradientFromLight={course.gradient_from_light}
-            gradientToLight={course.gradient_to_light}
-            gradientFromDark={course.gradient_from_dark}
-            gradientToDark={course.gradient_to_dark}
-            onLight={course.on_light}
-            onDark={course.on_dark}
+            {...(course.gradient_from_light && { gradientFromLight: course.gradient_from_light })}
+            {...(course.gradient_to_light && { gradientToLight: course.gradient_to_light })}
+            {...(course.gradient_from_dark && { gradientFromDark: course.gradient_from_dark })}
+            {...(course.gradient_to_dark && { gradientToDark: course.gradient_to_dark })}
+            {...(course.on_light && { onLight: course.on_light })}
+            {...(course.on_dark && { onDark: course.on_dark })}
           />
         </div>
       )}
