@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Eye, Zap, BookOpen, Anchor, Plus, PlayCircle, Video, Youtube, FileText, Download, Clock, CheckSquare, XSquare } from 'lucide-react';
+import { Eye, Zap, BookOpen, Anchor, Plus, PlayCircle, Video, Youtube, FileText, Download, Clock, CheckSquare, XSquare, HelpCircle, Grid3X3 } from 'lucide-react';
 
 interface AnimatedCoursePlanProps {
   plan_md: string;
@@ -577,6 +577,52 @@ export default function AnimatedCoursePlan({
     // Update lastIndex to include youtube processing
     if (youtubeLastIndex > lastIndex) {
       lastIndex = youtubeLastIndex;
+    }
+    
+    // Pattern for Quiz with word boundaries
+    const quizRegex = /\b(Quiz|Quizzes)\b/gi;
+    let quizMatch;
+    let quizLastIndex = lastIndex;
+    
+    while ((quizMatch = quizRegex.exec(line.substring(lastIndex))) !== null) {
+      const actualIndex = lastIndex + quizMatch.index;
+      const actualEnd = actualIndex + quizMatch[0].length;
+      
+      // Add text before quiz match
+      if (actualIndex > quizLastIndex) {
+        elements.push(
+          <span key={`quiz-text-before-${keyIndex++}`}>
+            {line.substring(quizLastIndex, actualIndex)}
+          </span>
+        );
+      }
+      
+      // Add the matched text
+      elements.push(
+        <span key={`quiz-text-${keyIndex++}`}>
+          {quizMatch[0]}
+        </span>
+      );
+      
+      // Add quiz icon (grid for quizzes/forms)
+      elements.push(
+        <Grid3X3
+          key={`quiz-icon-${keyIndex++}`}
+          className={cn(
+            "inline w-4 h-4 mx-1 align-text-bottom",
+            hasGradient 
+              ? `plan-text-${courseId}`
+              : "text-purple-600 dark:text-purple-400"
+          )}
+        />
+      );
+      
+      quizLastIndex = actualEnd;
+    }
+    
+    // Update lastIndex to include quiz processing
+    if (quizLastIndex > lastIndex) {
+      lastIndex = quizLastIndex;
     }
     
     // Reset for time pattern
