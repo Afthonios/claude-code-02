@@ -38,36 +38,48 @@ export function useSearchFilters() {
 
   // Update URL when state changes
   const updateURL = useCallback((newState: SearchFiltersState) => {
-    const params = new URLSearchParams();
-    
-    if (newState.search) {
-      params.set('search', newState.search);
-    }
-    
-    if (newState.showBookmarked) {
-      params.set('showBookmarked', 'true');
-    }
-    
-    if (newState.hideCompleted) {
-      params.set('hideCompleted', 'true');
-    }
-    
-    Object.entries(newState).forEach(([key, value]) => {
-      if (key !== 'search' && key !== 'showBookmarked' && key !== 'hideCompleted' && Array.isArray(value) && value.length > 0) {
-        params.set(key, value.join(','));
+    try {
+      const params = new URLSearchParams();
+      
+      if (newState.search) {
+        params.set('search', newState.search);
       }
-    });
+      
+      if (newState.showBookmarked) {
+        params.set('showBookmarked', 'true');
+      }
+      
+      if (newState.hideCompleted) {
+        params.set('hideCompleted', 'true');
+      }
+      
+      Object.entries(newState).forEach(([key, value]) => {
+        if (key !== 'search' && key !== 'showBookmarked' && key !== 'hideCompleted' && Array.isArray(value) && value.length > 0) {
+          params.set(key, value.join(','));
+        }
+      });
 
-    const queryString = params.toString();
-    
-    // Use replace to avoid cluttering browser history
-    // Only pass the query string, let Next.js handle the pathname
-    if (typeof window !== 'undefined') {
-      const currentPath = window.location.pathname;
-      const newURL = queryString ? `${currentPath}?${queryString}` : currentPath;
-      router.replace(newURL, { scroll: false });
+      const queryString = params.toString();
+      
+      // Use replace to avoid cluttering browser history
+      if (typeof window !== 'undefined') {
+        try {
+          const currentPath = window.location.pathname;
+          const newURL = queryString ? `${currentPath}?${queryString}` : currentPath;
+          
+          // Use a simple approach that doesn't trigger Next.js navigation
+          const url = new URL(newURL, window.location.origin);
+          window.history.replaceState(null, '', url.toString());
+        } catch (urlError) {
+          console.warn('Failed to update URL:', urlError);
+          // Fallback: don't update URL if it fails
+        }
+      }
+    } catch (error) {
+      console.warn('Error in updateURL:', error);
+      // Continue without URL updates if there's an error
     }
-  }, [router]);
+  }, []);
 
   // Update search query
   const setSearch = useCallback((search: string) => {
@@ -78,7 +90,15 @@ export function useSearchFilters() {
 
   // Update filters
   const setFilters = useCallback((filters: FilterState) => {
-    const newState = { ...state, ...filters };
+    // Special handling for courseType to ensure either/or behavior
+    let newState = { ...state, ...filters };
+    
+    // If courseType is being updated and has multiple values, keep only the last one
+    if (filters.courseType && filters.courseType.length > 1) {
+      console.log('⚠️ Multiple courseType values detected, keeping only:', filters.courseType[filters.courseType.length - 1]);
+      newState.courseType = [filters.courseType[filters.courseType.length - 1]];
+    }
+    
     setState(newState);
     updateURL(newState);
   }, [state, updateURL]);

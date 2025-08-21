@@ -33,10 +33,18 @@ export default function FilterSidebar({
   const tCommon = useTranslations('common');
 
   const handleFilterChange = (filterType: keyof FilterState, values: string[] | boolean) => {
-    onFiltersChange({
-      ...filters,
-      [filterType]: values,
-    });
+    // Create a clean new filter state
+    const newFilters = {
+      competences: filters.competences,
+      showBookmarked: filters.showBookmarked,
+      courseType: filters.courseType,
+      hideCompleted: filters.hideCompleted,
+    };
+    
+    // Update the specific filter type
+    (newFilters as any)[filterType] = values;
+    
+    onFiltersChange(newFilters);
   };
 
   const clearAllFilters = () => {
@@ -114,10 +122,14 @@ export default function FilterSidebar({
                         type="checkbox"
                         checked={filters.courseType.includes(option.value)}
                         onChange={(e) => {
-                          const newValues = e.target.checked
-                            ? [...filters.courseType, option.value]
-                            : filters.courseType.filter(v => v !== option.value);
-                          handleFilterChange('courseType', newValues);
+                          // Either/or logic: only one can be selected at a time
+                          if (e.target.checked) {
+                            // Select this option and deselect any others
+                            handleFilterChange('courseType', [option.value]);
+                          } else {
+                            // Uncheck: clear all selections
+                            handleFilterChange('courseType', []);
+                          }
                         }}
                         className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                       />

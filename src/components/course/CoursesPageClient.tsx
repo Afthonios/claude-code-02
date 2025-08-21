@@ -192,7 +192,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
 
   // Fetch courses when search or filters change
   useEffect(() => {
-    const currentFilters = JSON.stringify(filters.competences);
+    const currentFilters = JSON.stringify({ competences: filters.competences, courseType: filters.courseType });
     const currentSearch = search;
     
     // Check if filters or search actually changed
