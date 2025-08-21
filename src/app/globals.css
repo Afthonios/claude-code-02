@@ -294,7 +294,14 @@ body {
   }
 }
 
-@media (min-width: 1025px) {
+@media (min-width: 1025px) and (max-width: 1440px) {
+  .course-grid-safari {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 1441px) {
   .course-grid-safari {
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   }
