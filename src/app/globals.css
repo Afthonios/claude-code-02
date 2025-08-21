@@ -1,7 +1,45 @@
 @import "tailwindcss";
 
+/* Cross-browser reset for consistent container behavior */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
 html {
   color-scheme: light;
+  box-sizing: border-box;
+  -webkit-text-size-adjust: 100%;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* Safari-specific container fixes */
+@supports (-webkit-appearance: none) {
+  .container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1.5rem !important;
+      padding-right: 1.5rem !important;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .container {
+      padding-left: 2rem !important;
+      padding-right: 2rem !important;
+    }
+  }
 }
 
 .dark {
@@ -176,4 +214,128 @@ body {
 
 .animate-slide-up {
   animation: slideUp 0.3s ease-out;
+}
+
+/* Safari-specific course grid fixes */
+.course-grid-safari {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Safari-specific container fixes */
+@supports (-webkit-appearance: none) {
+  .course-grid-safari {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  
+  .course-card-container {
+    min-width: 0;
+    min-height: 0;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .course-card-link {
+    display: block;
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+    max-width: 100%;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+  
+  .course-card-content {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  .course-card-text {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+  
+  /* Fix for Safari flex containers */
+  .safari-flex-container {
+    min-width: 0;
+    min-height: 0;
+  }
+  
+  .safari-flex-content {
+    min-width: 0;
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* Enhanced Safari grid responsive behavior */
+@media (max-width: 640px) {
+  .course-grid-safari {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .course-grid-safari {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+@media (min-width: 1025px) {
+  .course-grid-safari {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+}
+
+/* Additional Safari optimizations */
+@supports (-webkit-appearance: none) {
+  /* Fix aspect-video in Safari */
+  .aspect-video {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    height: auto;
+  }
+  
+  /* Ensure Safari respects max-width */
+  .course-card-link {
+    max-width: 100% !important;
+    overflow: hidden;
+  }
+  
+  /* Fix Safari image sizing */
+  .course-card-content img {
+    max-width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+  
+  /* Force Safari to respect container queries */
+  .container {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  /* Fix Safari flexbox bugs */
+  .safari-flex-container > * {
+    min-width: 0;
+  }
+  
+  /* Prevent Safari from shrinking text */
+  .course-card-text {
+    font-size: inherit;
+    line-height: inherit;
+  }
 }

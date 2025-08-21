@@ -73,13 +73,13 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
       <Link 
         href={getCourseUrl(course, locale)}
         className={cn(
-          "block rounded-lg shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border group relative",
+          "course-card-link rounded-lg shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border group relative",
           gradientStyles.hasGradient 
             ? `border-transparent course-card-${course.id}` 
             : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
         )}
       >
-      <div className="relative z-10">
+      <div className="relative z-10 course-card-content">
         <div className="relative aspect-video w-full overflow-hidden">
           <Image
             src={imageUrl}
@@ -114,11 +114,17 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
           
           <p 
             className={cn(
-              "text-sm mb-4 line-clamp-3 opacity-90",
+              "text-sm mb-4 opacity-90 course-card-text",
               gradientStyles.hasGradient 
                 ? `course-card-${course.id}-text`
                 : "text-gray-600 dark:text-gray-400"
             )}
+            style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden'
+            }}
           >
             {translation.description}
           </p>

@@ -49,7 +49,7 @@ export default function SearchBar({ value, onChange, placeholder }: SearchBarPro
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
         placeholder={placeholder || t('searchPlaceholder')}
-        className="block w-full pl-10 pr-3 py-2 border border-input rounded-md leading-5 bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+        className="block w-full pl-10 pr-3 py-2 border border-input rounded-md leading-5 bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring appearance-none"
       />
       {localValue && (
         <button

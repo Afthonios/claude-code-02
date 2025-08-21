@@ -247,7 +247,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
 
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container py-8">
         
         {/* Header */}
         <div className="mb-8">
@@ -306,7 +306,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
         />
 
         {/* Main Content Area */}
-        <div className="flex gap-8">
+        <div className="flex gap-8 safari-flex-container">
           {/* Filter Sidebar */}
           <FilterSidebar
             filters={filters}
@@ -317,7 +317,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
           />
 
           {/* Main Content */}
-          <div className="flex-1 lg:ml-0">
+          <div className="flex-1 lg:ml-0 safari-flex-content">
             {error && (
               <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
                 <p className="text-destructive">{error}</p>
@@ -332,9 +332,9 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
 
             {/* Loading State */}
             {isLoading && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="course-grid-safari">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
+                  <div key={i} className="min-w-0 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
                     <div className="aspect-video w-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
                     <div className="p-6">
                       <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-2 animate-pulse"></div>
@@ -356,9 +356,11 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
             {!isLoading && !error && (
               <>
                 {filteredCourses.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="course-grid-safari">
                     {filteredCourses.map((course) => (
-                      <CourseCard key={course.id} course={course} locale={locale} />
+                      <div key={course.id} className="course-card-container">
+                        <CourseCard course={course} locale={locale} />
+                      </div>
                     ))}
                   </div>
                 ) : (

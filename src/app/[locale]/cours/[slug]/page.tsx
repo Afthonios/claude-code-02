@@ -77,7 +77,7 @@ async function CourseContent({ slug, locale }: { slug: string; locale: string })
 
 function CourseError({ locale }: { locale: string }) {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container py-8 px-4 md:px-0">
       <div className="text-center py-12">
         <div className="text-red-400 dark:text-red-600 text-6xl mb-4">⚠️</div>
         <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
@@ -95,7 +95,7 @@ function CourseError({ locale }: { locale: string }) {
 
 function CourseLoading() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container py-8 px-4 md:px-0">
       <div className="max-w-4xl mx-auto">
         {/* Breadcrumb skeleton */}
         <div className="mb-6">
@@ -143,7 +143,7 @@ export default async function CoursePage({ params }: Props) {
   const { locale, slug } = await params;
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container py-8 px-4 md:px-0">
       <Suspense fallback={<CourseLoading />}>
         <CourseContent slug={slug} locale={locale} />
       </Suspense>
