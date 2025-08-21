@@ -65,40 +65,90 @@ export async function GET(request: NextRequest) {
             availability: 'free',
             price_cents: 0,
             currency: 'EUR',
+            course_type: 'Formation',
             course_image: null,
             translations: [
               {
                 id: '1',
                 courses_id: '1',
                 languages_code: 'fr',
-                title: 'Cours d\'exemple 1',
-                subtitle: 'Un cours pour tester les filtres',
-                summary: 'Ce cours sert à tester le système de filtres',
-                description: 'Description détaillée du cours d\'exemple',
-                slug: 'cours-exemple-1'
+                title: 'Formation d\'exemple 1',
+                subtitle: 'Une formation pour tester les filtres',
+                summary: 'Cette formation sert à tester le système de filtres',
+                description: 'Description détaillée de la formation d\'exemple',
+                slug: 'formation-exemple-1'
               }
             ]
           },
           {
             id: '2',
-            legacy_id: 'f-sample-course-2',
+            legacy_id: 'p-sample-course-2',
             status: 'published',
             duration: 90,
             level: 'intermediate',
             availability: 'paid',
             price_cents: 2999,
             currency: 'EUR',
+            course_type: 'Parcours',
             course_image: null,
             translations: [
               {
                 id: '2',
                 courses_id: '2',
                 languages_code: 'fr',
-                title: 'Cours d\'exemple 2',
-                subtitle: 'Un cours intermédiaire',
-                summary: 'Ce cours intermédiaire teste les filtres',
-                description: 'Description détaillée du cours intermédiaire',
-                slug: 'cours-exemple-2'
+                title: 'Parcours d\'exemple 2',
+                subtitle: 'Un parcours intermédiaire',
+                summary: 'Ce parcours intermédiaire teste les filtres',
+                description: 'Description détaillée du parcours intermédiaire',
+                slug: 'parcours-exemple-2'
+              }
+            ]
+          },
+          {
+            id: '3',
+            legacy_id: 'f-sample-course-3',
+            status: 'published',
+            duration: 60,
+            level: 'advanced',
+            availability: 'paid',
+            price_cents: 4999,
+            currency: 'EUR',
+            course_type: 'Formation',
+            course_image: null,
+            translations: [
+              {
+                id: '3',
+                courses_id: '3',
+                languages_code: 'fr',
+                title: 'Formation avancée 3',
+                subtitle: 'Une formation avancée',
+                summary: 'Cette formation avancée teste les filtres',
+                description: 'Description détaillée de la formation avancée',
+                slug: 'formation-avancee-3'
+              }
+            ]
+          },
+          {
+            id: '4',
+            legacy_id: 'p-sample-course-4',
+            status: 'published',
+            duration: 120,
+            level: 'beginner',
+            availability: 'free',
+            price_cents: 0,
+            currency: 'EUR',
+            course_type: 'Parcours',
+            course_image: null,
+            translations: [
+              {
+                id: '4',
+                courses_id: '4',
+                languages_code: 'fr',
+                title: 'Parcours débutant 4',
+                subtitle: 'Un parcours pour débutants',
+                summary: 'Ce parcours débutant teste les filtres',
+                description: 'Description détaillée du parcours débutant',
+                slug: 'parcours-debutant-4'
               }
             ]
           }

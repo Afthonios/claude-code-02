@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 export interface FilterState {
   competences: string[];
   showBookmarked: boolean;
+  courseType: string[];  // Formation, Parcours
+  hideCompleted: boolean; // Masquer les formations terminées
 }
 
 export interface SearchFiltersState extends FilterState {
@@ -21,12 +23,16 @@ export function useSearchFilters() {
     const search = searchParams.get('search') || '';
     const competences = searchParams.get('competences')?.split(',').filter(Boolean) || [];
     const showBookmarked = searchParams.get('showBookmarked') === 'true';
+    const courseType = searchParams.get('courseType')?.split(',').filter(Boolean) || [];
+    const hideCompleted = searchParams.get('hideCompleted') === 'true';
     
     
     return {
       search,
       competences,
       showBookmarked,
+      courseType,
+      hideCompleted,
     };
   });
 
@@ -42,8 +48,12 @@ export function useSearchFilters() {
       params.set('showBookmarked', 'true');
     }
     
+    if (newState.hideCompleted) {
+      params.set('hideCompleted', 'true');
+    }
+    
     Object.entries(newState).forEach(([key, value]) => {
-      if (key !== 'search' && key !== 'showBookmarked' && Array.isArray(value) && value.length > 0) {
+      if (key !== 'search' && key !== 'showBookmarked' && key !== 'hideCompleted' && Array.isArray(value) && value.length > 0) {
         params.set(key, value.join(','));
       }
     });
@@ -77,8 +87,8 @@ export function useSearchFilters() {
   const removeFilter = useCallback((filterType: keyof FilterState, value: string) => {
     const newFilters = { ...state };
     
-    // Only handle competences array - showBookmarked is a boolean
-    if (filterType === 'competences' && Array.isArray(state[filterType])) {
+    // Handle array filters (competences, courseType)
+    if ((filterType === 'competences' || filterType === 'courseType') && Array.isArray(state[filterType])) {
       newFilters[filterType] = state[filterType].filter(v => v !== value);
     }
     
@@ -92,6 +102,8 @@ export function useSearchFilters() {
       search: '',
       competences: [],
       showBookmarked: false,
+      courseType: [],
+      hideCompleted: false,
     };
     setState(newState);
     updateURL(newState);
@@ -111,6 +123,8 @@ export function useSearchFilters() {
       search: searchParams.get('search') || '',
       competences: searchParams.get('competences')?.split(',').filter(Boolean) || [],
       showBookmarked: searchParams.get('showBookmarked') === 'true',
+      courseType: searchParams.get('courseType')?.split(',').filter(Boolean) || [],
+      hideCompleted: searchParams.get('hideCompleted') === 'true',
     };
 
 
@@ -144,13 +158,21 @@ export function useSearchFilters() {
       };
     }
 
+    // Course type filter
+    if (state.courseType.length > 0) {
+      filters.course_type = { _in: state.courseType };
+    }
+
+    console.log('🔍 [useSearchFilters] Generated filters:', JSON.stringify(filters, null, 2));
+    console.log('🔍 [useSearchFilters] Course type state:', state.courseType);
+    
     return filters;
-  }, [state.competences]); // Only depend on competences array, not entire state
+  }, [state.competences, state.courseType]); // Include courseType in dependencies
 
   // Stable hasActiveFilters computation
   const hasActiveFilters = useMemo(() => {
-    return state.search || state.competences.length > 0 || state.showBookmarked;
-  }, [state.search, state.competences, state.showBookmarked]);
+    return state.search || state.competences.length > 0 || state.showBookmarked || state.courseType.length > 0 || state.hideCompleted;
+  }, [state.search, state.competences, state.showBookmarked, state.courseType, state.hideCompleted]);
 
   return {
     // State
@@ -158,6 +180,8 @@ export function useSearchFilters() {
     filters: {
       competences: state.competences,
       showBookmarked: state.showBookmarked,
+      courseType: state.courseType,
+      hideCompleted: state.hideCompleted,
     },
     
     // Actions

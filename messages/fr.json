@@ -74,7 +74,12 @@
       "selectSkills": "Sélectionner les compétences",
       "loadingSkills": "Chargement des compétences...",
       "clearAllFilters": "Effacer tous les filtres",
-      "showBookmarked": "Afficher seulement mes favoris"
+      "showBookmarked": "par favoris",
+      "hideCompleted": "Masquer les formations terminées",
+      "courseType": {
+        "formation": "Formation",
+        "parcours": "Parcours"
+      }
     },
     "bookmark": {
       "add": "Ajouter aux favoris",

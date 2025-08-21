@@ -74,7 +74,12 @@
       "selectSkills": "Select skills",
       "loadingSkills": "Loading skills...",
       "clearAllFilters": "Clear all filters",
-      "showBookmarked": "Show my bookmarks only"
+      "showBookmarked": "by favorites",
+      "hideCompleted": "Hide completed courses",
+      "courseType": {
+        "formation": "Course",
+        "parcours": "Learning Path"
+      }
     },
     "bookmark": {
       "add": "Add to bookmarks",

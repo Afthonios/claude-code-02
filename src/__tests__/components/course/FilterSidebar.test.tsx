@@ -12,24 +12,20 @@ const mockCompetenceOptions = [
   { value: 'vue', label: 'Vue.js' },
 ];
 
-const mockCourseTypeOptions = [
-  { value: 'video', label: 'Video Course' },
-  { value: 'interactive', label: 'Interactive' },
-  { value: 'text', label: 'Text-based' },
-  { value: 'mixed', label: 'Mixed Media' },
-];
-
 describe('FilterSidebar Component', () => {
   const defaultProps = {
     filters: {
       competences: [],
-      course_type: [],
+      showBookmarked: false,
+      courseType: [],
+      hideCompleted: false,
     },
     onFiltersChange: vi.fn(),
     competenceOptions: mockCompetenceOptions,
-    courseTypeOptions: mockCourseTypeOptions,
     isOpen: true,
     onToggle: vi.fn(),
+    isPaidUser: false,
+    courseTypeCounts: { formation: 2, parcours: 1 },
   };
 
   beforeEach(() => {

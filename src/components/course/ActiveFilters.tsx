@@ -5,6 +5,8 @@ import { useTranslations } from 'next-intl';
 interface FilterState {
   competences: string[];
   showBookmarked: boolean;
+  courseType: string[];
+  hideCompleted: boolean;
 }
 
 interface ActiveFiltersProps {
@@ -34,6 +36,12 @@ export default function ActiveFilters({
         return found?.label || `Competence ${value} (${competenceOptions.length} options available)`;
       case 'showBookmarked':
         return t('filters.showBookmarked');
+      case 'courseType':
+        if (value === 'Formation') return t('filters.courseType.formation');
+        if (value === 'Parcours') return t('filters.courseType.parcours');
+        return value;
+      case 'hideCompleted':
+        return t('filters.hideCompleted');
       default:
         return value;
     }
@@ -59,6 +67,10 @@ export default function ActiveFilters({
         return t('filters.competences');
       case 'showBookmarked':
         return t('filters.showBookmarked');
+      case 'courseType':
+        return t('filters.course_type');
+      case 'hideCompleted':
+        return t('filters.hideCompleted');
       default:
         return filterType;
     }
@@ -157,7 +169,7 @@ export default function ActiveFilters({
               <button
                 onClick={() => {
                   // For boolean filters, we pass a special value to indicate toggling off
-                  if (item.type === 'showBookmarked') {
+                  if (item.type === 'showBookmarked' || item.type === 'hideCompleted') {
                     onFilterRemove(item.type, 'false');
                   } else {
                     onFilterRemove(item.type, item.value);

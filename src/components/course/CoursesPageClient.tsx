@@ -18,6 +18,9 @@ interface CoursesPageClientProps {
 
 export default function CoursesPageClient({ locale, initialCourses }: CoursesPageClientProps) {
   const t = useTranslations('courses');
+  
+  // TODO: Replace with actual user authentication check
+  const isPaidUser = false; // This should be determined from user session/auth
   const [courses, setCourses] = useState<DirectusCourse[]>(initialCourses);
   const [competenceOptions, setCompetenceOptions] = useState<Array<{ value: string; label: string; colorLight?: string; colorDark?: string }>>([]);
   
@@ -123,11 +126,15 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
       return;
     }
     
+    console.log('🔍 [CoursesPageClient] Starting fetchCourses');
+    console.log('🔍 [CoursesPageClient] Current filters state:', filters);
+    
     setIsLoading(true);
     setError(null);
     
     try {
       const directusFilters = getDirectusFilters();
+      console.log('🔍 [CoursesPageClient] Directus filters generated:', JSON.stringify(directusFilters, null, 2));
       
       const searchQuery = search.trim();
       
@@ -146,8 +153,9 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
         fetchOptions.search = searchQuery;
       }
 
-
+      console.log('🔍 [CoursesPageClient] Calling API with options:', fetchOptions);
       const result = await coursesApi.getAll(fetchOptions);
+      console.log('🔍 [CoursesPageClient] API returned:', result?.length, 'courses');
       
       setCourses(result || []);
       setHasInitialLoad(true);
@@ -210,7 +218,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
       previousFilters.current = '';
       previousSearch.current = '';
     }
-  }, [search, filters.competences, filters.showBookmarked, hasActiveFilters, fetchCourses, initialCourses]); // Include fetchCourses and initialCourses
+  }, [search, filters.competences, filters.showBookmarked, filters.courseType, filters.hideCompleted, hasActiveFilters, fetchCourses, initialCourses]); // Include fetchCourses and initialCourses
   
 
   const handleClearAllFilters = () => {
@@ -220,10 +228,10 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
 
   const handleFilterRemove = (filterType: keyof typeof filters, value: string) => {
     // Handle boolean filters differently
-    if (filterType === 'showBookmarked' && value === 'false') {
+    if ((filterType === 'showBookmarked' || filterType === 'hideCompleted') && value === 'false') {
       setFilters({
         ...filters,
-        showBookmarked: false,
+        [filterType]: false,
       });
     } else {
       removeFilter(filterType, value);
@@ -234,16 +242,47 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
     setIsFilterSidebarOpen(!isFilterSidebarOpen);
   };
 
-  // Filter courses based on bookmarks (client-side filtering)
+  // Filter courses based on bookmarks and course type (client-side filtering as fallback)
   const filteredCourses = useMemo(() => {
-    if (!filters.showBookmarked) {
-      return courses;
+    let filtered = courses;
+    
+    // Apply course type filter (client-side fallback when API filtering fails)
+    if (filters.courseType.length > 0) {
+      filtered = filtered.filter(course => 
+        filters.courseType.includes(course.course_type || '')
+      );
+      console.log('🔍 [Client-side filter] Applied course type filter:', filters.courseType);
+      console.log('🔍 [Client-side filter] Courses after type filter:', filtered.length);
+      console.log('🔍 [Client-side filter] Available course types in data:', [...new Set(courses.map(c => c.course_type))]);
     }
     
-    // Get bookmarked course IDs from localStorage
-    const bookmarks = JSON.parse(localStorage.getItem('courseBookmarks') || '[]');
-    return courses.filter(course => bookmarks.includes(course.id));
-  }, [courses, filters.showBookmarked]);
+    // Apply bookmark filter
+    if (filters.showBookmarked) {
+      const bookmarks = JSON.parse(localStorage.getItem('courseBookmarks') || '[]');
+      filtered = filtered.filter(course => bookmarks.includes(course.id));
+    }
+    
+    return filtered;
+  }, [courses, filters.showBookmarked, filters.courseType]);
+
+  // Calculate course type counts
+  const courseTypeCounts = useMemo(() => {
+    const counts = {
+      formation: 0,
+      parcours: 0,
+    };
+    
+    // Count from all available courses (not filtered) - match capitalized Directus values
+    initialCourses.forEach(course => {
+      if (course.course_type === 'Formation') {
+        counts.formation++;
+      } else if (course.course_type === 'Parcours') {
+        counts.parcours++;
+      }
+    });
+    
+    return counts;
+  }, [initialCourses]);
 
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] dark:bg-gray-900">
@@ -314,6 +353,8 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
             competenceOptions={competenceOptions}
             isOpen={isFilterSidebarOpen}
             onToggle={toggleFilterSidebar}
+            isPaidUser={isPaidUser}
+            courseTypeCounts={courseTypeCounts}
           />
 
           {/* Main Content */}

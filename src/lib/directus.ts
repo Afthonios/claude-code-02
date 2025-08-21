@@ -115,7 +115,9 @@ export const coursesApi = {
             });
           };
           
+          console.log('🔍 [DirectusAPI] Filter object being flattened:', JSON.stringify(filter, null, 2));
           flattenFilter(filter);
+          console.log('🔍 [DirectusAPI] Final URL with filters:', url.toString());
         }
         
         if (search) {

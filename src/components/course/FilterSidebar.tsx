@@ -6,6 +6,8 @@ import FilterDropdown from './FilterDropdown';
 interface FilterState {
   competences: string[];
   showBookmarked: boolean;
+  courseType: string[];
+  hideCompleted: boolean;
 }
 
 interface FilterSidebarProps {
@@ -14,6 +16,8 @@ interface FilterSidebarProps {
   competenceOptions: Array<{ value: string; label: string }>;
   isOpen: boolean;
   onToggle: () => void;
+  isPaidUser?: boolean; // Add prop to check if user has paid access
+  courseTypeCounts?: { formation: number; parcours: number };
 }
 
 export default function FilterSidebar({
@@ -22,6 +26,8 @@ export default function FilterSidebar({
   competenceOptions,
   isOpen,
   onToggle,
+  isPaidUser = false,
+  courseTypeCounts = { formation: 0, parcours: 0 },
 }: FilterSidebarProps) {
   const t = useTranslations('courses');
   const tCommon = useTranslations('common');
@@ -37,10 +43,18 @@ export default function FilterSidebar({
     onFiltersChange({
       competences: [],
       showBookmarked: false,
+      courseType: [],
+      hideCompleted: false,
     });
   };
 
-  const hasActiveFilters = filters.competences.length > 0 || filters.showBookmarked;
+  const hasActiveFilters = filters.competences.length > 0 || filters.showBookmarked || filters.courseType.length > 0 || filters.hideCompleted;
+
+  // Course type options with counts - use capitalized values to match Directus
+  const courseTypeOptions = [
+    { value: 'Formation', label: t('filters.courseType.formation'), count: courseTypeCounts.formation },
+    { value: 'Parcours', label: t('filters.courseType.parcours'), count: courseTypeCounts.parcours },
+  ];
 
   return (
     <>
@@ -88,6 +102,37 @@ export default function FilterSidebar({
 
             {/* Filter sections */}
             <div className="space-y-6">
+              {/* Course Type Filter - Formation first, then Parcours */}
+              <div>
+                <h3 className="text-sm font-medium text-card-foreground mb-3">
+                  {t('filters.course_type')}
+                </h3>
+                <div className="space-y-2">
+                  {courseTypeOptions.map((option) => (
+                    <label key={option.value} className="flex items-center space-x-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={filters.courseType.includes(option.value)}
+                        onChange={(e) => {
+                          const newValues = e.target.checked
+                            ? [...filters.courseType, option.value]
+                            : filters.courseType.filter(v => v !== option.value);
+                          handleFilterChange('courseType', newValues);
+                        }}
+                        className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
+                      />
+                      <span className="text-sm text-card-foreground">
+                        {option.label}
+                      </span>
+                      {/* Show counts */}
+                      <span className="text-xs text-muted-foreground">
+                        ({option.count})
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               {/* Bookmarks Filter */}
               <div>
                 <label className="flex items-center space-x-3 cursor-pointer">
@@ -102,6 +147,26 @@ export default function FilterSidebar({
                   </span>
                 </label>
               </div>
+
+              {/* Hide Completed Filter - Only for paid users */}
+              {isPaidUser && (
+                <div>
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={filters.hideCompleted}
+                      onChange={(e) => handleFilterChange('hideCompleted', e.target.checked)}
+                      className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
+                    />
+                    <span className="text-sm text-card-foreground">
+                      {t('filters.hideCompleted')}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      (319)
+                    </span>
+                  </label>
+                </div>
+              )}
 
               {/* Competences Filter */}
               <div>
