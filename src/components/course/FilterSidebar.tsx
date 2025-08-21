@@ -1,7 +1,6 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import FilterDropdown from './FilterDropdown';
 
 interface FilterState {
   competences: string[];
@@ -13,7 +12,7 @@ interface FilterState {
 interface FilterSidebarProps {
   filters: FilterState;
   onFiltersChange: (filters: FilterState) => void;
-  competenceOptions: Array<{ value: string; label: string }>;
+  competenceOptions: Array<{ value: string; label: string; count?: number }>;
   isOpen: boolean;
   onToggle: () => void;
   isPaidUser?: boolean; // Add prop to check if user has paid access
@@ -145,6 +144,48 @@ export default function FilterSidebar({
                 </div>
               </div>
 
+              {/* Competences Filter */}
+              <div>
+                <h3 className="text-sm font-medium text-card-foreground mb-3">
+                  {t('filters.competences')}
+                </h3>
+                {competenceOptions.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">
+                    {t('filters.loadingSkills')}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {competenceOptions.map((option) => (
+                      <label key={option.value} className="flex items-center space-x-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={filters.competences.includes(option.value)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              // Select only this competence (clear others)
+                              handleFilterChange('competences', [option.value]);
+                            } else {
+                              // Uncheck: clear all selections
+                              handleFilterChange('competences', []);
+                            }
+                          }}
+                          className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
+                        />
+                        <span className="text-sm text-card-foreground">
+                          {option.label}
+                        </span>
+                        {/* Show counts */}
+                        {option.count !== undefined && (
+                          <span className="text-xs text-muted-foreground">
+                            ({option.count})
+                          </span>
+                        )}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* Bookmarks Filter */}
               <div>
                 <label className="flex items-center space-x-3 cursor-pointer">
@@ -179,20 +220,6 @@ export default function FilterSidebar({
                   </label>
                 </div>
               )}
-
-              {/* Competences Filter */}
-              <div>
-                <label className="block text-sm font-medium text-card-foreground mb-2">
-                  {t('filters.competences')}
-                </label>
-                <FilterDropdown
-                  label={t('filters.competences')}
-                  value={filters.competences}
-                  options={competenceOptions}
-                  onChange={(values) => handleFilterChange('competences', values)}
-                  placeholder={competenceOptions.length === 0 ? t('filters.loadingSkills') : t('filters.selectSkills')}
-                />
-              </div>
 
             </div>
           </div>

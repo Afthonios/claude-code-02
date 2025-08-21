@@ -275,6 +275,46 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
     return counts;
   }, [initialCourses]);
 
+  // Calculate competence counts from courses
+  const competenceOptionsWithCounts = useMemo(() => {
+    if (competenceOptions.length === 0 || initialCourses.length === 0) {
+      return competenceOptions;
+    }
+
+    // Create a map to count courses by competence ID
+    const competenceCounts: Record<string, number> = {};
+    
+    initialCourses.forEach(course => {
+      if (course.competence && Array.isArray(course.competence)) {
+        course.competence.forEach((comp: any) => {
+          // Handle nested competence structure from Directus
+          let competenceId: string | null = null;
+          
+          if (comp.competences_id?.parent_competence) {
+            // If it's a sub-competence, count for the parent competence
+            competenceId = String(comp.competences_id.parent_competence);
+          } else if (comp.competences_id?.id) {
+            // If it's a main competence
+            competenceId = String(comp.competences_id.id);
+          } else if (typeof comp === 'string' || typeof comp === 'number') {
+            // Direct competence ID
+            competenceId = String(comp);
+          }
+          
+          if (competenceId) {
+            competenceCounts[competenceId] = (competenceCounts[competenceId] || 0) + 1;
+          }
+        });
+      }
+    });
+
+    // Add counts to competence options
+    return competenceOptions.map(option => ({
+      ...option,
+      count: competenceCounts[option.value] || 0
+    }));
+  }, [competenceOptions, initialCourses]);
+
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] dark:bg-gray-900">
       <div className="container py-8">
@@ -332,7 +372,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
           onFilterRemove={handleFilterRemove}
           onSearchClear={clearSearch}
           onClearAll={handleClearAllFilters}
-          competenceOptions={stableCompetenceOptions}
+          competenceOptions={competenceOptionsWithCounts}
         />
 
         {/* Main Content Area */}
@@ -341,7 +381,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
           <FilterSidebar
             filters={filters}
             onFiltersChange={setFilters}
-            competenceOptions={competenceOptions}
+            competenceOptions={competenceOptionsWithCounts}
             isOpen={isFilterSidebarOpen}
             onToggle={toggleFilterSidebar}
             isPaidUser={isPaidUser}
