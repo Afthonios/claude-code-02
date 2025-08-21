@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import LanguageSwitcher from "@/components/i18n/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import SearchOverlay from "@/components/layout/SearchOverlay";
 import Image from "next/image";
 import { getCoursesListUrl } from "@/lib/directus";
 import type { Locale } from "@/i18n";
@@ -14,6 +16,7 @@ import type { Locale } from "@/i18n";
  * Responsive design with proper accessibility features
  */
 export default function Header() {
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const t = useTranslations('navigation');
   const params = useParams();
   const currentLocale = params.locale as Locale;
@@ -71,13 +74,38 @@ export default function Header() {
 
         {/* Spacer */}
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          {/* Mobile navigation menu would go here */}
-          <div className="w-full flex-1 md:w-auto md:flex-none">
-            {/* Search component could go here */}
+          {/* Space for mobile menu or future features */}
+          <div className="flex-1 md:flex-none">
           </div>
 
           {/* Right side controls */}
           <div className="flex items-center space-x-2">
+            {/* Search Button */}
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="
+                flex items-center justify-center w-9 h-9 rounded-md
+                text-muted-foreground hover:text-foreground
+                hover:bg-muted transition-colors duration-150
+                focus:outline-none focus:ring-2 focus:ring-ring
+              "
+              aria-label="Search courses"
+            >
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </button>
+            
             <LanguageSwitcher />
             <ThemeToggle />
             
@@ -99,6 +127,12 @@ export default function Header() {
           </div>
         </div>
       </div>
+
+      {/* Search Overlay */}
+      <SearchOverlay 
+        isOpen={isSearchOpen} 
+        onClose={() => setIsSearchOpen(false)} 
+      />
     </header>
   );
 }

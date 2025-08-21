@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Eye, Zap, BookOpen, Anchor, Plus, PlayCircle, Video, Youtube, FileText, Download, Clock, CheckSquare, XSquare, HelpCircle, Grid3X3 } from 'lucide-react';
+import { Eye, Zap, BookOpen, Anchor, Plus, Video, Youtube, Download, Clock, CheckSquare, XSquare, Grid3X3 } from 'lucide-react';
 
 interface AnimatedCoursePlanProps {
   plan_md: string;

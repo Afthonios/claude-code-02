@@ -100,7 +100,7 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
           </div>
         </div>
         
-        <div className="p-6">
+        <div className="p-6 flex flex-col flex-1">
           <h3 
             className={cn(
               "text-xl font-semibold mb-2 group-hover:opacity-80 transition-all duration-200",
@@ -114,7 +114,7 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
           
           <p 
             className={cn(
-              "text-sm mb-4 opacity-90 course-card-text",
+              "text-sm mb-4 opacity-90 course-card-text flex-1",
               gradientStyles.hasGradient 
                 ? `course-card-${course.id}-text`
                 : "text-gray-600 dark:text-gray-400"
@@ -131,7 +131,7 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
           
           <div 
             className={cn(
-              "flex items-center justify-between text-sm",
+              "flex items-center justify-between text-sm mt-auto",
               gradientStyles.hasGradient 
                 ? `course-card-${course.id}-text`
                 : "text-gray-500 dark:text-gray-400"

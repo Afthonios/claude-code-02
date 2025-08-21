@@ -80,6 +80,11 @@ export const mockCompetencesApi = {
 vi.mock('@/lib/directus', () => ({
   coursesApi: mockCoursesApi,
   competencesApi: mockCompetencesApi,
+  getCoursesListUrl: vi.fn((locale: string) => `/${locale}/courses`),
+  filterTranslations: vi.fn(),
+  getAssetUrlWithTransforms: vi.fn(),
+  getCourseUrl: vi.fn(),
+  formatDuration: vi.fn(),
 }));
 
 // Reset all mocks before each test

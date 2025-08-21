@@ -260,7 +260,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
         <div className="mb-6">
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
             {/* Search Bar */}
-            <div className="w-full lg:w-auto">
+            <div className="w-full lg:w-[30%]">
               <SearchBar
                 value={search}
                 onChange={setSearch}
