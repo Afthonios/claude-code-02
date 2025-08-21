@@ -163,9 +163,6 @@ export function useSearchFilters() {
       filters.course_type = { _in: state.courseType };
     }
 
-    console.log('🔍 [useSearchFilters] Generated filters:', JSON.stringify(filters, null, 2));
-    console.log('🔍 [useSearchFilters] Course type state:', state.courseType);
-    
     return filters;
   }, [state.competences, state.courseType]); // Include courseType in dependencies
 

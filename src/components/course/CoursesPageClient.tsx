@@ -126,15 +126,11 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
       return;
     }
     
-    console.log('🔍 [CoursesPageClient] Starting fetchCourses');
-    console.log('🔍 [CoursesPageClient] Current filters state:', filters);
-    
     setIsLoading(true);
     setError(null);
     
     try {
       const directusFilters = getDirectusFilters();
-      console.log('🔍 [CoursesPageClient] Directus filters generated:', JSON.stringify(directusFilters, null, 2));
       
       const searchQuery = search.trim();
       
@@ -153,9 +149,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
         fetchOptions.search = searchQuery;
       }
 
-      console.log('🔍 [CoursesPageClient] Calling API with options:', fetchOptions);
       const result = await coursesApi.getAll(fetchOptions);
-      console.log('🔍 [CoursesPageClient] API returned:', result?.length, 'courses');
       
       setCourses(result || []);
       setHasInitialLoad(true);
@@ -251,9 +245,6 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
       filtered = filtered.filter(course => 
         filters.courseType.includes(course.course_type || '')
       );
-      console.log('🔍 [Client-side filter] Applied course type filter:', filters.courseType);
-      console.log('🔍 [Client-side filter] Courses after type filter:', filtered.length);
-      console.log('🔍 [Client-side filter] Available course types in data:', [...new Set(courses.map(c => c.course_type))]);
     }
     
     // Apply bookmark filter
