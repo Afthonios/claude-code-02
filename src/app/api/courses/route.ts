@@ -9,9 +9,12 @@ export async function GET(request: NextRequest) {
     // Build the Directus API URL
     const directusUrl = new URL(`${DIRECTUS_BASE_URL}/items/courses`);
     
-    // Forward all search parameters to Directus
+    // Whitelist allowed search parameters for security
+    const allowedParams = ['fields', 'filter', 'sort', 'limit', 'offset', 'search', 'meta'];
     searchParams.forEach((value, key) => {
-      directusUrl.searchParams.set(key, value);
+      if (allowedParams.includes(key)) {
+        directusUrl.searchParams.set(key, value);
+      }
     });
 
 
@@ -44,9 +47,9 @@ export async function GET(request: NextRequest) {
       // Return the data with CORS headers
       return NextResponse.json(data, {
         headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production' ? 'https://afthonios.com' : '*',
+          'Access-Control-Allow-Methods': 'GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
         },
       });
     } catch (fetchError) {
@@ -158,9 +161,9 @@ export async function GET(request: NextRequest) {
       
       return NextResponse.json(mockData, {
         headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production' ? 'https://afthonios.com' : '*',
+          'Access-Control-Allow-Methods': 'GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
         },
       });
     }
@@ -170,9 +173,9 @@ export async function GET(request: NextRequest) {
     // Return empty data as absolute fallback
     return NextResponse.json({ data: [] }, {
       headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production' ? 'https://afthonios.com' : '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
       },
     });
   }
@@ -182,9 +185,9 @@ export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production' ? 'https://afthonios.com' : '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
     },
   });
 }

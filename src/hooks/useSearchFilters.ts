@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState, useMemo } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 export interface FilterState {
   competences: string[];
@@ -15,7 +15,6 @@ export interface SearchFiltersState extends FilterState {
 }
 
 export function useSearchFilters() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   
   // Initialize state from URL parameters
@@ -91,12 +90,15 @@ export function useSearchFilters() {
   // Update filters
   const setFilters = useCallback((filters: FilterState) => {
     // Special handling for courseType to ensure either/or behavior
-    let newState = { ...state, ...filters };
+    const newState = { ...state, ...filters };
     
     // If courseType is being updated and has multiple values, keep only the last one
     if (filters.courseType && filters.courseType.length > 1) {
-      console.log('⚠️ Multiple courseType values detected, keeping only:', filters.courseType[filters.courseType.length - 1]);
-      newState.courseType = [filters.courseType[filters.courseType.length - 1]];
+      const lastValue = filters.courseType[filters.courseType.length - 1];
+      if (lastValue) {
+        console.log('⚠️ Multiple courseType values detected, keeping only:', lastValue);
+        newState.courseType = [lastValue];
+      }
     }
     
     setState(newState);

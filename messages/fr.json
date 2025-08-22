@@ -129,7 +129,8 @@
       "withoutFilters": "Aucune formation n'est disponible pour le moment.",
       "clearFilters": "Effacer tous les filtres",
       "tryAgain": "Réessayer"
-    }
+    },
+    "viewAll": "Voir toutes les formations"
   },
   "theme": {
     "light": "Clair",

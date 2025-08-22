@@ -261,34 +261,7 @@ export default function AnimatedCoursePlan({
     return title;
   };
 
-  // Helper function to detect trigger words and add icons after them
-  const addIconsToText = (text: string, _hasGradient: boolean, _courseId: string) => {
-    const triggerWords: { word: RegExp; icon: React.ComponentType<{ className?: string; width?: number; height?: number }> }[] = [
-      // No trigger words - all icons disabled
-    ];
-
-    const processedText = text;
-    const iconElements: { position: number; icon: React.ComponentType<{ className?: string; width?: number; height?: number }>; id: string }[] = [];
-    
-    triggerWords.forEach((trigger, triggerIndex) => {
-      let match;
-      while ((match = trigger.word.exec(processedText)) !== null) {
-        const IconComponent = trigger.icon;
-        const iconId = `icon-${triggerIndex}-${match.index}`;
-        
-        iconElements.push({
-          position: match.index + match[0].length,
-          icon: IconComponent,
-          id: iconId
-        });
-      }
-    });
-
-    // Sort icons by position (reverse order to insert from end to start)
-    iconElements.sort((a, b) => b.position - a.position);
-
-    return { text: processedText, iconElements };
-  };
+  // Icons disabled for now - remove helper function to fix ESLint warning
 
   // Helper function to format markdown section content
   const formatSectionContent = (content: string, hasGradient: boolean, courseId: string) => {
@@ -307,6 +280,8 @@ export default function AnimatedCoursePlan({
       if (group.length === 0) return null;
       
       const mainLine = group[0];
+      if (!mainLine) return null; // Guard against undefined mainLine
+      
       const subLines = group.slice(1);
       
       // Check if this is a main point (starts with letter+))
@@ -329,7 +304,9 @@ export default function AnimatedCoursePlan({
           </div>
           
           {/* Sub-lines (use bullet points instead of dashes) */}
-          {subLines.map((line, lineIndex) => (
+          {subLines.map((line, lineIndex) => {
+            if (!line) return null; // Guard against undefined line
+            return (
             <div key={`sub-${lineIndex}`} className="flex items-baseline gap-2 leading-relaxed mb-0.5 ml-6">
               {line.startsWith('-') && (
                 <span className={cn(
@@ -350,7 +327,8 @@ export default function AnimatedCoursePlan({
                 {formatLineWithIcons(line.replace(/^-\s*/, ''), hasGradient, courseId)}
               </span>
             </div>
-          ))}
+            );
+          })}
         </div>
       );
     };
@@ -388,7 +366,7 @@ export default function AnimatedCoursePlan({
   // Helper function to format a line with specific icons
   const formatLineWithIcons = (line: string, hasGradient: boolean, courseId: string) => {
     const elements: React.ReactElement[] = [];
-    let remainingText = line;
+    // Remove unused variable
     let keyIndex = 0;
     
     // Pattern 1: Add video icon after video-related content
@@ -631,8 +609,8 @@ export default function AnimatedCoursePlan({
     // Pattern 2: Add clock icon before time duration
     const timeRegex = /(\d+'\d+)/g;
     let timeMatch;
-    let processedLine = lastIndex > 0 ? line.substring(lastIndex) : line;
-    let timeElements: React.ReactElement[] = [];
+    const processedLine = lastIndex > 0 ? line.substring(lastIndex) : line;
+    const timeElements: React.ReactElement[] = [];
     let timeLastIndex = 0;
     let timeKeyIndex = 0;
     
@@ -729,7 +707,7 @@ export default function AnimatedCoursePlan({
       .trim();
     
     const lines = cleanText.split('\n').map(line => line.trim()).filter(line => line);
-    return lines.length > 0 ? lines[0] : '';
+    return lines.length > 0 && lines[0] ? lines[0] : '';
   };
   
   const firstLineSubtitle = getFirstLine(plan_md);

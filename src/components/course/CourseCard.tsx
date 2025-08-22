@@ -78,6 +78,7 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
             ? `border-transparent course-card-${course.id}` 
             : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
         )}
+        aria-label={`${translation.title} - ${locale === 'fr' ? 'Voir le cours' : 'View course'}`}
       >
       <div className="relative z-10 course-card-content">
         <div className="relative aspect-video w-full overflow-hidden">

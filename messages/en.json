@@ -129,8 +129,7 @@
       "withoutFilters": "No courses are available at the moment.",
       "clearFilters": "Clear all filters",
       "tryAgain": "Try again"
-    },
-    "viewAll": "View all courses"
+    }
   },
   "theme": {
     "light": "Light",

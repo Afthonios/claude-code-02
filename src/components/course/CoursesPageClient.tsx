@@ -11,6 +11,98 @@ import ActiveFilters from './ActiveFilters';
 import CourseCard from './CourseCard';
 import type { DirectusCourse, DirectusCompetence } from '@/types/directus';
 
+// Define the 8 main competences in the desired order (with Diversity and Inclusion last)
+function getMain8Competences(locale: string) {
+  const competences = [
+    { 
+      value: 'communication', 
+      label: locale === 'fr' ? 'Communication' : 'Communication', 
+      colorLight: '#3B82F6', 
+      colorDark: '#1D4ED8' 
+    },
+    { 
+      value: 'leadership', 
+      label: locale === 'fr' ? 'Leadership' : 'Leadership', 
+      colorLight: '#10B981', 
+      colorDark: '#047857' 
+    },
+    { 
+      value: 'management', 
+      label: locale === 'fr' ? 'Management' : 'Management', 
+      colorLight: '#F59E0B', 
+      colorDark: '#D97706' 
+    },
+    { 
+      value: 'strategic-thinking', 
+      label: locale === 'fr' ? 'Pensée stratégique' : 'Strategic Thinking', 
+      colorLight: '#EF4444', 
+      colorDark: '#DC2626' 
+    },
+    { 
+      value: 'innovation', 
+      label: locale === 'fr' ? 'Innovation' : 'Innovation', 
+      colorLight: '#8B5CF6', 
+      colorDark: '#7C3AED' 
+    },
+    { 
+      value: 'digital-transformation', 
+      label: locale === 'fr' ? 'Transformation digitale' : 'Digital Transformation', 
+      colorLight: '#06B6D4', 
+      colorDark: '#0891B2' 
+    },
+    { 
+      value: 'customer-focus', 
+      label: locale === 'fr' ? 'Orientation client' : 'Customer Focus', 
+      colorLight: '#84CC16', 
+      colorDark: '#65A30D' 
+    },
+    { 
+      value: 'diversity-inclusion', 
+      label: locale === 'fr' ? 'Diversité et Inclusion' : 'Diversity and Inclusion', 
+      colorLight: '#EC4899', 
+      colorDark: '#DB2777' 
+    }
+  ];
+  return competences;
+}
+
+// Function to match API data with our predefined 8 competences
+function getMain8CompetencesFromAPI(allOptions: Array<{ value: string; label: string; colorLight?: string; colorDark?: string }>, locale: string) {
+  const predefinedCompetences = getMain8Competences(locale);
+  const result: Array<{ value: string; label: string; colorLight?: string; colorDark?: string }> = [];
+  
+  // Try to match API data with our predefined competences based on label similarity
+  predefinedCompetences.forEach(predefined => {
+    // First try to find exact match by label
+    let found = allOptions.find(option => 
+      option.label.toLowerCase() === predefined.label.toLowerCase()
+    );
+    
+    // If no exact match, try partial match
+    if (!found) {
+      const labelWords = predefined.label.toLowerCase().split(' ');
+      found = allOptions.find(option => 
+        labelWords.some(word => option.label.toLowerCase().includes(word))
+      );
+    }
+    
+    if (found) {
+      // Use API data but maintain our predefined order
+      result.push({
+        value: found.value,
+        label: found.label,
+        colorLight: found.colorLight || predefined.colorLight,
+        colorDark: found.colorDark || predefined.colorDark
+      });
+    } else {
+      // Use predefined data if no match found
+      result.push(predefined);
+    }
+  });
+  
+  return result;
+}
+
 interface CoursesPageClientProps {
   locale: string;
   initialCourses: DirectusCourse[];
@@ -24,10 +116,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
   const [courses, setCourses] = useState<DirectusCourse[]>(initialCourses);
   const [competenceOptions, setCompetenceOptions] = useState<Array<{ value: string; label: string; colorLight?: string; colorDark?: string }>>([]);
   
-  // Memoize competence options to prevent loss during re-renders
-  const stableCompetenceOptions = useMemo(() => {
-    return competenceOptions.length > 0 ? competenceOptions : [];
-  }, [competenceOptions]);
+  // Remove unused memoized competence options
   const [isLoading, setIsLoading] = useState(false);
   const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,19 +159,16 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
         const competences = await competencesApi.getAll();
         
         if (competences.length === 0) {
-          // Provide fallback competence options if API returns empty
-          setCompetenceOptions([
-            { value: 'communication', label: locale === 'fr' ? 'Communication' : 'Communication', colorLight: '#3B82F6', colorDark: '#1D4ED8' },
-            { value: 'leadership', label: locale === 'fr' ? 'Leadership' : 'Leadership', colorLight: '#10B981', colorDark: '#047857' },
-            { value: 'teamwork', label: locale === 'fr' ? 'Travail d\'équipe' : 'Teamwork', colorLight: '#F59E0B', colorDark: '#D97706' },
-            { value: 'problem-solving', label: locale === 'fr' ? 'Résolution de problèmes' : 'Problem Solving', colorLight: '#EF4444', colorDark: '#DC2626' },
-          ]);
+          // Provide fallback with 8 main competences
+          console.log('📊 [CoursesPageClient] Using fallback 8 main competences');
+          setCompetenceOptions(getMain8Competences(locale));
           lastLoadedLocale.current = locale;
           isLoadingCompetences.current = false;
           return;
         }
         
-        const options = competences
+        // Map and filter to get exactly 8 main competences
+        const allOptions = competences
           .filter(competence => competence.translations && competence.translations.length > 0)
           .map((competence: DirectusCompetence) => {
             const translation = filterTranslations(competence.translations, locale);
@@ -95,18 +181,16 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
             return option;
           });
         
-        setCompetenceOptions(options);
+        // Get exactly 8 main competences in the correct order
+        const main8Competences = getMain8CompetencesFromAPI(allOptions, locale);
+        console.log('📊 [CoursesPageClient] Setting 8 main competences:', main8Competences);
+        setCompetenceOptions(main8Competences);
         lastLoadedLocale.current = locale;
         isLoadingCompetences.current = false;
       } catch (error) {
         console.error('🔍 [CoursesPageClient] Error loading competences:', error);
         // Set fallback options on error to prevent blocking UI
-        setCompetenceOptions([
-          { value: 'communication', label: locale === 'fr' ? 'Communication' : 'Communication', colorLight: '#3B82F6', colorDark: '#1D4ED8' },
-          { value: 'leadership', label: locale === 'fr' ? 'Leadership' : 'Leadership', colorLight: '#10B981', colorDark: '#047857' },
-          { value: 'teamwork', label: locale === 'fr' ? 'Travail d\'équipe' : 'Teamwork', colorLight: '#F59E0B', colorDark: '#D97706' },
-          { value: 'problem-solving', label: locale === 'fr' ? 'Résolution de problèmes' : 'Problem Solving', colorLight: '#EF4444', colorDark: '#DC2626' },
-        ]);
+        setCompetenceOptions(getMain8Competences(locale));
         lastLoadedLocale.current = locale;
         isLoadingCompetences.current = false;
       }
@@ -118,7 +202,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
       loadCompetences();
     }, 100);
     return () => clearTimeout(timeout);
-  }, [locale, competenceOptions.length]);
+  }, [locale, competenceOptions.length]); // Include competenceOptions.length dependency
 
   // Fetch courses based on current filters
   const fetchCourses = useCallback(async (skipIfLoading = false) => {
@@ -284,35 +368,51 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
     // Create a map to count courses by competence ID
     const competenceCounts: Record<string, number> = {};
     
+    
     initialCourses.forEach(course => {
       if (course.competence && Array.isArray(course.competence)) {
-        course.competence.forEach((comp: any) => {
-          // Handle nested competence structure from Directus
-          let competenceId: string | null = null;
+        const processedParentIds = new Set<string>(); // Track parent IDs for this course to avoid double counting
+        
+        course.competence.forEach((comp: unknown) => {
+          // Handle the Directus junction table structure: courses_competences_1
+          let parentCompetenceId: string | null = null;
           
-          if (comp.competences_id?.parent_competence) {
-            // If it's a sub-competence, count for the parent competence
-            competenceId = String(comp.competences_id.parent_competence);
-          } else if (comp.competences_id?.id) {
-            // If it's a main competence
-            competenceId = String(comp.competences_id.id);
-          } else if (typeof comp === 'string' || typeof comp === 'number') {
-            // Direct competence ID
-            competenceId = String(comp);
+          // Type guard for comp structure
+          if (comp && typeof comp === 'object' && 'competences_id' in comp) {
+            const typedComp = comp as { competences_id?: { parent_competence?: string | number | null; id?: string | number } };
+            
+            if (typedComp.competences_id && typeof typedComp.competences_id === 'object') {
+              // Check if this competence has a parent (meaning it's a sub-competence)
+              if (typedComp.competences_id.parent_competence) {
+                // The parent_competence is just the ID number (not an object)
+                parentCompetenceId = String(typedComp.competences_id.parent_competence);
+              }
+              // Check if this is a main competence (no parent)
+              else if (typedComp.competences_id.parent_competence === null && typedComp.competences_id.id) {
+                parentCompetenceId = String(typedComp.competences_id.id);
+              }
+            }
           }
           
-          if (competenceId) {
-            competenceCounts[competenceId] = (competenceCounts[competenceId] || 0) + 1;
+          // Only count each parent competence once per course
+          if (parentCompetenceId && !processedParentIds.has(parentCompetenceId)) {
+            competenceCounts[parentCompetenceId] = (competenceCounts[parentCompetenceId] || 0) + 1;
+            processedParentIds.add(parentCompetenceId);
           }
         });
       }
     });
 
-    // Add counts to competence options
-    return competenceOptions.map(option => ({
-      ...option,
-      count: competenceCounts[option.value] || 0
-    }));
+
+    // Add counts to competence options and sort by count (descending)
+    const optionsWithCounts = competenceOptions
+      .map(option => ({
+        ...option,
+        count: competenceCounts[option.value] || 0
+      }))
+      .sort((a, b) => (b.count || 0) - (a.count || 0)); // Sort by count, highest first
+
+    return optionsWithCounts;
   }, [competenceOptions, initialCourses]);
 
   return (

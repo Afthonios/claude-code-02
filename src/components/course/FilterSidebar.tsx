@@ -41,7 +41,7 @@ export default function FilterSidebar({
     };
     
     // Update the specific filter type
-    (newFilters as any)[filterType] = values;
+    (newFilters as Record<string, unknown>)[filterType] = values;
     
     onFiltersChange(newFilters);
   };
