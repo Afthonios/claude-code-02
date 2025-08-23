@@ -38,7 +38,8 @@ export interface DirectusCourse extends DirectusItem {
   // Translations are handled separately
   translations: DirectusCourseTranslation[];
   // Relations
-  competence?: DirectusCourseCompetence[];
+  competence?: DirectusCourseCompetence[]; // Legacy relation through sub-competences
+  main_competences?: DirectusCourseMainCompetence[]; // New direct relation to main competences
   instructors?: DirectusCourseInstructor[];
 }
 
@@ -90,8 +91,15 @@ export interface DirectusCompetenceTranslation {
   meta_keywords?: string;
 }
 
-// Directus Course-Competence junction table
+// Directus Course-Competence junction table (legacy - through sub-competences)
 export interface DirectusCourseCompetence {
+  id: string;
+  courses_id: string | DirectusCourse;
+  competences_id: DirectusCompetence;
+}
+
+// Directus Course-Main Competence junction table (new - direct relation)
+export interface DirectusCourseMainCompetence {
   id: string;
   courses_id: string | DirectusCourse;
   competences_id: DirectusCompetence;
@@ -184,7 +192,8 @@ export type DirectusCollection =
   | 'competences_translations'
   | 'instructors'
   | 'instructors_translations'
-  | 'courses_competences'
+  | 'courses_competences' // Legacy junction table
+  | 'courses_main_competences' // New direct junction table
   | 'courses_instructors'
   | 'pages'
   | 'pages_translations';

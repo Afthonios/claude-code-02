@@ -42,3 +42,9 @@ next-env.d.ts
 
 # screenshots for testing
 screenshots/
+
+# playwright artifacts
+.playwright/
+.playwright-mcp/
+playwright-report/
+test-results/

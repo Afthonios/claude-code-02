@@ -5,7 +5,8 @@ import type {
   DirectusInstructor,
   DirectusCourseTranslation,
   DirectusCompetenceTranslation,
-  DirectusCourseCompetence,
+  // DirectusCourseCompetence, // Legacy type - kept in types for backwards compatibility
+  // DirectusCourseMainCompetence, // Used via DirectusCourse.main_competences type
 } from '@/types/directus';
 
 // Directus client configured for public access only
@@ -44,11 +45,10 @@ export const coursesApi = {
         'on_light',
         'on_dark',
         'translations.*',
-        'competence.competences_id.id',
-        'competence.competences_id.parent_competence.id',
-        'competence.competences_id.parent_competence.color_light',
-        'competence.competences_id.parent_competence.color_dark',
-        'competence.competences_id.parent_competence.translations.*',
+        'main_competences.competences_id.id',
+        'main_competences.competences_id.color_light',
+        'main_competences.competences_id.color_dark',
+        'main_competences.competences_id.translations.*',
       ],
       limit,
       page,
@@ -88,7 +88,7 @@ export const coursesApi = {
         const url = new URL('/api/courses', typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
         
         // Add parameters that will be forwarded to Directus
-        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_type,course_image,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*,competence.competences_id.*');
+        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_type,course_image,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*,main_competences.competences_id.*');
         url.searchParams.set('filter[status][_eq]', 'published');
         url.searchParams.set('limit', limit.toString());
         url.searchParams.set('page', page.toString());
@@ -162,11 +162,10 @@ export const coursesApi = {
             'on_light',
             'on_dark',
             'translations.*',
-            'competence.competences_id.id',
-            'competence.competences_id.parent_competence.id',
-            'competence.competences_id.parent_competence.color_light',
-            'competence.competences_id.parent_competence.color_dark',
-            'competence.competences_id.parent_competence.translations.*',
+            'main_competences.competences_id.id',
+            'main_competences.competences_id.color_light',
+            'main_competences.competences_id.color_dark',
+            'main_competences.competences_id.translations.*',
           ],
           filter: {
             status: { _eq: 'published' },
@@ -190,7 +189,7 @@ export const coursesApi = {
         
         // Search by translation slug
         const url = new URL(`${baseUrl}/items/courses`);
-        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_image,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*,competence.competences_id.id,competence.competences_id.parent_competence.id,competence.competences_id.parent_competence.color_light,competence.competences_id.parent_competence.color_dark,competence.competences_id.parent_competence.translations.*');
+        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_image,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*,main_competences.competences_id.id,main_competences.competences_id.color_light,main_competences.competences_id.color_dark,main_competences.competences_id.translations.*');
         url.searchParams.set('filter[status][_eq]', 'published');
         url.searchParams.set('filter[translations][slug][_eq]', slug);
 
@@ -226,11 +225,10 @@ export const coursesApi = {
             'on_light',
             'on_dark',
             'translations.*',
-            'competence.competences_id.id',
-            'competence.competences_id.parent_competence.id',
-            'competence.competences_id.parent_competence.color_light',
-            'competence.competences_id.parent_competence.color_dark',
-            'competence.competences_id.parent_competence.translations.*',
+            'main_competences.competences_id.id',
+            'main_competences.competences_id.color_light',
+            'main_competences.competences_id.color_dark',
+            'main_competences.competences_id.translations.*',
           ],
         })
       );
@@ -259,11 +257,10 @@ export const coursesApi = {
             'on_light',
             'on_dark',
             'translations.*',
-            'competence.competences_id.id',
-            'competence.competences_id.parent_competence.id',
-            'competence.competences_id.parent_competence.color_light',
-            'competence.competences_id.parent_competence.color_dark',
-            'competence.competences_id.parent_competence.translations.*',
+            'main_competences.competences_id.id',
+            'main_competences.competences_id.color_light',
+            'main_competences.competences_id.color_dark',
+            'main_competences.competences_id.translations.*',
           ],
           filter: {
             status: { _eq: 'published' },
@@ -509,7 +506,10 @@ export function formatDuration(duration: number | string, locale = 'fr'): string
 }
 
 export function getParentCompetences(course: DirectusCourse, locale: string) {
-  if (!course.competence || course.competence.length === 0) {
+  // Use the new main_competences field for direct access, fallback to legacy competence field
+  const competenceRelations = course.main_competences || course.competence;
+  
+  if (!competenceRelations || competenceRelations.length === 0) {
     return [];
   }
 
@@ -520,22 +520,19 @@ export function getParentCompetences(course: DirectusCourse, locale: string) {
     colorDark?: string;
   }> = [];
 
-  course.competence.forEach((competenceRelation: DirectusCourseCompetence) => {
+  competenceRelations.forEach((competenceRelation) => {
     const competence = competenceRelation.competences_id;
-    if (typeof competence === 'object' && competence?.parent_competence) {
-      const parentCompetence = competence.parent_competence;
-      if (typeof parentCompetence === 'object' && parentCompetence.translations) {
-        const translation = filterTranslations(parentCompetence.translations, locale);
-        
-        if (translation && !parentCompetences.find(p => p.id === parentCompetence.id)) {
-          const parent: { id: string; title: string; colorLight?: string; colorDark?: string } = {
-            id: parentCompetence.id,
-            title: translation.title,
-          };
-          if (parentCompetence.color_light) parent.colorLight = parentCompetence.color_light;
-          if (parentCompetence.color_dark) parent.colorDark = parentCompetence.color_dark;
-          parentCompetences.push(parent);
-        }
+    if (typeof competence === 'object' && competence.translations) {
+      const translation = filterTranslations(competence.translations, locale);
+      
+      if (translation && !parentCompetences.find(p => p.id === competence.id)) {
+        const parent: { id: string; title: string; colorLight?: string; colorDark?: string } = {
+          id: competence.id,
+          title: translation.title,
+        };
+        if (competence.color_light) parent.colorLight = competence.color_light;
+        if (competence.color_dark) parent.colorDark = competence.color_dark;
+        parentCompetences.push(parent);
       }
     }
   });

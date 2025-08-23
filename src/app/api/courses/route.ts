@@ -81,6 +81,25 @@ export async function GET(request: NextRequest) {
                 description: 'Description détaillée de la formation d\'exemple',
                 slug: 'formation-exemple-1'
               }
+            ],
+            main_competences: [
+              {
+                id: '1',
+                courses_id: '1',
+                competences_id: {
+                  id: '1',
+                  color_light: '#3B82F6',
+                  color_dark: '#1D4ED8',
+                  translations: [
+                    {
+                      id: '1',
+                      competences_id: '1',
+                      languages_code: 'fr',
+                      title: 'Communication'
+                    }
+                  ]
+                }
+              }
             ]
           },
           {
@@ -104,6 +123,25 @@ export async function GET(request: NextRequest) {
                 summary: 'Ce parcours intermédiaire teste les filtres',
                 description: 'Description détaillée du parcours intermédiaire',
                 slug: 'parcours-exemple-2'
+              }
+            ],
+            main_competences: [
+              {
+                id: '2',
+                courses_id: '2',
+                competences_id: {
+                  id: '2',
+                  color_light: '#10B981',
+                  color_dark: '#047857',
+                  translations: [
+                    {
+                      id: '2',
+                      competences_id: '2',
+                      languages_code: 'fr',
+                      title: 'Leadership'
+                    }
+                  ]
+                }
               }
             ]
           },
@@ -129,6 +167,25 @@ export async function GET(request: NextRequest) {
                 description: 'Description détaillée de la formation avancée',
                 slug: 'formation-avancee-3'
               }
+            ],
+            main_competences: [
+              {
+                id: '3',
+                courses_id: '3',
+                competences_id: {
+                  id: '1',
+                  color_light: '#3B82F6',
+                  color_dark: '#1D4ED8',
+                  translations: [
+                    {
+                      id: '3',
+                      competences_id: '1',
+                      languages_code: 'fr',
+                      title: 'Communication'
+                    }
+                  ]
+                }
+              }
             ]
           },
           {
@@ -152,6 +209,25 @@ export async function GET(request: NextRequest) {
                 summary: 'Ce parcours débutant teste les filtres',
                 description: 'Description détaillée du parcours débutant',
                 slug: 'parcours-debutant-4'
+              }
+            ],
+            main_competences: [
+              {
+                id: '4',
+                courses_id: '4',
+                competences_id: {
+                  id: '2',
+                  color_light: '#10B981',
+                  color_dark: '#047857',
+                  translations: [
+                    {
+                      id: '4',
+                      competences_id: '2',
+                      languages_code: 'fr',
+                      title: 'Leadership'
+                    }
+                  ]
+                }
               }
             ]
           }
