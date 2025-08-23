@@ -168,21 +168,20 @@ export function useSearchFilters() {
       status: { _eq: 'published' },
     };
 
-    // Competences filter (filtering by parent competences)
-    if (state.competences.length > 0) {
-      // Filter courses that have any of the selected parent competences
-      filters.competence = {
-        competences_id: {
-          parent_competence: {
-            id: { _in: state.competences }
-          }
-        }
-      };
-    }
-
     // Course type filter
     if (state.courseType.length > 0) {
       filters.course_type = { _in: state.courseType };
+    }
+
+    // Competences filter (filtering by main competences)
+    if (state.competences.length > 0) {
+      // Use the new main_competences field for direct filtering
+      // For now, prioritize the new structure and fallback to legacy in the component logic
+      filters.main_competences = {
+        competences_id: {
+          id: { _in: state.competences }
+        }
+      };
     }
 
     return filters;

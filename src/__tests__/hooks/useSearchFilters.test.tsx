@@ -106,13 +106,11 @@ describe('useSearchFilters Hook', () => {
       
       expect(directusFilters).toEqual({
         status: { _eq: 'published' },
-        competence: {
+        main_competences: {
           competences_id: {
-            parent_competence: {
-              id: { _in: ['javascript', 'react'] }
-            }
+            id: { _in: ['javascript', 'react'] }
           }
-        },
+        }
       });
     });
 
@@ -127,13 +125,11 @@ describe('useSearchFilters Hook', () => {
       expect(directusFilters).toEqual({
         status: { _eq: 'published' },
         course_type: { _in: ['formation'] },
-        competence: {
+        main_competences: {
           competences_id: {
-            parent_competence: {
-              id: { _in: ['javascript'] }
-            }
+            id: { _in: ['javascript'] }
           }
-        },
+        }
       });
     });
   });

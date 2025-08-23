@@ -18,6 +18,7 @@ interface ActiveFiltersProps {
   competenceOptions: Array<{ value: string; label: string; colorLight?: string; colorDark?: string }>;
 }
 
+
 export default function ActiveFilters({
   filters,
   searchQuery,

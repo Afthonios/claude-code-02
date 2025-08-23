@@ -19,6 +19,27 @@ interface FilterSidebarProps {
   courseTypeCounts?: { formation: number; parcours: number };
 }
 
+// Helper function to add line breaks before "et" and "and"
+function formatCompetenceLabel(label: string) {
+  // First try to split on existing line breaks (\n)
+  let parts = label.split('\n');
+  
+  // If no existing line breaks, add line breaks before "et" and "and"
+  if (parts.length === 1) {
+    const text = label
+      .replace(/ et /g, '\net ')
+      .replace(/ and /g, '\nand ');
+    parts = text.split('\n');
+  }
+  
+  return parts.map((line, index, array) => (
+    <span key={index}>
+      {line}
+      {index < array.length - 1 && <br />}
+    </span>
+  ));
+}
+
 export default function FilterSidebar({
   filters,
   onFiltersChange,
@@ -172,7 +193,7 @@ export default function FilterSidebar({
                           className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                         />
                         <span className="text-sm text-card-foreground">
-                          {option.label}
+                          {formatCompetenceLabel(option.label)}
                         </span>
                         {/* Show counts */}
                         {option.count !== undefined && (
