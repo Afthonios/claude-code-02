@@ -101,7 +101,25 @@ export const coursesApi = {
               if (key === 'status') return; // status already added above
               
               const filterKey = `${prefix}[${key}]`;
-              if (value && typeof value === 'object' && !Array.isArray(value)) {
+              
+              // Handle special case for competence filters with deep nesting
+              if (key === 'main_competences' && value && typeof value === 'object') {
+                const competenceFilter = value as Record<string, unknown>;
+                if (competenceFilter.competences_id && typeof competenceFilter.competences_id === 'object') {
+                  const competenceIdFilter = competenceFilter.competences_id as Record<string, unknown>;
+                  if (competenceIdFilter.id && typeof competenceIdFilter.id === 'object') {
+                    const idFilter = competenceIdFilter.id as Record<string, unknown>;
+                    if (idFilter._in && Array.isArray(idFilter._in)) {
+                      // Set the properly nested filter parameter for competences
+                      url.searchParams.set(`${filterKey}[competences_id][id][_in]`, idFilter._in.join(','));
+                      console.log('🔍 [directus.ts] Setting competence filter:', `${filterKey}[competences_id][id][_in]`, '=', idFilter._in.join(','));
+                      return;
+                    }
+                  }
+                }
+                // Fallback to regular recursion if structure doesn't match expected
+                flattenFilter(competenceFilter, filterKey);
+              } else if (value && typeof value === 'object' && !Array.isArray(value)) {
                 // Recursively flatten nested objects
                 flattenFilter(value as Record<string, unknown>, filterKey);
               } else {
@@ -111,10 +129,12 @@ export const coursesApi = {
                 } else {
                   url.searchParams.set(filterKey, String(value));
                 }
+                console.log('🔍 [directus.ts] Setting filter parameter:', filterKey, '=', Array.isArray(value) ? value.join(',') : String(value));
               }
             });
           };
           
+          console.log('🔍 [directus.ts] Flattening filter object:', JSON.stringify(filter, null, 2));
           flattenFilter(filter);
         }
         

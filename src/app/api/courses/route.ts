@@ -5,15 +5,18 @@ const DIRECTUS_BASE_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://api.a
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    console.log('🔍 [API Route] Received search params:', Array.from(searchParams.entries()));
     
     // Build the Directus API URL
     const directusUrl = new URL(`${DIRECTUS_BASE_URL}/items/courses`);
     
-    // Whitelist allowed search parameters for security
-    const allowedParams = ['fields', 'filter', 'sort', 'limit', 'offset', 'search', 'meta'];
+    // Pass through all filter parameters that match the pattern
+    // This includes nested parameters like filter[main_competences][competences_id][id][_in]
     searchParams.forEach((value, key) => {
-      if (allowedParams.includes(key)) {
+      // Allow basic parameters and any filter parameters (including nested ones)
+      if (key.match(/^(fields|sort|limit|offset|search|meta)$/) || key.startsWith('filter[')) {
         directusUrl.searchParams.set(key, value);
+        console.log('🔍 [API Route] Forwarding parameter:', key, '=', value);
       }
     });
 
