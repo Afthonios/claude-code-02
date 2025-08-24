@@ -11,7 +11,8 @@ type Props = {
 
 export async function generateStaticParams(): Promise<{ locale: string; slug: string }[]> {
   try {
-    const courses = await coursesApi.getAll({ limit: 100 });
+    const result = await coursesApi.getAll({ limit: 100 });
+    const courses = result.success ? result.data : [];
     
     const params: { locale: string; slug: string }[] = [];
     

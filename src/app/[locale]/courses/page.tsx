@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'courses' });
 
   return {
-    title: t('title'),
-    description: t('searchPlaceholder'),
+    title: t('seoTitle'),
+    description: t('seoDescription'),
   };
 }
 
@@ -24,14 +24,18 @@ async function CoursesContent({ locale }: { locale: string }) {
   
   try {
     // Load initial courses for SSR
-    const initialCourses = await coursesApi.getAll({ limit: 1000 });
+    const result = await coursesApi.getAll({ limit: 1000 });
     
     return (
-      <CoursesPageClient locale={locale} initialCourses={initialCourses || []} />
+      <CoursesPageClient 
+        locale={locale} 
+        initialCourses={result.data} 
+        hasApiError={!result.success && result.error === 'api_failure'}
+      />
     );
   } catch (error) {
     console.error('❌ [CoursesPage] Error loading initial courses:', error);
-    return <CoursesPageClient locale={locale} initialCourses={[]} />;
+    return <CoursesPageClient locale={locale} initialCourses={[]} hasApiError={true} />;
   }
 }
 

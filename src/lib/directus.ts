@@ -5,6 +5,7 @@ import type {
   DirectusInstructor,
   DirectusCourseTranslation,
   DirectusCompetenceTranslation,
+  ApiResult,
   // DirectusCourseCompetence, // Legacy type - kept in types for backwards compatibility
   // DirectusCourseMainCompetence, // Used via DirectusCourse.main_competences type
 } from '@/types/directus';
@@ -24,7 +25,7 @@ export const coursesApi = {
     search?: string;
     filter?: Record<string, unknown>;
     sort?: string[];
-  }) {
+  }): Promise<ApiResult<DirectusCourse>> {
     const { limit = 1000, page = 1, search, filter, sort } = options || {};
     
     const query: Record<string, unknown> = {
@@ -77,7 +78,12 @@ export const coursesApi = {
       const response = await directus.request(
         readItems('courses', query)
       );
-      return response as DirectusCourse[];
+      const courses = response as DirectusCourse[];
+      return {
+        data: courses,
+        success: true,
+        error: courses.length === 0 ? 'no_results' : undefined
+      };
     } catch (error) {
       // Only log non-client-side fallback errors to avoid console noise
       if (error instanceof Error && error.message !== 'CLIENT_SIDE_FALLBACK') {
@@ -153,11 +159,20 @@ export const coursesApi = {
         }
         
         const data = await fetchResponse.json();
-        return data.data as DirectusCourse[];
+        const courses = data.data as DirectusCourse[];
+        return {
+          data: courses,
+          success: true,
+          error: courses.length === 0 ? 'no_results' : undefined
+        };
       } catch (fallbackError) {
         console.error('🔍 [coursesApi] All attempts failed:', fallbackError);
-        // Return empty array as final fallback to prevent app crash
-        return [];
+        // Return API failure result to indicate service unavailability
+        return {
+          data: [],
+          success: false,
+          error: 'api_failure'
+        };
       }
     }
   },

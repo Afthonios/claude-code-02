@@ -27,8 +27,8 @@ export default async function HomePage({ params }: Props) {
   // Fetch a few courses for the preview section
   let featuredCourses: DirectusCourse[] = [];
   try {
-    const allCourses = await coursesApi.getAll();
-    featuredCourses = allCourses.slice(0, 3); // Get first 3 courses
+    const result = await coursesApi.getAll();
+    featuredCourses = result.success ? result.data.slice(0, 3) : []; // Get first 3 courses
   } catch (error) {
     console.error('Error loading featured courses:', error);
   }

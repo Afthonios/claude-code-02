@@ -76,9 +76,10 @@ function getMain8CompetencesFallback(locale: string) {
 interface CoursesPageClientProps {
   locale: string;
   initialCourses: DirectusCourse[];
+  hasApiError?: boolean;
 }
 
-export default function CoursesPageClient({ locale, initialCourses }: CoursesPageClientProps) {
+export default function CoursesPageClient({ locale, initialCourses, hasApiError = false }: CoursesPageClientProps) {
   const t = useTranslations('courses');
   
   // TODO: Replace with actual user authentication check
@@ -91,6 +92,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
   const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasInitialLoad, setHasInitialLoad] = useState(initialCourses.length > 0);
+  const [apiError, setApiError] = useState<boolean>(hasApiError);
   
   // Use refs to track previous values and prevent unnecessary re-renders
   const previousFilters = useRef<string>('');  
@@ -232,12 +234,28 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
 
       const result = await coursesApi.getAll(fetchOptions);
       
-      setCourses(result || []);
-      setHasInitialLoad(true);
-      
-      // Clear any previous errors on successful load
-      if (error) {
-        setError(null);
+      if (result.success) {
+        setCourses(result.data);
+        setHasInitialLoad(true);
+        setApiError(false);
+        // Clear any previous errors on successful load
+        if (error) {
+          setError(null);
+        }
+      } else if (result.error === 'api_failure') {
+        // API failure - keep existing courses and show API error
+        setApiError(true);
+        if (error) {
+          setError(null);
+        }
+      } else {
+        // No results but API worked
+        setCourses([]);
+        setHasInitialLoad(true);
+        setApiError(false);
+        if (error) {
+          setError(null);
+        }
       }
     } catch (fetchError) {
       console.error('❌ [CoursesPageClient] Error fetching courses:', fetchError);
@@ -299,6 +317,11 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
   const handleClearAllFilters = () => {
     clearAll();
     setIsFilterSidebarOpen(false);
+  };
+
+  const handleRetryApiCall = () => {
+    setApiError(false);
+    fetchCourses();
   };
 
   const handleFilterRemove = (filterType: keyof typeof filters, value: string) => {
@@ -548,8 +571,28 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
               </div>
             )}
 
+            {/* API Error State */}
+            {apiError && (
+              <div className="text-center py-12">
+                <div className="text-red-400 dark:text-red-600 text-6xl mb-4">⚠️</div>
+                <h3 className="text-lg font-medium text-foreground mb-2">
+                  {t('apiError.title')}
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  {t('apiError.message')}
+                </p>
+                <button
+                  onClick={handleRetryApiCall}
+                  disabled={isLoading}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 px-4 py-2 rounded-md transition-colors"
+                >
+                  {isLoading ? t('common.loading') : t('apiError.retry')}
+                </button>
+              </div>
+            )}
+
             {/* Course Results */}
-            {!isLoading && !error && (
+            {!isLoading && !error && !apiError && (
               <>
                 {filteredCourses.length > 0 ? (
                   <div className="course-grid-safari">

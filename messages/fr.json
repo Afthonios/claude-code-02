@@ -65,7 +65,9 @@
     }
   },
   "courses": {
-    "title": "Nos Formations",
+    "title": "Découvrez nos Formations",
+    "seoTitle": "Découvrez nos Formations | Développement Professionnel & Formation | Afthonios",
+    "seoDescription": "Découvrez nos formations complètes en ligne pour le développement professionnel. Développez vos compétences en leadership, management, collaboration et efficacité personnelle.",
     "searchPlaceholder": "Rechercher des formations...",
     "filters": {
       "title": "Filtrer",
@@ -135,6 +137,11 @@
       "withoutFilters": "Aucune formation n'est disponible pour le moment.",
       "clearFilters": "Effacer tous les filtres",
       "tryAgain": "Réessayer"
+    },
+    "apiError": {
+      "title": "Service temporairement indisponible",
+      "message": "Nous rencontrons des difficultés pour charger les formations. Veuillez réessayer dans quelques instants.",
+      "retry": "Réessayer"
     },
     "viewAll": "Voir toutes les formations"
   },

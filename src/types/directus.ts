@@ -2,6 +2,13 @@
 
 import type { DirectusFile } from './index';
 
+// API Result wrapper to distinguish between empty results and API failures
+export interface ApiResult<T> {
+  data: T[];
+  success: boolean;
+  error?: 'api_failure' | 'no_results';
+}
+
 // Base Directus item structure
 export interface DirectusItem {
   id: string;

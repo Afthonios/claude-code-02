@@ -65,7 +65,9 @@
     }
   },
   "courses": {
-    "title": "Our Courses",
+    "title": "Discover Our Courses",
+    "seoTitle": "Discover Our Courses | Professional Development & Training | Afthonios",
+    "seoDescription": "Discover our comprehensive online courses for professional development. Enhance your skills in leadership, management, collaboration, and personal effectiveness. Start your learning journey today.",
     "searchPlaceholder": "Search courses...",
     "filters": {
       "title": "Filter",
@@ -136,6 +138,11 @@
       "withoutFilters": "No courses are available at the moment.",
       "clearFilters": "Clear all filters",
       "tryAgain": "Try again"
+    },
+    "apiError": {
+      "title": "Service temporarily unavailable",
+      "message": "We're having trouble loading courses. Please try again in a few moments.",
+      "retry": "Retry"
     }
   },
   "theme": {
