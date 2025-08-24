@@ -1,4 +1,4 @@
-import { ReactNode, CSSProperties } from 'react';
+import { ReactNode, CSSProperties, forwardRef } from 'react';
 import { fixFrenchPunctuation } from '../../utils/french-typography';
 
 interface FrenchTextProps {
@@ -17,20 +17,24 @@ interface FrenchTextProps {
  * @param style - Inline styles
  * @param as - HTML element to render (default: span)
  */
-export default function FrenchText({ 
+const FrenchText = forwardRef<HTMLElement, FrenchTextProps>(({ 
   children, 
   className = '', 
   style,
   as: Element = 'span' 
-}: FrenchTextProps) {
+}, ref) => {
   // If children is a string, apply French typography rules
   const processedContent = typeof children === 'string' 
     ? fixFrenchPunctuation(children)
     : children;
 
   return (
-    <Element className={`french-text ${className}`.trim()} style={style}>
+    <Element ref={ref} className={`french-text ${className}`.trim()} style={style}>
       {processedContent}
     </Element>
   );
-}
+});
+
+FrenchText.displayName = 'FrenchText';
+
+export default FrenchText;

@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useState, useRef, useEffect } from 'react';
 import { formatDuration, filterTranslations, getAssetUrlWithTransforms, getCourseUrl } from '@/lib/directus';
 import { getCourseGradientStyles, cn, type CourseGradientData } from '@/lib/utils';
 import BookmarkButton from './BookmarkButton';
@@ -32,19 +33,58 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
   const t = useTranslations('courses');
   const translation = filterTranslations(course.translations, locale);
   
+  // State for dynamic line allocation (7 total lines: title + description)
+  const [titleLines, setTitleLines] = useState(2); // Default assumption
+  const [descriptionLines, setDescriptionLines] = useState(5); // 7 - 2
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  // Effect to measure title lines and calculate description lines
+  useEffect(() => {
+    if (!titleRef.current || !translation?.title) return;
+
+    const measureTitleLines = () => {
+      const element = titleRef.current;
+      if (!element) return;
+
+      // Get computed line height
+      const computedStyle = window.getComputedStyle(element);
+      const lineHeight = parseFloat(computedStyle.lineHeight);
+      
+      // If line-height is 'normal' or not a number, calculate it
+      const fontSize = parseFloat(computedStyle.fontSize);
+      const actualLineHeight = isNaN(lineHeight) ? fontSize * 1.2 : lineHeight; // 1.2 is typical for 'normal'
+      
+      // Get actual height of the element
+      const height = element.scrollHeight;
+      
+      // Calculate number of lines
+      const calculatedLines = Math.round(height / actualLineHeight);
+      
+      // Clamp between 1 and 6 lines (leave at least 1 line for description)
+      const clampedTitleLines = Math.min(Math.max(calculatedLines, 1), 6);
+      const remainingDescriptionLines = 7 - clampedTitleLines;
+      
+      // Only update if different to prevent unnecessary re-renders
+      if (clampedTitleLines !== titleLines) {
+        setTitleLines(clampedTitleLines);
+        setDescriptionLines(remainingDescriptionLines);
+      }
+    };
+
+    // Measure on mount
+    measureTitleLines();
+
+    // Measure on resize (for responsive behavior)
+    const handleResize = () => measureTitleLines();
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [translation?.title, titleLines]); // Include titleLines to prevent infinite loops
+
   if (!translation) {
     return null;
-  }
-  
-  // Debug: Log the description to console for inspection
-  if (typeof window !== 'undefined' && translation.description?.includes('intérieurs')) {
-    console.log('Raw description:', JSON.stringify(translation.description));
-    console.log('Cleaned description:', JSON.stringify(cleanDescription(translation.description)));
-    console.log('Character codes around intérieurs:', 
-      translation.description.split('').map((char, i) => 
-        `${i}: "${char}" (${char.charCodeAt(0)})`
-      ).filter(info => info.includes('intérieurs') || info.includes('élans'))
-    );
   }
 
   // Determine button text based on course type
@@ -143,6 +183,7 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
         <div className="p-6 flex flex-col flex-1">
           <FrenchText 
             as="h3"
+            ref={titleRef}
             className={cn(
               "text-xl font-semibold mb-3 group-hover:opacity-80 transition-all duration-200 course-title leading-tight",
               gradientStyles.hasGradient 
@@ -163,23 +204,17 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
             )}
             style={{
               display: '-webkit-box',
-              WebkitLineClamp: 4,
+              WebkitLineClamp: descriptionLines,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               lineHeight: '1.5em',
-              maxHeight: '6em',
+              maxHeight: `${descriptionLines * 1.5}em`,
               wordWrap: 'break-word',
               whiteSpace: 'pre-line'
             }}
           >
             {cleanDescription(translation.description)}
-            {/* Temporary debug for spacing issue */}
-            {translation.description?.includes('intérieurs') && (
-              <div className="text-xs text-red-500 mt-1 font-mono">
-                Debug: "{cleanDescription(translation.description).slice(-50)}"
-              </div>
-            )}
           </FrenchText>
           
           <div 

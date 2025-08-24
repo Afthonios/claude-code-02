@@ -329,7 +329,7 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
     }
     
     // Apply bookmark filter
-    if (filters.showBookmarked) {
+    if (filters.showBookmarked && typeof window !== 'undefined') {
       const bookmarks = JSON.parse(localStorage.getItem('courseBookmarks') || '[]');
       filtered = filtered.filter(course => bookmarks.includes(course.id));
     }
