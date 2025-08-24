@@ -14,12 +14,37 @@ interface CourseCardProps {
   locale: string;
 }
 
+// Comprehensive text cleaning function
+const cleanDescription = (text: string | undefined): string => {
+  if (!text) return '';
+  
+  // Remove all types of whitespace and replace with single spaces
+  // This includes: regular spaces, non-breaking spaces, em spaces, en spaces, 
+  // thin spaces, zero-width spaces, etc.
+  return text
+    .trim()
+    .replace(/[\s\u00A0\u1680\u2000-\u200D\u2028\u2029\u202F\u205F\u3000\uFEFF]+/g, ' ')
+    .replace(/\u200B/g, '') // Remove zero-width spaces
+    .trim();
+};
+
 export default function CourseCard({ course, locale }: CourseCardProps) {
   const t = useTranslations('courses');
   const translation = filterTranslations(course.translations, locale);
   
   if (!translation) {
     return null;
+  }
+  
+  // Debug: Log the description to console for inspection
+  if (typeof window !== 'undefined' && translation.description?.includes('intérieurs')) {
+    console.log('Raw description:', JSON.stringify(translation.description));
+    console.log('Cleaned description:', JSON.stringify(cleanDescription(translation.description)));
+    console.log('Character codes around intérieurs:', 
+      translation.description.split('').map((char, i) => 
+        `${i}: "${char}" (${char.charCodeAt(0)})`
+      ).filter(info => info.includes('intérieurs') || info.includes('élans'))
+    );
   }
 
   // Determine button text based on course type
@@ -87,14 +112,14 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
       <Link 
         href={getCourseUrl(course, locale)}
         className={cn(
-          "course-card-link rounded-lg shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border group relative",
+          "course-card-link rounded-lg shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border group relative flex flex-col h-full min-h-[420px]",
           gradientStyles.hasGradient 
             ? `border-transparent course-card-${course.id}` 
             : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
         )}
         aria-label={`${translation.title} - ${getViewButtonText()}`}
       >
-      <div className="relative z-10 course-card-content">
+      <div className="relative z-10 course-card-content flex flex-col flex-1">
         <div className="relative aspect-video w-full overflow-hidden">
           <Image
             src={imageUrl}
@@ -119,7 +144,7 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
           <FrenchText 
             as="h3"
             className={cn(
-              "text-xl font-semibold mb-2 group-hover:opacity-80 transition-all duration-200 course-title",
+              "text-xl font-semibold mb-3 group-hover:opacity-80 transition-all duration-200 course-title leading-tight",
               gradientStyles.hasGradient 
                 ? `course-card-${course.id}-text`
                 : "text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400"
@@ -131,24 +156,35 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
           <FrenchText 
             as="p"
             className={cn(
-              "text-sm mb-4 opacity-90 course-card-text flex-1",
+              "text-sm mb-5 opacity-90 course-card-text flex-1 leading-relaxed",
               gradientStyles.hasGradient 
                 ? `course-card-${course.id}-text`
                 : "text-gray-600 dark:text-gray-400"
             )}
             style={{
               display: '-webkit-box',
-              WebkitLineClamp: 3,
+              WebkitLineClamp: 4,
               WebkitBoxOrient: 'vertical',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              lineHeight: '1.5em',
+              maxHeight: '6em',
+              wordWrap: 'break-word',
+              whiteSpace: 'pre-line'
             }}
           >
-            {translation.description}
+            {cleanDescription(translation.description)}
+            {/* Temporary debug for spacing issue */}
+            {translation.description?.includes('intérieurs') && (
+              <div className="text-xs text-red-500 mt-1 font-mono">
+                Debug: "{cleanDescription(translation.description).slice(-50)}"
+              </div>
+            )}
           </FrenchText>
           
           <div 
             className={cn(
-              "flex items-center justify-between text-sm mt-auto",
+              "flex items-center justify-between text-sm mt-auto pt-3",
               gradientStyles.hasGradient 
                 ? `course-card-${course.id}-text`
                 : "text-gray-500 dark:text-gray-400"
