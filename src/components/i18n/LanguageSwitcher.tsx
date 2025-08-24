@@ -105,7 +105,12 @@ export default function LanguageSwitcher() {
         }
         
         const newPath = segments.join('/');
-        router.push(newPath);
+        
+        // Preserve URL search parameters (filters, etc.)
+        const currentSearchParams = window.location.search;
+        const finalPath = currentSearchParams ? `${newPath}${currentSearchParams}` : newPath;
+        
+        router.push(finalPath);
       }
     });
   };
