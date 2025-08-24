@@ -90,15 +90,15 @@ export async function GET(request: NextRequest) {
                 id: '1',
                 courses_id: '1',
                 competences_id: {
-                  id: '1',
+                  id: '5',
                   color_light: '#3B82F6',
                   color_dark: '#1D4ED8',
                   translations: [
                     {
-                      id: '1',
-                      competences_id: '1',
+                      id: '5',
+                      competences_id: '5',
                       languages_code: 'fr',
-                      title: 'Communication'
+                      title: 'Assertivité et Courage'
                     }
                   ]
                 }
@@ -133,15 +133,15 @@ export async function GET(request: NextRequest) {
                 id: '2',
                 courses_id: '2',
                 competences_id: {
-                  id: '2',
+                  id: '6',
                   color_light: '#10B981',
                   color_dark: '#047857',
                   translations: [
                     {
-                      id: '2',
-                      competences_id: '2',
+                      id: '6',
+                      competences_id: '6',
                       languages_code: 'fr',
-                      title: 'Leadership'
+                      title: 'Efficacité Personnelle et Professionnelle'
                     }
                   ]
                 }
@@ -176,15 +176,15 @@ export async function GET(request: NextRequest) {
                 id: '3',
                 courses_id: '3',
                 competences_id: {
-                  id: '1',
-                  color_light: '#3B82F6',
-                  color_dark: '#1D4ED8',
+                  id: '7',
+                  color_light: '#EF4444',
+                  color_dark: '#DC2626',
                   translations: [
                     {
-                      id: '3',
-                      competences_id: '1',
+                      id: '7',
+                      competences_id: '7',
                       languages_code: 'fr',
-                      title: 'Communication'
+                      title: 'Collaboration et Travail en Équipe'
                     }
                   ]
                 }
@@ -219,15 +219,15 @@ export async function GET(request: NextRequest) {
                 id: '4',
                 courses_id: '4',
                 competences_id: {
-                  id: '2',
-                  color_light: '#10B981',
-                  color_dark: '#047857',
+                  id: '8',
+                  color_light: '#8B5CF6',
+                  color_dark: '#7C3AED',
                   translations: [
                     {
-                      id: '4',
-                      competences_id: '2',
+                      id: '8',
+                      competences_id: '8',
                       languages_code: 'fr',
-                      title: 'Leadership'
+                      title: 'Agilité et Changement'
                     }
                   ]
                 }

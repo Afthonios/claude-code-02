@@ -60,34 +60,138 @@ export async function GET(request: NextRequest) {
       const mockData = {
         data: [
           {
-            id: '1',
-            icon: 'communication',
+            id: '5',
+            icon: 'assertiveness',
             color_light: '#3B82F6',
             color_dark: '#1D4ED8',
             competence_type: 'main_competence',
             translations: [
               {
-                id: '1',
-                competences_id: '1',
+                id: '5',
+                competences_id: '5',
                 languages_code: 'fr',
-                title: 'Communication',
-                description: 'Compétences en communication'
+                title: 'Assertivité et Courage',
+                card_title: 'Assertivité et Courage',
+                description: 'Compétences en assertivité et courage'
               }
             ]
           },
           {
-            id: '2',
-            icon: 'leadership',
+            id: '6',
+            icon: 'efficiency',
             color_light: '#10B981',
             color_dark: '#047857',
             competence_type: 'main_competence',
             translations: [
               {
-                id: '2',
-                competences_id: '2',
+                id: '6',
+                competences_id: '6',
                 languages_code: 'fr',
-                title: 'Leadership',
-                description: 'Compétences en leadership'
+                title: 'Efficacité Personnelle et Professionnelle',
+                card_title: 'Efficacité Personnelle et Professionnelle',
+                description: 'Compétences en efficacité personnelle et professionnelle'
+              }
+            ]
+          },
+          {
+            id: '7',
+            icon: 'collaboration',
+            color_light: '#EF4444',
+            color_dark: '#DC2626',
+            competence_type: 'main_competence',
+            translations: [
+              {
+                id: '7',
+                competences_id: '7',
+                languages_code: 'fr',
+                title: 'Collaboration et Travail en Équipe',
+                card_title: 'Collaboration et Travail en Équipe',
+                description: 'Compétences en collaboration et travail en équipe'
+              }
+            ]
+          },
+          {
+            id: '8',
+            icon: 'agility',
+            color_light: '#8B5CF6',
+            color_dark: '#7C3AED',
+            competence_type: 'main_competence',
+            translations: [
+              {
+                id: '8',
+                competences_id: '8',
+                languages_code: 'fr',
+                title: 'Agilité et Changement',
+                card_title: 'Agilité et Changement',
+                description: 'Compétences en agilité et changement'
+              }
+            ]
+          },
+          {
+            id: '9',
+            icon: 'communication',
+            color_light: '#06B6D4',
+            color_dark: '#0891B2',
+            competence_type: 'main_competence',
+            translations: [
+              {
+                id: '9',
+                competences_id: '9',
+                languages_code: 'fr',
+                title: 'Communication et Relations',
+                card_title: 'Communication et Relations',
+                description: 'Compétences en communication et relations'
+              }
+            ]
+          },
+          {
+            id: '10',
+            icon: 'leadership',
+            color_light: '#84CC16',
+            color_dark: '#65A30D',
+            competence_type: 'main_competence',
+            translations: [
+              {
+                id: '10',
+                competences_id: '10',
+                languages_code: 'fr',
+                title: 'Management et Leadership',
+                card_title: 'Management et Leadership',
+                description: 'Compétences en management et leadership'
+              }
+            ]
+          },
+          {
+            id: '11',
+            icon: 'wellbeing',
+            color_light: '#EC4899',
+            color_dark: '#DB2777',
+            competence_type: 'main_competence',
+            translations: [
+              {
+                id: '11',
+                competences_id: '11',
+                languages_code: 'fr',
+                title: 'Énergie Positive et Bien-être',
+                card_title: 'Énergie Positive et Bien-être',
+                description: 'Compétences en énergie positive et bien-être'
+              }
+            ]
+          },
+          {
+            id: '12',
+            icon: 'diversity',
+            color_light: '#F59E0B',
+            color_dark: '#D97706',
+            competence_type: 'main_competence',
+            translations: [
+              {
+                id: '12',
+                competences_id: '12',
+                languages_code: 'fr',
+                title: 'Diversité et Inclusion',
+                card_title: 'Diversité et Inclusion',
+                description: 'Compétences en diversité et inclusion'
               }
             ]
           }
