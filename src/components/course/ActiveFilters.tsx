@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { useTheme } from 'next-themes';
 
 interface FilterState {
   competences: string[];
@@ -28,6 +29,7 @@ export default function ActiveFilters({
   competenceOptions,
 }: ActiveFiltersProps) {
   const t = useTranslations('courses');
+  const { resolvedTheme } = useTheme();
 
   const getFilterLabel = (filterType: keyof FilterState, value: string): string => {
     switch (filterType) {
@@ -145,25 +147,44 @@ export default function ActiveFilters({
         {/* Filter tags */}
         {activeFilterItems.map((item, index) => {
           const hasColor = item.color?.light && item.color?.dark;
-          const colorStyle = hasColor ? {
-            borderColor: `#${item.color.light}`,
-            backgroundColor: `#${item.color.light}20`, // 20% opacity
+          
+          // Helper function to determine if a color is light or dark for text contrast
+          const getTextColor = (hexColor: string) => {
+            const hex = hexColor.replace('#', '');
+            const r = parseInt(hex.substr(0, 2), 16);
+            const g = parseInt(hex.substr(2, 2), 16);
+            const b = parseInt(hex.substr(4, 2), 16);
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            return luminance > 0.5 ? '#1f2937' : '#ffffff'; // dark text for light colors, white for dark
+          };
+          
+          const lightColor = hasColor && item.color.light ? item.color.light : null;
+          const darkColor = hasColor && item.color.dark ? item.color.dark : null;
+          
+          // Determine which color to use based on current theme
+          const isDarkMode = resolvedTheme === 'dark';
+          const currentColor = hasColor ? (isDarkMode && darkColor ? darkColor : lightColor) : null;
+          
+          const colorStyle = currentColor ? {
+            borderColor: currentColor,
+            backgroundColor: `${currentColor}15`, // 15% opacity background
+            color: getTextColor(currentColor),
           } : {};
           
           return (
             <div
               key={`${item.type}-${item.value}-${index}`}
               className={`inline-flex items-center px-3 py-1 rounded-full text-sm border-2 ${
-                hasColor 
-                  ? 'border-current text-gray-800 dark:text-gray-200' 
+                currentColor
+                  ? '' // No default classes when we have colors
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600'
               }`}
-              style={colorStyle}
+              style={currentColor ? colorStyle : {}}
             >
-              {hasColor && (
+              {currentColor && (
                 <div 
                   className="w-3 h-3 rounded-full mr-2 flex-shrink-0" 
-                  style={{ backgroundColor: `#${item.color.light}` }}
+                  style={{ backgroundColor: currentColor }}
                 />
               )}
               <span className="font-medium">{item.label}</span>
@@ -176,8 +197,9 @@ export default function ActiveFilters({
                     onFilterRemove(item.type, item.value);
                   }
                 }}
-                className="ml-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                className="ml-2 opacity-70 hover:opacity-100 transition-opacity"
                 aria-label={`Remove ${item.typeLabel} filter`}
+                style={{ color: currentColor ? 'currentColor' : undefined }}
               >
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
