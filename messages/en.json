@@ -68,16 +68,17 @@
     "title": "Our Courses",
     "searchPlaceholder": "Search courses...",
     "filters": {
-      "title": "Filters",
+      "title": "Filter",
+      "activeFilters": "Active filters",
       "competences": "Skills",
-      "course_type": "Course Type",
+      "course_type": "",
       "selectSkills": "Select skills",
       "loadingSkills": "Loading skills...",
       "clearAllFilters": "Clear all filters",
       "showBookmarked": "by favorites",
       "hideCompleted": "Hide completed courses",
       "courseType": {
-        "formation": "Course",
+        "formation": "Micro Course",
         "parcours": "Learning Path"
       }
     },
@@ -121,7 +122,11 @@
     },
     "resultsCount": {
       "loading": "Loading...",
-      "found": "{count, plural, =0 {No courses found} one {# course found} other {# courses found}}"
+      "found": "{count, plural, =0 {No courses found} one {# course found} other {# courses found}}",
+      "foundFormations": "{count, plural, =0 {No micro courses found} one {# micro course found} other {# micro courses found}}",
+      "foundParcours": "{count, plural, =0 {No learning paths found} one {# learning path found} other {# learning paths found}}",
+      "foundCours": "{count, plural, =0 {No courses found} one {# course found} other {# courses found}}",
+      "foundCourses": "{count, plural, =0 {No courses found} one {# course found} other {# courses found}}"
     },
     "noResults": {
       "title": "No courses found",

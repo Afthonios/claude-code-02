@@ -68,9 +68,10 @@
     "title": "Nos Formations",
     "searchPlaceholder": "Rechercher des formations...",
     "filters": {
-      "title": "Filtres",
+      "title": "Filtrer",
+      "activeFilters": "Filtres actifs",
       "competences": "Compétences",
-      "course_type": "Type de formation",
+      "course_type": "",
       "selectSkills": "Sélectionner les compétences",
       "loadingSkills": "Chargement des compétences...",
       "clearAllFilters": "Effacer tous les filtres",
@@ -121,7 +122,10 @@
     },
     "resultsCount": {
       "loading": "Chargement...",
-      "found": "{count, plural, =0 {Aucune formation trouvée} one {# formation trouvée} other {# formations trouvées}}"
+      "found": "{count, plural, =0 {Aucune formation trouvée} one {# formation trouvée} other {# formations trouvées}}",
+      "foundFormations": "{count, plural, =0 {Aucune formation trouvée} one {# formation trouvée} other {# formations trouvées}}",
+      "foundParcours": "{count, plural, =0 {Aucun parcours trouvé} one {# parcours trouvé} other {# parcours trouvés}}",
+      "foundCours": "{count, plural, =0 {Aucun cours trouvé} one {# cours trouvé} other {# cours trouvés}}"
     },
     "noResults": {
       "title": "Aucune formation trouvée",

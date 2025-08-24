@@ -110,16 +110,6 @@ export default function FilterSidebar({
               </button>
             </div>
 
-            {/* Clear all filters */}
-            {hasActiveFilters && (
-              <button
-                onClick={clearAllFilters}
-                className="w-full mb-4 px-3 py-2 text-sm text-primary hover:bg-muted rounded-md transition-colors"
-              >
-                {t('filters.clearAllFilters')}
-              </button>
-            )}
-
             {/* Filter sections */}
             <div className="space-y-6">
               {/* Course Type Filter - Formation first, then Parcours */}

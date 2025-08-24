@@ -116,13 +116,13 @@ export default function ActiveFilters({
     <div className="mb-6">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Active filters
+          {t('filters.activeFilters')}
         </h3>
         <button
           onClick={onClearAll}
           className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
         >
-          Clear all
+          {t('filters.clearAllFilters')}
         </button>
       </div>
       

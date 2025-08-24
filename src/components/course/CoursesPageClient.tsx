@@ -466,9 +466,25 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
             <div className="text-sm text-muted-foreground">
               {isLoading ? (
                 t('resultsCount.loading')
-              ) : (
-                t('resultsCount.found', { count: filteredCourses.length })
-              )}
+              ) : (() => {
+                // Determine which message to show based on selected course type
+                const { courseType } = filters;
+                
+                if (courseType.length === 1) {
+                  // Single course type selected
+                  if (courseType.includes('Formation')) {
+                    return t('resultsCount.foundFormations', { count: filteredCourses.length });
+                  } else if (courseType.includes('Parcours')) {
+                    return t('resultsCount.foundParcours', { count: filteredCourses.length });
+                  }
+                } else if (courseType.length === 0) {
+                  // No course type filter selected - show neutral "cours/courses"
+                  return t('resultsCount.foundCours', { count: filteredCourses.length });
+                }
+                
+                // Default fallback (multiple types or other cases)
+                return t('resultsCount.found', { count: filteredCourses.length });
+              })()}
             </div>
           </div>
         </div>
