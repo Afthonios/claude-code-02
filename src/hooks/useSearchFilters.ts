@@ -173,13 +173,13 @@ export function useSearchFilters() {
       filters.course_type = { _in: state.courseType };
     }
 
-    // Competences filter (filtering by main competences)
+    // Competences filter (filtering by parent competence through legacy competence field)
     if (state.competences.length > 0) {
-      // Use the new main_competences field for direct filtering
-      // For now, prioritize the new structure and fallback to legacy in the component logic
-      filters.main_competences = {
+      // Real courses use 'competence' field with sub-competences that have parent_competence
+      // We need to filter by the parent_competence field to get courses with specific main competences
+      filters.competence = {
         competences_id: {
-          id: { _in: state.competences }
+          parent_competence: { _in: state.competences }
         }
       };
     }
