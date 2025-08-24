@@ -148,8 +148,13 @@ export default function CoursesPageClient({ locale, initialCourses }: CoursesPag
               // Use card_title if available, otherwise fallback to title
               label: translation?.card_title || translation?.title || `Competence ${competence.id}`,
             };
-            if (competence.color_light) option.colorLight = competence.color_light;
-            if (competence.color_dark) option.colorDark = competence.color_dark;
+            // Fix colors by adding # prefix if missing
+            if (competence.color_light) {
+              option.colorLight = competence.color_light.startsWith('#') ? competence.color_light : `#${competence.color_light}`;
+            }
+            if (competence.color_dark) {
+              option.colorDark = competence.color_dark.startsWith('#') ? competence.color_dark : `#${competence.color_dark}`;
+            }
             return option;
           })
           .filter(option => {

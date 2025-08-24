@@ -45,10 +45,9 @@ export const coursesApi = {
         'on_light',
         'on_dark',
         'translations.*',
-        'main_competences.competences_id.id',
-        'main_competences.competences_id.color_light',
-        'main_competences.competences_id.color_dark',
-        'main_competences.competences_id.translations.*',
+        // Try both new and legacy competence fields
+        'main_competences.competences_id.*',
+        'competence.competences_id.*',
       ],
       limit,
       page,
@@ -88,7 +87,7 @@ export const coursesApi = {
         const url = new URL('/api/courses', typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
         
         // Add parameters that will be forwarded to Directus
-        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_type,course_image,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*,main_competences.competences_id.*');
+        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_type,course_image,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*,main_competences.competences_id.*,competence.competences_id.*');
         url.searchParams.set('filter[status][_eq]', 'published');
         url.searchParams.set('limit', limit.toString());
         url.searchParams.set('page', page.toString());

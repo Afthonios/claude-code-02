@@ -73,6 +73,7 @@ export interface DirectusCompetence extends DirectusItem {
   color_light?: string;
   color_dark?: string;
   category?: string;
+  competence_type?: string; // Added field to distinguish main_competence vs sub_competence
   parent_competence?: string | DirectusCompetence;
   translations: DirectusCompetenceTranslation[];
 }
