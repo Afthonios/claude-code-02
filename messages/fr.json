@@ -120,6 +120,8 @@
       "language": "Langue",
       "certificate": "Certificat inclus"
     },
+    "viewMicroCourse": "Voir la formation →",
+    "viewLearningPath": "Voir le parcours →",
     "resultsCount": {
       "loading": "Chargement...",
       "found": "{count, plural, =0 {Aucune formation trouvée} one {# formation trouvée} other {# formations trouvées}}",

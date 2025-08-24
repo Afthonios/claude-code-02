@@ -120,6 +120,8 @@
       "language": "Language",
       "certificate": "Certificate included"
     },
+    "viewMicroCourse": "View micro course →",
+    "viewLearningPath": "View learning path →",
     "resultsCount": {
       "loading": "Loading...",
       "found": "{count, plural, =0 {No courses found} one {# course found} other {# courses found}}",

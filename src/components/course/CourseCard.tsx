@@ -1,5 +1,8 @@
+"use client";
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { formatDuration, filterTranslations, getAssetUrlWithTransforms, getCourseUrl } from '@/lib/directus';
 import { getCourseGradientStyles, cn, type CourseGradientData } from '@/lib/utils';
 import BookmarkButton from './BookmarkButton';
@@ -11,11 +14,21 @@ interface CourseCardProps {
 }
 
 export default function CourseCard({ course, locale }: CourseCardProps) {
+  const t = useTranslations('courses');
   const translation = filterTranslations(course.translations, locale);
   
   if (!translation) {
     return null;
   }
+
+  // Determine button text based on course type
+  const getViewButtonText = () => {
+    if (course.course_type === 'Parcours') {
+      return t('viewLearningPath');
+    }
+    // Default to micro course for 'Formation' or any other type
+    return t('viewMicroCourse');
+  };
 
   // Get course image from Directus or use fallback
   const courseImage = course.course_image;
@@ -78,7 +91,7 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
             ? `border-transparent course-card-${course.id}` 
             : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
         )}
-        aria-label={`${translation.title} - ${locale === 'fr' ? 'Voir le cours' : 'View course'}`}
+        aria-label={`${translation.title} - ${getViewButtonText()}`}
       >
       <div className="relative z-10 course-card-content">
         <div className="relative aspect-video w-full overflow-hidden">
@@ -156,7 +169,7 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
                   : "text-blue-600 dark:text-blue-400"
               )}
             >
-              {locale === 'fr' ? 'Voir le cours →' : 'View course →'}
+              {getViewButtonText()}
             </span>
           </div>
         </div>
