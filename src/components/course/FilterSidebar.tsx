@@ -19,16 +19,25 @@ interface FilterSidebarProps {
   courseTypeCounts?: { formation: number; parcours: number };
 }
 
-// Helper function to add line breaks before "et" and "and"
+// Helper function to add line breaks before "et" and "and", except for "Personal and Professional"
 function formatCompetenceLabel(label: string) {
   // First try to split on existing line breaks (\n)
   let parts = label.split('\n');
   
   // If no existing line breaks, add line breaks before "et" and "and"
   if (parts.length === 1) {
-    const text = label
-      .replace(/ et /g, '\net ')
-      .replace(/ and /g, '\nand ');
+    let text = label;
+    
+    // Special case: "Personal and Professional" should break after "Professional"
+    if (text.includes('Personal and Professional')) {
+      text = text.replace(/Personal and Professional /g, 'Personal and Professional\n');
+    } else {
+      // For all other cases, add line breaks before "et" and "and"
+      text = text
+        .replace(/ et /g, '\net ')
+        .replace(/ and /g, '\nand ');
+    }
+    
     parts = text.split('\n');
   }
   
