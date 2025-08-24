@@ -334,6 +334,82 @@ body {
   }
 }
 
+/* French Typography - Prevent Line Breaks Before Punctuation */
+/* 
+ * In French, spaces before punctuation marks (:, ?, !, ;) should not cause line breaks
+ * This CSS provides a foundation that works with properly formatted content
+ */
+
+/* Apply to all text elements by default - French typography rules */
+body, p, h1, h2, h3, h4, h5, h6, div, span, a, li, td, th, label, button {
+  /* Prevent aggressive line breaking and maintain French spacing rules */
+  hyphens: none;
+  -webkit-hyphens: none;
+  -ms-hyphens: none;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+/* French language specific rules */
+:lang(fr), [lang="fr"] {
+  /* Enhanced text rendering for French typography */
+  text-rendering: optimizeLegibility;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphenate-character: "-";
+}
+
+/* 
+ * CSS-only solution using Unicode non-breaking space (U+00A0)
+ * This works when content uses proper French spacing with non-breaking spaces
+ */
+ 
+/* Ensure non-breaking spaces before punctuation don't wrap */
+*:not(pre):not(code) {
+  /* Allow normal wrapping but respect non-breaking spaces */
+  white-space: pre-wrap;
+  white-space: break-spaces; /* Modern browsers */
+}
+
+/* Reset white-space for elements that need normal behavior */
+pre, code, input, textarea, select {
+  white-space: pre;
+}
+
+input[type="text"], input[type="email"], input[type="password"], 
+input[type="search"], input[type="url"], textarea {
+  white-space: normal;
+}
+
+/* Utility class for content with French punctuation spacing */
+.french-text {
+  /* Optimize for French typography */
+  text-rendering: optimizeLegibility;
+  word-break: normal;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+/* Utility class to prevent breaks in specific text sections */
+.no-break-punctuation {
+  /* Prevent any line breaks in this content */
+  white-space: nowrap;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* For course titles and headers - prevent punctuation orphaning */
+h1, h2, h3, .course-title, .card-title {
+  /* Better handling of long titles with punctuation */
+  word-break: keep-all; /* Prevent breaking of words/punctuation units */
+  overflow-wrap: break-word; /* Allow breaking at word boundaries only */
+  hyphens: none; /* Disable hyphenation in titles */
+  -webkit-hyphens: none;
+}
+
 /* Additional Safari optimizations */
 @supports (-webkit-appearance: none) {
   /* Fix aspect-video in Safari */

@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { formatDuration, filterTranslations, getAssetUrlWithTransforms, getCourseUrl } from '@/lib/directus';
 import { getCourseGradientStyles, cn, type CourseGradientData } from '@/lib/utils';
 import BookmarkButton from './BookmarkButton';
+import FrenchText from '../ui/FrenchText';
 import type { DirectusCourse } from '@/types/directus';
 
 interface CourseCardProps {
@@ -115,18 +116,20 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
         </div>
         
         <div className="p-6 flex flex-col flex-1">
-          <h3 
+          <FrenchText 
+            as="h3"
             className={cn(
-              "text-xl font-semibold mb-2 group-hover:opacity-80 transition-all duration-200",
+              "text-xl font-semibold mb-2 group-hover:opacity-80 transition-all duration-200 course-title",
               gradientStyles.hasGradient 
                 ? `course-card-${course.id}-text`
                 : "text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400"
             )}
           >
             {translation.title}
-          </h3>
+          </FrenchText>
           
-          <p 
+          <FrenchText 
+            as="p"
             className={cn(
               "text-sm mb-4 opacity-90 course-card-text flex-1",
               gradientStyles.hasGradient 
@@ -141,7 +144,7 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
             }}
           >
             {translation.description}
-          </p>
+          </FrenchText>
           
           <div 
             className={cn(
