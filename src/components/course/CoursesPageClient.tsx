@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo, memo } from 'react';
 import { useTranslations } from 'next-intl';
 import { coursesApi, competencesApi, freeWeeklyApi } from '@/lib/directus';
 import { filterTranslations } from '@/lib/directus';
@@ -79,7 +79,7 @@ interface CoursesPageClientProps {
   hasApiError?: boolean;
 }
 
-export default function CoursesPageClient({ locale, initialCourses, hasApiError = false }: CoursesPageClientProps) {
+function CoursesPageClient({ locale, initialCourses, hasApiError = false }: CoursesPageClientProps) {
   const t = useTranslations('courses');
   
   // TODO: Replace with actual user authentication check
@@ -129,101 +129,96 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
     hasActiveFilters,
   } = useSearchFilters();
 
-  // Load competence options for filter
-  useEffect(() => {
-    const loadCompetences = async () => {
-      // Prevent multiple simultaneous loads
-      if (isLoadingCompetences.current) {
-        return;
-      }
+  // Load competence options for filter - memoized to prevent re-renders
+  const loadCompetences = useCallback(async () => {
+    // Prevent multiple simultaneous loads
+    if (isLoadingCompetences.current) {
+      return;
+    }
+    
+    // Skip if already loaded for current locale
+    if (lastLoadedLocale.current === locale && competenceOptions.length > 0) {
+      return;
+    }
+    
+    isLoadingCompetences.current = true;
+    try {
+      const competences = await competencesApi.getAll();
       
-      // For debugging: always load competences to ensure we have the data
-      if (lastLoadedLocale.current === locale && competenceOptions.length > 0) {
-        return;
-      }
-      
-      isLoadingCompetences.current = true;
-      try {
-        const competences = await competencesApi.getAll();
-        
-        if (competences.length === 0) {
-          // Provide fallback with 8 main competences
-          console.log('📊 [CoursesPageClient] Using fallback 8 main competences');
-          setCompetenceOptions(getMain8CompetencesFallback(locale));
-          lastLoadedLocale.current = locale;
-          isLoadingCompetences.current = false;
-          return;
-        }
-        
-        // Map and filter to get exactly 8 main competences, ensuring unique IDs
-        const seenIds = new Set<string>();
-        const allOptions = competences
-          .filter(competence => competence.translations && competence.translations.length > 0)
-          .map((competence: DirectusCompetence) => {
-            const translation = filterTranslations(competence.translations, locale);
-            const option: { value: string; label: string; title?: string; colorLight?: string; colorDark?: string } = {
-              value: String(competence.id), // Ensure ID is always a string
-              // Use card_title if available, otherwise fallback to title
-              label: translation?.card_title || translation?.title || `Competence ${competence.id}`,
-            };
-            // Add title field for active filters if available
-            if (translation?.title) {
-              option.title = translation.title;
-            }
-            // Fix colors by adding # prefix if missing
-            if (competence.color_light) {
-              option.colorLight = competence.color_light.startsWith('#') ? competence.color_light : `#${competence.color_light}`;
-            }
-            if (competence.color_dark) {
-              option.colorDark = competence.color_dark.startsWith('#') ? competence.color_dark : `#${competence.color_dark}`;
-            }
-            return option;
-          })
-          .filter(option => {
-            // Remove duplicates by ID
-            if (seenIds.has(option.value)) {
-              console.warn(`🔍 [CoursesPageClient] Duplicate competence ID found: ${option.value} (${option.label})`);
-              return false;
-            }
-            seenIds.add(option.value);
-            return true;
-          });
-        
-        // Use the competences from Directus directly (they're already main competences)
-        // Limit to 8 and ensure they're ordered consistently
-        const main8Competences = allOptions.slice(0, 8);
-        
-        // Final check for duplicates before setting options
-        const uniqueCompetences = main8Competences.filter((competence, index, array) => 
-          array.findIndex(c => c.value === competence.value) === index
-        );
-        
-        if (uniqueCompetences.length !== main8Competences.length) {
-          console.warn(`🔍 [CoursesPageClient] Removed ${main8Competences.length - uniqueCompetences.length} duplicate competences`);
-        }
-        
-        console.log('📊 [CoursesPageClient] Setting main competences from Directus:', uniqueCompetences);
-        setCompetenceOptions(uniqueCompetences);
-        lastLoadedLocale.current = locale;
-        isLoadingCompetences.current = false;
-      } catch (error) {
-        console.error('🔍 [CoursesPageClient] Error loading competences:', error);
-        // Set fallback options on error to prevent blocking UI
+      if (competences.length === 0) {
+        console.log('📊 [CoursesPageClient] Using fallback 8 main competences');
         setCompetenceOptions(getMain8CompetencesFallback(locale));
         lastLoadedLocale.current = locale;
-        isLoadingCompetences.current = false;
+        return;
+      }
+      
+      // Map and filter to get exactly 8 main competences, ensuring unique IDs
+      const seenIds = new Set<string>();
+      const allOptions = competences
+        .filter(competence => competence.translations && competence.translations.length > 0)
+        .map((competence: DirectusCompetence) => {
+          const translation = filterTranslations(competence.translations, locale);
+          const option: { value: string; label: string; title?: string; colorLight?: string; colorDark?: string } = {
+            value: String(competence.id),
+            label: translation?.card_title || translation?.title || `Competence ${competence.id}`,
+          };
+          if (translation?.title) {
+            option.title = translation.title;
+          }
+          if (competence.color_light) {
+            option.colorLight = competence.color_light.startsWith('#') ? competence.color_light : `#${competence.color_light}`;
+          }
+          if (competence.color_dark) {
+            option.colorDark = competence.color_dark.startsWith('#') ? competence.color_dark : `#${competence.color_dark}`;
+          }
+          return option;
+        })
+        .filter(option => {
+          if (seenIds.has(option.value)) {
+            console.warn(`🔍 [CoursesPageClient] Duplicate competence ID found: ${option.value}`);
+            return false;
+          }
+          seenIds.add(option.value);
+          return true;
+        });
+      
+      const main8Competences = allOptions.slice(0, 8);
+      const uniqueCompetences = main8Competences.filter((competence, index, array) => 
+        array.findIndex(c => c.value === competence.value) === index
+      );
+      
+      console.log('📊 [CoursesPageClient] Setting main competences from Directus:', uniqueCompetences);
+      setCompetenceOptions(uniqueCompetences);
+      lastLoadedLocale.current = locale;
+    } catch (error) {
+      console.error('🔍 [CoursesPageClient] Error loading competences:', error);
+      setCompetenceOptions(getMain8CompetencesFallback(locale));
+      lastLoadedLocale.current = locale;
+    } finally {
+      isLoadingCompetences.current = false;
+    }
+  }, [locale]);
+
+  // Load competences only on locale change or initial load
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    // Load competences if locale changed or if we have no competences yet
+    if (lastLoadedLocale.current !== locale || (competenceOptions.length === 0 && !isLoadingCompetences.current)) {
+      timeoutId = setTimeout(() => {
+        loadCompetences();
+      }, 100);
+    }
+    
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale, loadCompetences]);
 
-
-    // Add a small delay to avoid immediate execution that might cause issues
-    const timeout = setTimeout(() => {
-      loadCompetences();
-    }, 100);
-    return () => clearTimeout(timeout);
-  }, [locale, competenceOptions.length]); // Include competenceOptions.length dependency
-
-  // Fetch courses based on current filters
+  // Memoized fetch courses function with stable dependencies  
   const fetchCourses = useCallback(async (skipIfLoading = false) => {
     if (skipIfLoading && isLoading) {
       return;
@@ -234,7 +229,6 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
     
     try {
       const directusFilters = getDirectusFilters();
-      
       const searchQuery = search.trim();
       
       const fetchOptions: {
@@ -258,49 +252,38 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
         setCourses(result.data);
         setHasInitialLoad(true);
         setApiError(false);
-        // Clear any previous errors on successful load
-        if (error) {
-          setError(null);
-        }
+        setError(null);
       } else if (result.error === 'api_failure') {
-        // API failure - keep existing courses and show API error
         setApiError(true);
-        if (error) {
-          setError(null);
-        }
+        setError(null);
       } else {
-        // No results but API worked
         setCourses([]);
         setHasInitialLoad(true);
         setApiError(false);
-        if (error) {
-          setError(null);
-        }
+        setError(null);
       }
     } catch (fetchError) {
       console.error('❌ [CoursesPageClient] Error fetching courses:', fetchError);
       
-      // More specific error messages
+      let errorMessage = 'Failed to load courses. Please try again later.';
       if (fetchError instanceof Error) {
         if (fetchError.message.includes('fetch')) {
-          setError('Unable to connect to the server. Please check your internet connection and try again.');
+          errorMessage = 'Unable to connect to the server. Please check your internet connection and try again.';
         } else if (fetchError.message.includes('timeout')) {
-          setError('Request timed out. Please try again.');
+          errorMessage = 'Request timed out. Please try again.';
         } else {
-          setError(`Error loading courses: ${fetchError.message}`);
+          errorMessage = `Error loading courses: ${fetchError.message}`;
         }
-      } else {
-        setError('Failed to load courses. Please try again later.');
       }
       
-      // Only clear courses if this isn't the initial load
+      setError(errorMessage);
       if (hasInitialLoad) {
         setCourses([]);
       }
     } finally {
       setIsLoading(false);
     }
-  }, [search, getDirectusFilters, isLoading, hasInitialLoad, error]);
+  }, [search, getDirectusFilters, isLoading, hasInitialLoad]);
 
   // Initialize courses from initialCourses if needed
   useEffect(() => {
@@ -309,42 +292,57 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
     }
   }, [initialCourses, courses.length]);
 
-  // Fetch courses when search or filters change
+  // Debounced effect for search and filter changes
   useEffect(() => {
-    const currentFilters = JSON.stringify({ competences: filters.competences, courseType: filters.courseType });
-    const currentSearch = search;
+    const currentFilters = JSON.stringify({ 
+      competences: filters.competences, 
+      courseType: filters.courseType,
+      showBookmarked: filters.showBookmarked,
+      hideCompleted: filters.hideCompleted
+    });
+    const currentSearch = search.trim();
     
     // Check if filters or search actually changed
     const filtersChanged = currentFilters !== previousFilters.current;
     const searchChanged = currentSearch !== previousSearch.current;
     
-    if (hasActiveFilters && (filtersChanged || searchChanged)) {
-      
-      // Update refs
-      previousFilters.current = currentFilters;
-      previousSearch.current = currentSearch;
-      
-      fetchCourses(true);
-    } else if (!hasActiveFilters && (previousFilters.current !== '' || previousSearch.current !== '')) {
-      // Reset to initial courses when filters are cleared
-      setCourses(initialCourses);
-      previousFilters.current = '';
-      previousSearch.current = '';
+    if (!filtersChanged && !searchChanged) {
+      return;
     }
-  }, [search, filters.competences, filters.showBookmarked, filters.courseType, filters.hideCompleted, hasActiveFilters, fetchCourses, initialCourses]); // Include fetchCourses and initialCourses
+    
+    // Update refs immediately to prevent duplicate calls
+    previousFilters.current = currentFilters;
+    previousSearch.current = currentSearch;
+    
+    // Debounce API calls for search, immediate for filters
+    const isSearchOnly = searchChanged && !filtersChanged;
+    const delay = isSearchOnly ? 300 : 0;
+    
+    const timeoutId = setTimeout(() => {
+      if (hasActiveFilters) {
+        fetchCourses(true);
+      } else {
+        // Reset to initial courses when no filters active
+        setCourses(initialCourses);
+      }
+    }, delay);
+    
+    return () => clearTimeout(timeoutId);
+  }, [search, filters.competences, filters.showBookmarked, filters.courseType, filters.hideCompleted, hasActiveFilters, fetchCourses, initialCourses]);
   
 
-  const handleClearAllFilters = () => {
+  // Memoized event handlers to prevent child re-renders
+  const handleClearAllFilters = useCallback(() => {
     clearAll();
     setIsFilterSidebarOpen(false);
-  };
+  }, [clearAll]);
 
-  const handleRetryApiCall = () => {
+  const handleRetryApiCall = useCallback(() => {
     setApiError(false);
     fetchCourses();
-  };
+  }, [fetchCourses]);
 
-  const handleFilterRemove = (filterType: keyof typeof filters, value: string) => {
+  const handleFilterRemove = useCallback((filterType: keyof typeof filters, value: string) => {
     // Handle boolean filters differently
     if ((filterType === 'showBookmarked' || filterType === 'hideCompleted') && value === 'false') {
       setFilters({
@@ -354,48 +352,14 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
     } else {
       removeFilter(filterType, value);
     }
-  };
+  }, [filters, setFilters, removeFilter]);
 
-  const toggleFilterSidebar = () => {
+  const toggleFilterSidebar = useCallback(() => {
     setIsFilterSidebarOpen(!isFilterSidebarOpen);
-  };
+  }, [isFilterSidebarOpen]);
 
-  // Filter courses based on bookmarks and course type (client-side filtering as fallback)
-  const filteredCourses = useMemo(() => {
-    let filtered = courses;
-    
-    // Apply course type filter (client-side fallback when API filtering fails)
-    if (filters.courseType.length > 0) {
-      filtered = filtered.filter(course => 
-        filters.courseType.includes(course.course_type || '')
-      );
-    }
-    
-    // Apply bookmark filter
-    if (filters.showBookmarked && typeof window !== 'undefined') {
-      const bookmarks = JSON.parse(localStorage.getItem('courseBookmarks') || '[]');
-      filtered = filtered.filter(course => bookmarks.includes(course.id));
-    }
 
-    // Add weekly free course at position 1 if:
-    // 1. Weekly free course exists
-    // 2. No search is active (we only show it in the default view)
-    // 3. The weekly free course isn't already in the list
-    // 4. No specific filters that would exclude it are active
-    if (weeklyFreeCourse && 
-        !search.trim() && 
-        !filtered.find(course => course.id === weeklyFreeCourse.id) &&
-        !filters.showBookmarked && // Don't show if user is viewing bookmarks only
-        (filters.courseType.length === 0 || filters.courseType.includes(weeklyFreeCourse.course_type || ''))) {
-      
-      // Add the weekly course at the beginning
-      filtered = [weeklyFreeCourse, ...filtered];
-    }
-    
-    return filtered;
-  }, [courses, filters.showBookmarked, filters.courseType, weeklyFreeCourse, search]);
-
-  // Calculate course type counts
+  // Memoized course type counts
   const courseTypeCounts = useMemo(() => {
     const counts = {
       formation: 0,
@@ -414,7 +378,7 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
     return counts;
   }, [initialCourses]);
 
-  // Calculate competence counts from courses
+  // Memoized competence counts calculation to prevent re-renders
   const competenceOptionsWithCounts = useMemo(() => {
     if (competenceOptions.length === 0 || initialCourses.length === 0) {
       return competenceOptions;
@@ -422,7 +386,6 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
 
     // Create a map to count courses by competence ID
     const competenceCounts: Record<string, number> = {};
-    
     
     initialCourses.forEach(course => {
       // Use the new main_competences field for direct access, fallback to legacy competence field
@@ -469,7 +432,6 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
       }
     });
 
-
     // Add counts to competence options and sort by count (descending)
     const optionsWithCounts = competenceOptions
       .map(option => ({
@@ -480,6 +442,36 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
 
     return optionsWithCounts;
   }, [competenceOptions, initialCourses]);
+
+  // Memoized filtered courses to prevent unnecessary recalculations
+  const filteredCourses = useMemo(() => {
+    let filtered = courses;
+    
+    // Apply course type filter (client-side fallback when API filtering fails)
+    if (filters.courseType.length > 0) {
+      filtered = filtered.filter(course => 
+        filters.courseType.includes(course.course_type || '')
+      );
+    }
+    
+    // Apply bookmark filter
+    if (filters.showBookmarked && typeof window !== 'undefined') {
+      const bookmarks = JSON.parse(localStorage.getItem('courseBookmarks') || '[]');
+      filtered = filtered.filter(course => bookmarks.includes(course.id));
+    }
+
+    // Add weekly free course at position 1 if conditions are met
+    if (weeklyFreeCourse && 
+        !search.trim() && 
+        !filtered.find(course => course.id === weeklyFreeCourse.id) &&
+        !filters.showBookmarked && 
+        (filters.courseType.length === 0 || filters.courseType.includes(weeklyFreeCourse.course_type || ''))) {
+      
+      filtered = [weeklyFreeCourse, ...filtered];
+    }
+    
+    return filtered;
+  }, [courses, filters.showBookmarked, filters.courseType, weeklyFreeCourse, search]);
 
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] dark:bg-gray-900">
@@ -670,3 +662,36 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
     </div>
   );
 }
+
+// Custom comparison function for React.memo
+const arePropsEqual = (prevProps: CoursesPageClientProps, nextProps: CoursesPageClientProps) => {
+  // Check locale
+  if (prevProps.locale !== nextProps.locale) return false;
+  
+  // Check hasApiError
+  if (prevProps.hasApiError !== nextProps.hasApiError) return false;
+  
+  // Check initialCourses length and basic comparison
+  if (prevProps.initialCourses.length !== nextProps.initialCourses.length) return false;
+  
+  // For performance, only do deep comparison if arrays are small or do shallow check
+  if (prevProps.initialCourses.length > 100) {
+    // For large arrays, just check first and last few items
+    const checkItems = Math.min(3, prevProps.initialCourses.length);
+    for (let i = 0; i < checkItems; i++) {
+      if (prevProps.initialCourses[i]?.id !== nextProps.initialCourses[i]?.id) return false;
+    }
+    // Check last items
+    const lastIndex = prevProps.initialCourses.length - 1;
+    if (lastIndex >= 0 && prevProps.initialCourses[lastIndex]?.id !== nextProps.initialCourses[lastIndex]?.id) return false;
+  } else {
+    // For smaller arrays, do full comparison
+    for (let i = 0; i < prevProps.initialCourses.length; i++) {
+      if (prevProps.initialCourses[i]?.id !== nextProps.initialCourses[i]?.id) return false;
+    }
+  }
+  
+  return true;
+};
+
+export default memo(CoursesPageClient, arePropsEqual);
