@@ -85,7 +85,7 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
   // TODO: Replace with actual user authentication check
   const isPaidUser = false; // This should be determined from user session/auth
   const [courses, setCourses] = useState<DirectusCourse[]>(initialCourses);
-  const [competenceOptions, setCompetenceOptions] = useState<Array<{ value: string; label: string; colorLight?: string; colorDark?: string }>>([]);
+  const [competenceOptions, setCompetenceOptions] = useState<Array<{ value: string; label: string; title?: string; colorLight?: string; colorDark?: string }>>([]);
   
   // Remove unused memoized competence options
   const [isLoading, setIsLoading] = useState(false);
@@ -145,10 +145,12 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
           .filter(competence => competence.translations && competence.translations.length > 0)
           .map((competence: DirectusCompetence) => {
             const translation = filterTranslations(competence.translations, locale);
-            const option: { value: string; label: string; colorLight?: string; colorDark?: string } = {
+            const option: { value: string; label: string; title?: string; colorLight?: string; colorDark?: string } = {
               value: String(competence.id), // Ensure ID is always a string
               // Use card_title if available, otherwise fallback to title
               label: translation?.card_title || translation?.title || `Competence ${competence.id}`,
+              // Add title field for active filters
+              title: translation?.title,
             };
             // Fix colors by adding # prefix if missing
             if (competence.color_light) {

@@ -16,7 +16,7 @@ interface ActiveFiltersProps {
   onFilterRemove: (filterType: keyof FilterState, value: string) => void;
   onSearchClear: () => void;
   onClearAll: () => void;
-  competenceOptions: Array<{ value: string; label: string; colorLight?: string; colorDark?: string }>;
+  competenceOptions: Array<{ value: string; label: string; title?: string; colorLight?: string; colorDark?: string }>;
 }
 
 
@@ -36,7 +36,8 @@ export default function ActiveFilters({
       case 'competences':
         // Ensure both values are strings for comparison
         const found = competenceOptions.find(opt => String(opt.value) === String(value));
-        return found?.label || `Competence ${value} (${competenceOptions.length} options available)`;
+        // Use title for active filter display, fallback to label if title not available
+        return found?.title || found?.label || `Competence ${value} (${competenceOptions.length} options available)`;
       case 'showBookmarked':
         return t('filters.showBookmarked');
       case 'courseType':

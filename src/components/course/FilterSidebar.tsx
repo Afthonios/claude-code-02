@@ -12,7 +12,7 @@ interface FilterState {
 interface FilterSidebarProps {
   filters: FilterState;
   onFiltersChange: (filters: FilterState) => void;
-  competenceOptions: Array<{ value: string; label: string; count?: number }>;
+  competenceOptions: Array<{ value: string; label: string; title?: string; count?: number }>;
   isOpen: boolean;
   onToggle: () => void;
   isPaidUser?: boolean; // Add prop to check if user has paid access
