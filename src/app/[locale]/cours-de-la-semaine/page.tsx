@@ -1,7 +1,16 @@
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getCoursesListUrl } from '@/lib/directus';
+import Image from 'next/image';
+import { 
+  getCoursesListUrl, 
+  freeWeeklyApi, 
+  filterTranslations, 
+  formatDuration, 
+  getAssetUrl,
+  getCourseUrl,
+  getParentCompetences
+} from '@/lib/directus';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -22,6 +31,23 @@ export default async function CourseOfTheWeekPage({ params }: Props) {
   const t = await getTranslations({ locale, namespace: 'navigation' });
   const courseT = await getTranslations({ locale, namespace: 'courses' });
 
+  // Fetch current week course from Directus
+  const weekCourse = await freeWeeklyApi.getCurrentWeekCourse();
+  const weekPeriod = await freeWeeklyApi.getWeekPeriod();
+  
+  let courseTranslation = null;
+  let parentCompetences: Array<{
+    id: string;
+    title: string;
+    colorLight?: string;
+    colorDark?: string;
+  }> = [];
+  
+  if (weekCourse) {
+    courseTranslation = filterTranslations(weekCourse.translations, locale);
+    parentCompetences = getParentCompetences(weekCourse, locale);
+  }
+
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-900">
       <div className="container py-12">
@@ -40,70 +66,130 @@ export default async function CourseOfTheWeekPage({ params }: Props) {
           </div>
 
           {/* Featured Course */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-            <div className="grid md:grid-cols-2 gap-0">
-              {/* Course Image */}
-              <div className="aspect-video md:aspect-square bg-gradient-to-br from-primary/10 to-primary/30 flex items-center justify-center">
-                <div className="text-center text-primary">
-                  <div className="text-6xl mb-4">🎓</div>
-                  <p className="text-lg font-medium">
-                    {locale === 'fr' ? 'Cours de la semaine' : 'Course of the week'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Course Details */}
-              <div className="p-8">
-                <div className="mb-4">
-                  <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-4">
-                    {locale === 'fr' ? 'Sélection de la semaine' : 'Weekly Selection'}
-                  </span>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                    {locale === 'fr' 
-                      ? 'Formation JavaScript Avancé'
-                      : 'Advanced JavaScript Training'
-                    }
-                  </h2>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6">
-                    {locale === 'fr' 
-                      ? 'Maîtrisez les concepts avancés de JavaScript avec des projets pratiques et des exercices interactifs.'
-                      : 'Master advanced JavaScript concepts with practical projects and interactive exercises.'
-                    }
-                  </p>
-                </div>
-
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <span className="mr-2">⏱️</span>
-                    <span>{locale === 'fr' ? '8 heures' : '8 hours'}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <span className="mr-2">📊</span>
-                    <span>{locale === 'fr' ? 'Intermédiaire' : 'Intermediate'}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <span className="mr-2">💰</span>
-                    <span>{courseT('price.free')}</span>
-                  </div>
+          {weekCourse && courseTranslation ? (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+              <div className="grid md:grid-cols-2 gap-0">
+                {/* Course Image */}
+                <div 
+                  className="aspect-video md:aspect-square flex items-center justify-center"
+                  style={{
+                    background: weekCourse.course_image ? undefined : `linear-gradient(135deg, ${weekCourse.gradient_from_light || '#E1E3EA'}, ${weekCourse.gradient_to_light || '#C7C8DB'})`,
+                    color: weekCourse.on_light || '#0A0A0A'
+                  }}
+                >
+                  {weekCourse.course_image ? (
+                    <div className="w-full h-full relative">
+                      <Image
+                        src={getAssetUrl(typeof weekCourse.course_image === 'string' ? weekCourse.course_image : weekCourse.course_image?.id)}
+                        alt={courseTranslation.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <div className="text-6xl mb-4">🎓</div>
+                      <p className="text-lg font-medium">
+                        {locale === 'fr' ? 'Cours de la semaine' : 'Course of the week'}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
-                <div className="space-y-3">
-                  <Link
-                    href={getCoursesListUrl(locale)}
-                    className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                  >
-                    {locale === 'fr' ? 'Commencer le cours' : 'Start Course'}
-                  </Link>
-                  <Link
-                    href={getCoursesListUrl(locale)}
-                    className="w-full inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                  >
-                    {courseT('viewAll')}
-                  </Link>
+                {/* Course Details */}
+                <div className="p-8">
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
+                        {locale === 'fr' ? 'Sélection de la semaine' : 'Weekly Selection'}
+                      </span>
+                      {weekPeriod && (
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {new Date(weekPeriod.week_start).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US')} - {new Date(weekPeriod.week_end).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US')}
+                        </span>
+                      )}
+                    </div>
+                    
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                      {courseTranslation.title}
+                    </h2>
+                    
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                      {courseTranslation.description}
+                    </p>
+                    
+                    {/* Competences */}
+                    {parentCompetences.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-6">
+                        {parentCompetences.map((competence) => (
+                          <span
+                            key={competence.id}
+                            className="inline-block px-2 py-1 rounded text-xs"
+                            style={{
+                              backgroundColor: competence.colorLight ? `${competence.colorLight}20` : '#F3F4F6',
+                              color: competence.colorLight || '#6B7280'
+                            }}
+                          >
+                            {competence.title}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                      <span className="mr-2">⏱️</span>
+                      <span>{formatDuration(weekCourse.duration || 0, locale)}</span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                      <span className="mr-2">📚</span>
+                      <span>{weekCourse.course_type || (locale === 'fr' ? 'Formation' : 'Training')}</span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                      <span className="mr-2">💰</span>
+                      <span>{courseT('price.free')}</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Link
+                      href={getCourseUrl(weekCourse, locale)}
+                      className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                    >
+                      {locale === 'fr' ? 'Commencer le cours' : 'Start Course'}
+                    </Link>
+                    <Link
+                      href={getCoursesListUrl(locale)}
+                      className="w-full inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                    >
+                      {courseT('viewAll')}
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
+              <div className="text-6xl mb-4">🎓</div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                {locale === 'fr' ? 'Aucun cours cette semaine' : 'No course this week'}
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                {locale === 'fr' 
+                  ? 'Découvrez notre catalogue complet de formations' 
+                  : 'Explore our complete training catalog'
+                }
+              </p>
+              <Link
+                href={getCoursesListUrl(locale)}
+                className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90"
+              >
+                {courseT('viewAll')}
+              </Link>
+            </div>
+          )}
 
           {/* Additional Information */}
           <div className="mt-12 grid md:grid-cols-3 gap-8">

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { coursesApi, competencesApi } from '@/lib/directus';
+import { coursesApi, competencesApi, freeWeeklyApi } from '@/lib/directus';
 import { filterTranslations } from '@/lib/directus';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
 import SearchBar from './SearchBar';
@@ -85,6 +85,7 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
   // TODO: Replace with actual user authentication check
   const isPaidUser = false; // This should be determined from user session/auth
   const [courses, setCourses] = useState<DirectusCourse[]>(initialCourses);
+  const [weeklyFreeCourse, setWeeklyFreeCourse] = useState<DirectusCourse | null>(null);
   const [competenceOptions, setCompetenceOptions] = useState<Array<{ value: string; label: string; title?: string; colorLight?: string; colorDark?: string }>>([]);
   
   // Remove unused memoized competence options
@@ -99,6 +100,21 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
   const previousSearch = useRef<string>('');
   const isLoadingCompetences = useRef<boolean>(false);
   const lastLoadedLocale = useRef<string>('');
+
+  // Load free weekly course
+  useEffect(() => {
+    const loadWeeklyCourse = async () => {
+      try {
+        const course = await freeWeeklyApi.getCurrentWeekCourse();
+        setWeeklyFreeCourse(course);
+      } catch (error) {
+        console.error('Error loading weekly free course:', error);
+        setWeeklyFreeCourse(null);
+      }
+    };
+
+    loadWeeklyCourse();
+  }, []);
   
   
   const {
@@ -149,9 +165,11 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
               value: String(competence.id), // Ensure ID is always a string
               // Use card_title if available, otherwise fallback to title
               label: translation?.card_title || translation?.title || `Competence ${competence.id}`,
-              // Add title field for active filters
-              title: translation?.title,
             };
+            // Add title field for active filters if available
+            if (translation?.title) {
+              option.title = translation.title;
+            }
             // Fix colors by adding # prefix if missing
             if (competence.color_light) {
               option.colorLight = competence.color_light.startsWith('#') ? competence.color_light : `#${competence.color_light}`;
@@ -358,9 +376,24 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
       const bookmarks = JSON.parse(localStorage.getItem('courseBookmarks') || '[]');
       filtered = filtered.filter(course => bookmarks.includes(course.id));
     }
+
+    // Add weekly free course at position 1 if:
+    // 1. Weekly free course exists
+    // 2. No search is active (we only show it in the default view)
+    // 3. The weekly free course isn't already in the list
+    // 4. No specific filters that would exclude it are active
+    if (weeklyFreeCourse && 
+        !search.trim() && 
+        !filtered.find(course => course.id === weeklyFreeCourse.id) &&
+        !filters.showBookmarked && // Don't show if user is viewing bookmarks only
+        (filters.courseType.length === 0 || filters.courseType.includes(weeklyFreeCourse.course_type || ''))) {
+      
+      // Add the weekly course at the beginning
+      filtered = [weeklyFreeCourse, ...filtered];
+    }
     
     return filtered;
-  }, [courses, filters.showBookmarked, filters.courseType]);
+  }, [courses, filters.showBookmarked, filters.courseType, weeklyFreeCourse, search]);
 
   // Calculate course type counts
   const courseTypeCounts = useMemo(() => {
@@ -600,7 +633,11 @@ export default function CoursesPageClient({ locale, initialCourses, hasApiError 
                   <div className="course-grid-safari">
                     {filteredCourses.map((course) => (
                       <div key={course.id} className="course-card-container">
-                        <CourseCard course={course} locale={locale} />
+                        <CourseCard 
+                          course={course} 
+                          locale={locale} 
+                          isWeeklyFreeCourse={weeklyFreeCourse?.id === course.id}
+                        />
                       </div>
                     ))}
                   </div>

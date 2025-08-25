@@ -13,6 +13,7 @@ import type { DirectusCourse } from '@/types/directus';
 interface CourseCardProps {
   course: DirectusCourse;
   locale: string;
+  isWeeklyFreeCourse?: boolean;
 }
 
 // Comprehensive text cleaning function
@@ -29,7 +30,7 @@ const cleanDescription = (text: string | undefined): string => {
     .trim();
 };
 
-export default function CourseCard({ course, locale }: CourseCardProps) {
+export default function CourseCard({ course, locale, isWeeklyFreeCourse = false }: CourseCardProps) {
   const t = useTranslations('courses');
   const translation = filterTranslations(course.translations, locale);
   
@@ -170,6 +171,15 @@ export default function CourseCard({ course, locale }: CourseCardProps) {
           />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
           
+          {/* Free Course of the Week badge */}
+          {isWeeklyFreeCourse && (
+            <div className="absolute top-2 left-2 z-10">
+              <div className="bg-[#C2410C] text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+                {locale === 'fr' ? 'Cours gratuit de la semaine' : 'Free Course of the Week'}
+              </div>
+            </div>
+          )}
+
           {/* Bookmark button positioned in top-right corner */}
           <div className="absolute top-2 right-2 z-10">
             <BookmarkButton 

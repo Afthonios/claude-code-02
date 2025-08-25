@@ -451,6 +451,115 @@ export const pagesApi = {
   },
 };
 
+export const freeWeeklyApi = {
+  async getCurrentWeekCourse(): Promise<DirectusCourse | null> {
+    try {
+      const now = new Date();
+      
+      // On client side, use fetch to avoid CORS issues
+      if (typeof window !== 'undefined') {
+        throw new Error('CLIENT_SIDE_FALLBACK');
+      }
+      
+      const response = await directus.request(
+        readItems('free_weekly', {
+          fields: [
+            'id',
+            'week_start',
+            'week_end',
+            'course_id.id',
+            'course_id.legacy_id',
+            'course_id.status',
+            'course_id.duration',
+            'course_id.course_image',
+            'course_id.gradient_from_light',
+            'course_id.gradient_to_light',
+            'course_id.gradient_from_dark',
+            'course_id.gradient_to_dark',
+            'course_id.on_light',
+            'course_id.on_dark',
+            'course_id.translations.*',
+            'course_id.main_competences.competences_id.id',
+            'course_id.main_competences.competences_id.color_light',
+            'course_id.main_competences.competences_id.color_dark',
+            'course_id.main_competences.competences_id.translations.*',
+          ],
+          filter: {
+            status: { _eq: 'published' },
+            week_start: { _lte: now.toISOString() },
+            week_end: { _gte: now.toISOString() },
+          },
+          limit: 1,
+        })
+      );
+
+      if (response.length > 0) {
+        return response[0].course_id as DirectusCourse;
+      }
+
+      return null;
+    } catch (error) {
+      // Only log non-client-side fallback errors
+      if (error instanceof Error && error.message !== 'CLIENT_SIDE_FALLBACK') {
+        console.error('🔍 [freeWeeklyApi] Directus SDK failed. Error:', error);
+      }
+      
+      // Fallback to our Next.js API route
+      try {
+        const url = new URL('/api/free-weekly', typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+        
+        const fetchResponse = await fetch(url.toString());
+        if (!fetchResponse.ok) {
+          console.error('🔍 [freeWeeklyApi] API route failed with status:', fetchResponse.status);
+          return null;
+        }
+        
+        const data = await fetchResponse.json();
+        if (data.data) {
+          return data.data as DirectusCourse;
+        }
+
+        return null;
+      } catch (fallbackError) {
+        console.error('🔍 [freeWeeklyApi] All attempts failed:', fallbackError);
+        return null;
+      }
+    }
+  },
+
+  async getWeekPeriod(): Promise<{ week_start: string; week_end: string } | null> {
+    try {
+      const now = new Date();
+      const baseUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://api.afthonios.com';
+      
+      const url = new URL(`${baseUrl}/items/free_weekly`);
+      url.searchParams.set('fields', 'week_start,week_end');
+      url.searchParams.set('filter[status][_eq]', 'published');
+      url.searchParams.set('filter[week_start][_lte]', now.toISOString());
+      url.searchParams.set('filter[week_end][_gte]', now.toISOString());
+      url.searchParams.set('limit', '1');
+
+      const fetchResponse = await fetch(url.toString());
+      if (!fetchResponse.ok) {
+        return null;
+      }
+      
+      const data = await fetchResponse.json();
+      if (data.data && data.data.length > 0) {
+        return {
+          week_start: data.data[0].week_start,
+          week_end: data.data[0].week_end,
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error('🔍 [freeWeeklyApi] Failed to get week period:', error);
+      return null;
+    }
+  },
+};
+
 export function getAssetUrl(id: string | undefined | null): string {
   if (!id) return '';
   const baseUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://api.afthonios.com';
