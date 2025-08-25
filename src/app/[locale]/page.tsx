@@ -238,8 +238,8 @@ export default async function HomePage({ params }: Props) {
           {/* Featured Course Cards */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {featuredCourses.length > 0 ? (
-              featuredCourses.map((course) => (
-                <CourseCard key={course.id} course={course} locale={locale} />
+              featuredCourses.map((course, index) => (
+                <CourseCard key={course.id} course={course} locale={locale} priority={index < 6} />
               ))
             ) : (
               // Fallback to placeholder cards if no courses available

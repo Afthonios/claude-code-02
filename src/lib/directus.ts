@@ -592,6 +592,102 @@ export function getAssetUrlWithTransforms(
   return url;
 }
 
+// Responsive breakpoints for course card images
+export const COURSE_IMAGE_BREAKPOINTS = {
+  mobile: { width: 350, height: 197 },    // 16:9 aspect ratio for mobile
+  tablet: { width: 384, height: 216 },    // 16:9 aspect ratio for tablet  
+  desktop: { width: 400, height: 225 },   // 16:9 aspect ratio for desktop
+  large: { width: 448, height: 252 }      // 16:9 aspect ratio for large screens
+} as const;
+
+// Quality settings for different use cases
+export const IMAGE_QUALITY_SETTINGS = {
+  placeholder: 10,  // Very low quality for blur placeholders
+  list: 75,         // Good quality for course cards
+  hero: 85,         // High quality for hero images
+  thumbnail: 70     // Medium quality for small thumbnails
+} as const;
+
+/**
+ * Generate optimized course image URLs for different breakpoints
+ */
+export function getOptimizedCourseImageUrls(
+  id: string | undefined | null,
+  options?: {
+    quality?: keyof typeof IMAGE_QUALITY_SETTINGS;
+    format?: 'auto' | 'jpg' | 'png' | 'webp' | 'avif';
+    fit?: 'cover' | 'contain' | 'inside' | 'outside';
+  }
+) {
+  if (!id) return null;
+  
+  const { quality = 'list', format = 'webp', fit = 'cover' } = options || {};
+  const qualityValue = IMAGE_QUALITY_SETTINGS[quality];
+  
+  return {
+    mobile: getAssetUrlWithTransforms(id, {
+      ...COURSE_IMAGE_BREAKPOINTS.mobile,
+      quality: qualityValue,
+      format,
+      fit
+    }),
+    tablet: getAssetUrlWithTransforms(id, {
+      ...COURSE_IMAGE_BREAKPOINTS.tablet,
+      quality: qualityValue,
+      format,
+      fit
+    }),
+    desktop: getAssetUrlWithTransforms(id, {
+      ...COURSE_IMAGE_BREAKPOINTS.desktop,
+      quality: qualityValue,
+      format,
+      fit
+    }),
+    large: getAssetUrlWithTransforms(id, {
+      ...COURSE_IMAGE_BREAKPOINTS.large,
+      quality: qualityValue,
+      format,
+      fit
+    }),
+    // Default fallback URL (desktop size)
+    default: getAssetUrlWithTransforms(id, {
+      ...COURSE_IMAGE_BREAKPOINTS.desktop,
+      quality: qualityValue,
+      format,
+      fit
+    })
+  };
+}
+
+/**
+ * Generate a low-quality blur placeholder URL
+ */
+export function getCourseImageBlurPlaceholder(id: string | undefined | null): string {
+  if (!id) return '';
+  
+  return getAssetUrlWithTransforms(id, {
+    width: 40,
+    height: 23,  // Maintain 16:9 aspect ratio
+    quality: IMAGE_QUALITY_SETTINGS.placeholder,
+    format: 'jpg', // JPEG is better for very low quality images
+    fit: 'cover'
+  });
+}
+
+/**
+ * Generate optimized sizes string for course card grids
+ */
+export function getCourseCardSizes(): string {
+  return [
+    '(max-width: 640px) 100vw',      // Mobile: full width
+    '(max-width: 768px) 100vw',      // Small tablet: full width  
+    '(max-width: 1024px) 50vw',      // Tablet: 2-column grid
+    '(max-width: 1280px) 33vw',      // Desktop: 3-column grid
+    '(max-width: 1536px) 25vw',      // Large desktop: 4-column grid
+    '20vw'                           // Extra large: 5-column grid
+  ].join(', ');
+}
+
 export function filterTranslations<T extends DirectusCourseTranslation | DirectusCompetenceTranslation>(
   translations: T[] | undefined,
   locale: string

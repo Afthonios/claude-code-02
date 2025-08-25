@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useState, useRef, useEffect } from 'react';
-import { formatDuration, filterTranslations, getAssetUrlWithTransforms, getCourseUrl } from '@/lib/directus';
+import { formatDuration, filterTranslations, getOptimizedCourseImageUrls, getCourseImageBlurPlaceholder, getCourseCardSizes, getCourseUrl } from '@/lib/directus';
 import { getCourseGradientStyles, cn, type CourseGradientData } from '@/lib/utils';
 import BookmarkButton from './BookmarkButton';
 import FrenchText from '../ui/FrenchText';
@@ -14,6 +14,7 @@ interface CourseCardProps {
   course: DirectusCourse;
   locale: string;
   isWeeklyFreeCourse?: boolean;
+  priority?: boolean; // For above-the-fold images
 }
 
 // Comprehensive text cleaning function
@@ -30,7 +31,7 @@ const cleanDescription = (text: string | undefined): string => {
     .trim();
 };
 
-export default function CourseCard({ course, locale, isWeeklyFreeCourse = false }: CourseCardProps) {
+export default function CourseCard({ course, locale, isWeeklyFreeCourse = false, priority = false }: CourseCardProps) {
   const t = useTranslations('courses');
   const translation = filterTranslations(course.translations, locale);
   
@@ -97,20 +98,19 @@ export default function CourseCard({ course, locale, isWeeklyFreeCourse = false 
     return t('viewMicroCourse');
   };
 
-  // Get course image from Directus or use fallback
+  // Get optimized course image URLs (but still use direct Next.js Image component)
   const courseImage = course.course_image;
-  const imageUrl = courseImage 
-    ? getAssetUrlWithTransforms(
-        typeof courseImage === 'string' ? courseImage : courseImage?.id,
-        {
-          width: 400,
-          height: 225,
-          fit: 'cover',
-          quality: 80,
-          format: 'webp'
-        }
-      )
-    : '/images/course-placeholder.svg';
+  const imageId = typeof courseImage === 'string' ? courseImage : courseImage?.id;
+  
+  // Try the optimized version first
+  const optimizedImageUrls = getOptimizedCourseImageUrls(imageId, {
+    quality: isWeeklyFreeCourse ? 'hero' : 'list', 
+    format: 'webp'
+  });
+  
+  const blurDataURL = imageId ? getCourseImageBlurPlaceholder(imageId) : undefined;
+  const imageUrl = optimizedImageUrls?.default || '/images/course-placeholder.svg';
+  const courseSizes = getCourseCardSizes();
   
   const duration = course.duration ? formatDuration(course.duration, locale) : null;
 
@@ -166,8 +166,10 @@ export default function CourseCard({ course, locale, isWeeklyFreeCourse = false 
             src={imageUrl}
             alt={translation.title}
             fill
+            priority={priority}
+            sizes={courseSizes}
+            {...(blurDataURL && { placeholder: 'blur' as const, blurDataURL })}
             className="object-cover group-hover:scale-105 transition-transform duration-200"
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
           

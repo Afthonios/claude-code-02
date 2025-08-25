@@ -623,11 +623,12 @@ function CoursesPageClient({ locale, initialCourses, hasApiError = false }: Cour
               <>
                 {filteredCourses.length > 0 ? (
                   <div className="course-grid-safari">
-                    {filteredCourses.map((course) => (
+                    {filteredCourses.map((course, index) => (
                       <div key={course.id} className="course-card-container">
                         <CourseCard 
                           course={course} 
                           locale={locale} 
+                          priority={index < 8} // First 8 courses get priority loading
                           isWeeklyFreeCourse={weeklyFreeCourse?.id === course.id}
                         />
                       </div>
