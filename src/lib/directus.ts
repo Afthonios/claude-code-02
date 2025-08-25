@@ -103,7 +103,7 @@ export const coursesApi = {
         return {
           data: courses,
           success: true,
-          error: courses.length === 0 ? 'no_results' as const : undefined
+          ...(courses.length === 0 ? { error: 'no_results' as const } : {})
         };
       } catch (error) {
         console.error('🔍 [coursesApi] API call failed:', error);
@@ -162,7 +162,7 @@ export const coursesApi = {
       return {
         data: courses,
         success: true,
-        error: courses.length === 0 ? 'no_results' as const : undefined
+        ...(courses.length === 0 ? { error: 'no_results' as const } : {})
       };
     } catch (error) {
       console.error('🔍 [coursesApi] Directus SDK failed:', error);
@@ -509,7 +509,7 @@ export const freeWeeklyApi = {
         })
       );
 
-      if (response.length > 0) {
+      if (response.length > 0 && response[0]) {
         return response[0].course_id as DirectusCourse;
       }
 

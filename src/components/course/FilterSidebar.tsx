@@ -59,16 +59,7 @@ export default function FilterSidebar({
     onFiltersChange(newFilters);
   };
 
-  const clearAllFilters = () => {
-    onFiltersChange({
-      competences: [],
-      showBookmarked: false,
-      courseType: [],
-      hideCompleted: false,
-    });
-  };
-
-  const hasActiveFilters = filters.competences.length > 0 || filters.showBookmarked || filters.courseType.length > 0 || filters.hideCompleted;
+  // Remove unused variables - functionality is handled by parent component
 
   // Course type options with counts - use capitalized values to match Directus
   const courseTypeOptions = [

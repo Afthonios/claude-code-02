@@ -197,7 +197,7 @@ function CoursesPageClient({ locale, initialCourses, hasApiError = false }: Cour
     } finally {
       isLoadingCompetences.current = false;
     }
-  }, [locale]);
+  }, [locale, competenceOptions.length]);
 
   // Load competences only on locale change or initial load
   useEffect(() => {

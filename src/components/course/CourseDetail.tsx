@@ -33,13 +33,14 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
       }
     );
 
-    if (objectivesRef.current) {
-      observer.observe(objectivesRef.current);
+    const currentRef = objectivesRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => {
-      if (objectivesRef.current) {
-        observer.unobserve(objectivesRef.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
   }, []);

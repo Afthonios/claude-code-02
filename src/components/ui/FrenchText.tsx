@@ -1,11 +1,11 @@
-import { ReactNode, CSSProperties, forwardRef } from 'react';
+import { ReactNode, CSSProperties, forwardRef, ElementType } from 'react';
 import { fixFrenchPunctuation } from '../../utils/french-typography';
 
 interface FrenchTextProps {
   children: string | ReactNode;
   className?: string;
   style?: CSSProperties;
-  as?: keyof JSX.IntrinsicElements;
+  as?: ElementType;
 }
 
 /**
