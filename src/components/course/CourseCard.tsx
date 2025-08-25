@@ -175,7 +175,7 @@ export default function CourseCard({ course, locale, isWeeklyFreeCourse = false 
           {isWeeklyFreeCourse && (
             <div className="absolute top-2 left-2 z-10">
               <div className="bg-[#C2410C] text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
-                {locale === 'fr' ? 'Cours gratuit de la semaine' : 'Free Course of the Week'}
+                {locale === 'fr' ? 'Gratuit cette semaine' : 'Free this Week'}
               </div>
             </div>
           )}

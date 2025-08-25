@@ -47,12 +47,15 @@ export async function GET(request: NextRequest) {
 
       const data = await response.json();
 
-      // Return the data with CORS headers
+      // Return the data with CORS headers and caching
       return NextResponse.json(data, {
         headers: {
           'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production' ? 'https://afthonios.com' : '*',
           'Access-Control-Allow-Methods': 'GET, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type',
+          // Add cache headers for better performance
+          'Cache-Control': 'public, max-age=300, stale-while-revalidate=600', // Cache 5 minutes, stale for 10 minutes
+          'CDN-Cache-Control': 'public, max-age=300',
         },
       });
     } catch (fetchError) {

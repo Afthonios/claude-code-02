@@ -28,70 +28,10 @@ export const coursesApi = {
   }): Promise<ApiResult<DirectusCourse>> {
     const { limit = 1000, page = 1, search, filter, sort } = options || {};
     
-    const query: Record<string, unknown> = {
-      fields: [
-        'id',
-        'legacy_id',
-        'status',
-        'sort',
-        'date_created',
-        'date_updated',
-        'duration',
-        'course_type',
-        'course_image',
-        'gradient_from_light',
-        'gradient_to_light',
-        'gradient_from_dark',
-        'gradient_to_dark',
-        'on_light',
-        'on_dark',
-        'translations.*',
-        // Try both new and legacy competence fields with parent relationship
-        'main_competences.competences_id.*',
-        'competence.competences_id.id',
-        'competence.competences_id.parent_competence',
-      ],
-      limit,
-      page,
-      filter: {
-        status: { _eq: 'published' },
-        ...filter,
-      },
-    };
-
-    if (search) {
-      query.search = search;
-    }
-
-    if (sort) {
-      query.sort = sort;
-    }
-
-
-    try {
-      // On client side, skip SDK and go directly to API route to avoid CORS issues
-      if (typeof window !== 'undefined') {
-        // Skip SDK and fall through to the catch block to use API route
-        throw new Error('CLIENT_SIDE_FALLBACK');
-      }
-      
-      const response = await directus.request(
-        readItems('courses', query)
-      );
-      const courses = response as DirectusCourse[];
-      return {
-        data: courses,
-        success: true,
-        error: courses.length === 0 ? 'no_results' : undefined
-      };
-    } catch (error) {
-      // Only log non-client-side fallback errors to avoid console noise
-      if (error instanceof Error && error.message !== 'CLIENT_SIDE_FALLBACK') {
-        console.error('🔍 [coursesApi] Directus SDK failed. Error:', error);
-      }
-      // Fallback to our Next.js API route to avoid CORS issues
+    // On client side, use Next.js API route exclusively
+    if (typeof window !== 'undefined') {
       try {
-        const url = new URL('/api/courses', typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+        const url = new URL('/api/courses', window.location.origin);
         
         // Add parameters that will be forwarded to Directus
         url.searchParams.set('fields', 'id,legacy_id,status,duration,course_type,course_image,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*,main_competences.competences_id.*,competence.competences_id.id,competence.competences_id.parent_competence');
@@ -118,7 +58,6 @@ export const coursesApi = {
                     if (idFilter._in && Array.isArray(idFilter._in)) {
                       // Set the properly nested filter parameter for competences
                       url.searchParams.set(`${filterKey}[competences_id][id][_in]`, idFilter._in.join(','));
-                      console.log('🔍 [directus.ts] Setting competence filter:', `${filterKey}[competences_id][id][_in]`, '=', idFilter._in.join(','));
                       return;
                     }
                   }
@@ -135,12 +74,10 @@ export const coursesApi = {
                 } else {
                   url.searchParams.set(filterKey, String(value));
                 }
-                console.log('🔍 [directus.ts] Setting filter parameter:', filterKey, '=', Array.isArray(value) ? value.join(',') : String(value));
               }
             });
           };
           
-          console.log('🔍 [directus.ts] Flattening filter object:', JSON.stringify(filter, null, 2));
           flattenFilter(filter);
         }
         
@@ -152,28 +89,88 @@ export const coursesApi = {
           url.searchParams.set('sort', sort.join(','));
         }
 
-        const fetchResponse = await fetch(url.toString());
-        if (!fetchResponse.ok) {
-          console.error('🔍 [coursesApi] Fallback fetch failed with status:', fetchResponse.status);
-          throw new Error(`HTTP ${fetchResponse.status}: ${fetchResponse.statusText}`);
+        const response = await fetch(url.toString(), {
+          // Add caching for GET requests
+          next: { revalidate: 300 } // Cache for 5 minutes
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
-        const data = await fetchResponse.json();
+        const data = await response.json();
         const courses = data.data as DirectusCourse[];
         return {
           data: courses,
           success: true,
-          error: courses.length === 0 ? 'no_results' : undefined
+          error: courses.length === 0 ? 'no_results' as const : undefined
         };
-      } catch (fallbackError) {
-        console.error('🔍 [coursesApi] All attempts failed:', fallbackError);
-        // Return API failure result to indicate service unavailability
+      } catch (error) {
+        console.error('🔍 [coursesApi] API call failed:', error);
         return {
           data: [],
           success: false,
           error: 'api_failure'
         };
       }
+    }
+
+    // Server-side: Use Directus SDK directly
+    const query: Record<string, unknown> = {
+      fields: [
+        'id',
+        'legacy_id',
+        'status',
+        'sort',
+        'date_created',
+        'date_updated',
+        'duration',
+        'course_type',
+        'course_image',
+        'gradient_from_light',
+        'gradient_to_light',
+        'gradient_from_dark',
+        'gradient_to_dark',
+        'on_light',
+        'on_dark',
+        'translations.*',
+        'main_competences.competences_id.*',
+        'competence.competences_id.id',
+        'competence.competences_id.parent_competence',
+      ],
+      limit,
+      page,
+      filter: {
+        status: { _eq: 'published' },
+        ...filter,
+      },
+    };
+
+    if (search) {
+      query.search = search;
+    }
+
+    if (sort) {
+      query.sort = sort;
+    }
+
+    try {
+      const response = await directus.request(
+        readItems('courses', query)
+      );
+      const courses = response as DirectusCourse[];
+      return {
+        data: courses,
+        success: true,
+        error: courses.length === 0 ? 'no_results' as const : undefined
+      };
+    } catch (error) {
+      console.error('🔍 [coursesApi] Directus SDK failed:', error);
+      return {
+        data: [],
+        success: false,
+        error: 'api_failure'
+      };
     }
   },
 
@@ -315,13 +312,34 @@ export const coursesApi = {
 
 export const competencesApi = {
   async getAll() {
-    try {
-      // On client side, skip SDK and go directly to API route to avoid CORS issues
-      if (typeof window !== 'undefined') {
-        // Skip SDK and fall through to the catch block to use API route
-        throw new Error('CLIENT_SIDE_FALLBACK');
+    // On client side, use Next.js API route exclusively
+    if (typeof window !== 'undefined') {
+      try {
+        const url = new URL('/api/competences', window.location.origin);
+        url.searchParams.set('fields', 'id,icon,color_light,color_dark,competence_type,translations.*');
+        url.searchParams.set('filter[competence_type][_eq]', 'main_competence');
+        url.searchParams.set('filter[parent_competence][_null]', 'true');
+
+        const response = await fetch(url.toString(), {
+          // Add caching for GET requests
+          next: { revalidate: 600 } // Cache for 10 minutes (competences change less frequently)
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        return data.data as DirectusCompetence[];
+      } catch (error) {
+        console.error('🔍 [competencesApi] API call failed:', error);
+        // Return empty array as fallback
+        return [];
       }
-      
+    }
+
+    // Server-side: Use Directus SDK directly
+    try {
       const response = await directus.request(
         readItems('competences', {
           fields: [
@@ -341,30 +359,8 @@ export const competencesApi = {
 
       return response as DirectusCompetence[];
     } catch (error) {
-      // Only log non-client-side fallback errors to avoid console noise
-      if (error instanceof Error && error.message !== 'CLIENT_SIDE_FALLBACK') {
-        console.error('🔍 [competencesApi] Directus SDK failed. Error:', error);
-      }
-      // Try API route fallback to avoid CORS issues
-      try {
-        const url = new URL('/api/competences', typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
-        url.searchParams.set('fields', 'id,icon,color_light,color_dark,competence_type,translations.*');
-        url.searchParams.set('filter[competence_type][_eq]', 'main_competence');
-        url.searchParams.set('filter[parent_competence][_null]', 'true');
-
-        const fetchResponse = await fetch(url.toString());
-        if (!fetchResponse.ok) {
-          console.error('🔍 [competencesApi] Fallback fetch failed with status:', fetchResponse.status);
-          throw new Error(`HTTP ${fetchResponse.status}: ${fetchResponse.statusText}`);
-        }
-        
-        const data = await fetchResponse.json();
-        return data.data as DirectusCompetence[];
-      } catch (fallbackError) {
-        console.error('🔍 [competencesApi] All attempts failed:', fallbackError);
-        // Return empty array as final fallback
-        return [];
-      }
+      console.error('🔍 [competencesApi] Directus SDK failed:', error);
+      return [];
     }
   },
 
@@ -453,13 +449,33 @@ export const pagesApi = {
 
 export const freeWeeklyApi = {
   async getCurrentWeekCourse(): Promise<DirectusCourse | null> {
+    // On client side, use Next.js API route exclusively
+    if (typeof window !== 'undefined') {
+      try {
+        const response = await fetch('/api/free-weekly', {
+          // Add caching for GET requests
+          next: { revalidate: 1800 } // Cache for 30 minutes (changes weekly)
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        if (data.data) {
+          return data.data as DirectusCourse;
+        }
+
+        return null;
+      } catch (error) {
+        console.error('🔍 [freeWeeklyApi] API call failed:', error);
+        return null;
+      }
+    }
+
+    // Server-side: Use Directus SDK directly
     try {
       const now = new Date();
-      
-      // On client side, use fetch to avoid CORS issues
-      if (typeof window !== 'undefined') {
-        throw new Error('CLIENT_SIDE_FALLBACK');
-      }
       
       const response = await directus.request(
         readItems('free_weekly', {
@@ -499,31 +515,8 @@ export const freeWeeklyApi = {
 
       return null;
     } catch (error) {
-      // Only log non-client-side fallback errors
-      if (error instanceof Error && error.message !== 'CLIENT_SIDE_FALLBACK') {
-        console.error('🔍 [freeWeeklyApi] Directus SDK failed. Error:', error);
-      }
-      
-      // Fallback to our Next.js API route
-      try {
-        const url = new URL('/api/free-weekly', typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
-        
-        const fetchResponse = await fetch(url.toString());
-        if (!fetchResponse.ok) {
-          console.error('🔍 [freeWeeklyApi] API route failed with status:', fetchResponse.status);
-          return null;
-        }
-        
-        const data = await fetchResponse.json();
-        if (data.data) {
-          return data.data as DirectusCourse;
-        }
-
-        return null;
-      } catch (fallbackError) {
-        console.error('🔍 [freeWeeklyApi] All attempts failed:', fallbackError);
-        return null;
-      }
+      console.error('🔍 [freeWeeklyApi] Directus SDK failed:', error);
+      return null;
     }
   },
 

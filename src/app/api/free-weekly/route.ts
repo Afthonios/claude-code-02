@@ -25,10 +25,22 @@ export async function GET() {
     console.log('🔍 [API Route] Free weekly course fetched successfully. Found:', data.data?.length || 0, 'records');
     
     if (data.data && data.data.length > 0) {
-      return NextResponse.json({ data: data.data[0].course_id });
+      return NextResponse.json({ data: data.data[0].course_id }, {
+        headers: {
+          // Weekly course changes weekly, so cache longer
+          'Cache-Control': 'public, max-age=1800, stale-while-revalidate=3600', // Cache 30 minutes, stale for 1 hour
+          'CDN-Cache-Control': 'public, max-age=1800',
+        },
+      });
     }
 
-    return NextResponse.json({ data: null });
+    return NextResponse.json({ data: null }, {
+      headers: {
+        // Cache "no course" responses for shorter time
+        'Cache-Control': 'public, max-age=300, stale-while-revalidate=600', // Cache 5 minutes, stale for 10 minutes
+        'CDN-Cache-Control': 'public, max-age=300',
+      },
+    });
   } catch (error) {
     console.error('🔍 [API Route] Error fetching free weekly course:', error);
     return NextResponse.json({ data: null, error: 'Internal server error' }, { status: 500 });
