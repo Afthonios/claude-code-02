@@ -130,12 +130,20 @@ export default function ActiveFilters({
       <div className="flex flex-wrap gap-2">
         {/* Search query tag */}
         {searchQuery && (
-          <div className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
+          <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm border-2 transition-all duration-200 ${
+            resolvedTheme === 'dark' 
+              ? 'bg-blue-800 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-500'
+              : 'bg-blue-100 hover:bg-blue-200 text-blue-800 border-blue-200 hover:border-blue-300'
+          }`}>
             <span className="mr-1">Search:</span>
             <span className="font-medium">&quot;{searchQuery}&quot;</span>
             <button
               onClick={onSearchClear}
-              className="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+              className={`ml-2 transition-colors ${
+                resolvedTheme === 'dark'
+                  ? 'text-white hover:text-blue-100'
+                  : 'text-blue-600 hover:text-blue-800'
+              }`}
               aria-label="Clear search"
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,12 +159,21 @@ export default function ActiveFilters({
           
           // Helper function to determine if a color is light or dark for text contrast
           const getTextColor = (hexColor: string) => {
+            // In dark mode, prioritize white text for better visibility
+            if (isDarkMode) {
+              return '#ffffff'; // Always use white text in dark mode for colored badges
+            }
+            
+            // In light mode, calculate brightness for contrast
             const hex = hexColor.replace('#', '');
             const r = parseInt(hex.substr(0, 2), 16);
             const g = parseInt(hex.substr(2, 2), 16);
             const b = parseInt(hex.substr(4, 2), 16);
-            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-            return luminance > 0.5 ? '#1f2937' : '#ffffff'; // dark text for light colors, white for dark
+            
+            // Simple brightness calculation
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            
+            return brightness > 128 ? '#1f2937' : '#ffffff';
           };
           
           const lightColor = hasColor && item.color.light ? item.color.light : null;
@@ -166,21 +183,35 @@ export default function ActiveFilters({
           const isDarkMode = resolvedTheme === 'dark';
           const currentColor = hasColor ? (isDarkMode && darkColor ? darkColor : lightColor) : null;
           
+          // Get conditional classes for non-colored badges
+          const getConditionalClasses = () => {
+            if (currentColor) {
+              return ''; // No default classes when we have colors
+            }
+            
+            if (isDarkMode) {
+              return 'bg-gray-800 hover:bg-gray-700 text-white border-gray-600 hover:border-gray-500';
+            } else {
+              return 'bg-gray-100 hover:bg-gray-200 text-gray-800 border-gray-300 hover:border-gray-400';
+            }
+          };
+          
           const colorStyle = currentColor ? {
             borderColor: currentColor,
-            backgroundColor: `${currentColor}15`, // 15% opacity background
+            backgroundColor: `${currentColor}${isDarkMode ? '30' : '15'}`, // Much higher opacity in dark mode for better visibility
             color: getTextColor(currentColor),
+            textShadow: isDarkMode ? '0 1px 2px rgba(0, 0, 0, 0.5)' : 'none', // Add text shadow in dark mode for better readability
           } : {};
           
           return (
             <div
               key={`${item.type}-${item.value}-${index}`}
-              className={`inline-flex items-center px-3 py-1 rounded-full text-sm border-2 ${
-                currentColor
-                  ? '' // No default classes when we have colors
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600'
-              }`}
-              style={currentColor ? colorStyle : {}}
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm border-2 transition-all duration-200 ${getConditionalClasses()}`}
+              style={currentColor ? {
+                borderColor: colorStyle.borderColor,
+                backgroundColor: colorStyle.backgroundColor,
+                textShadow: colorStyle.textShadow,
+              } : {}}
             >
               {currentColor && (
                 <div 
@@ -188,7 +219,12 @@ export default function ActiveFilters({
                   style={{ backgroundColor: currentColor }}
                 />
               )}
-              <span className="font-medium">{item.label}</span>
+              <span 
+                className="font-medium"
+                style={currentColor ? { color: getTextColor(currentColor) } : {}}
+              >
+                {item.label}
+              </span>
               <button
                 onClick={() => {
                   // For boolean filters, we pass a special value to indicate toggling off
@@ -198,9 +234,9 @@ export default function ActiveFilters({
                     onFilterRemove(item.type, item.value);
                   }
                 }}
-                className="ml-2 opacity-70 hover:opacity-100 transition-opacity"
+                className="ml-2 opacity-70 hover:opacity-100 transition-all duration-200 hover:scale-110"
                 aria-label={`Remove ${item.typeLabel} filter`}
-                style={{ color: currentColor ? 'currentColor' : undefined }}
+                style={{ color: currentColor ? getTextColor(currentColor) : undefined }}
               >
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
