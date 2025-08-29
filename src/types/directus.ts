@@ -30,6 +30,7 @@ export interface DirectusCourse extends DirectusItem {
   tags?: string;
   price_cents: number;
   currency: string;
+  quote_author?: string;
   // Gradient background fields
   gradient_from_light?: string;
   gradient_to_light?: string;
@@ -69,7 +70,6 @@ export interface DirectusCourseTranslation {
   plan_md?: string;
   public?: string;
   quote?: string;
-  quote_author?: string;
   long_description?: string;
 }
 

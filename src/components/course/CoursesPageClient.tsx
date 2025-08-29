@@ -462,16 +462,65 @@ function CoursesPageClient({ locale, initialCourses, hasApiError = false }: Cour
 
     // Add weekly free course at position 1 if conditions are met
     if (weeklyFreeCourse && 
-        !search.trim() && 
         !filtered.find(course => course.id === weeklyFreeCourse.id) &&
-        !filters.showBookmarked && 
-        (filters.courseType.length === 0 || filters.courseType.includes(weeklyFreeCourse.course_type || ''))) {
+        !filters.showBookmarked) {
       
-      filtered = [weeklyFreeCourse, ...filtered];
+      let shouldShowWeeklyCourse = false;
+      
+      // Show weekly course first when:
+      // 1. No filters applied at all
+      // 2. Only "Formation" course type filter is applied (all weekly courses are formations)
+      // 3. Any competence filter matches the weekly course's competences
+      
+      const hasNoFilters = filters.courseType.length === 0 && 
+                          filters.competences.length === 0;
+      
+      const hasOnlyFormationFilter = filters.courseType.length === 1 && 
+                                   filters.courseType.includes('Formation') && 
+                                   filters.competences.length === 0;
+      
+      const hasMatchingCompetenceFilter = filters.competences.length > 0 && 
+        (() => {
+          const courseCompetences = weeklyFreeCourse.main_competences || weeklyFreeCourse.competence || [];
+          return courseCompetences.some((comp: unknown) => {
+            if (comp && typeof comp === 'object' && 'competences_id' in comp) {
+              const typedComp = comp as { 
+                competences_id?: { 
+                  id?: string | number;
+                  parent_competence?: string | number | null;
+                } 
+              };
+              
+              if (typedComp.competences_id && typeof typedComp.competences_id === 'object') {
+                let competenceId: string | null = null;
+                
+                if (weeklyFreeCourse.main_competences) {
+                  competenceId = String(typedComp.competences_id.id);
+                } else {
+                  // Legacy competence field logic
+                  if (typedComp.competences_id.parent_competence) {
+                    competenceId = String(typedComp.competences_id.parent_competence);
+                  } else if (typedComp.competences_id.parent_competence === null && typedComp.competences_id.id) {
+                    competenceId = String(typedComp.competences_id.id);
+                  }
+                }
+                
+                return competenceId && filters.competences.includes(competenceId);
+              }
+            }
+            return false;
+          });
+        })();
+      
+      shouldShowWeeklyCourse = hasNoFilters || hasOnlyFormationFilter || hasMatchingCompetenceFilter;
+      
+      if (shouldShowWeeklyCourse) {
+        filtered = [weeklyFreeCourse, ...filtered];
+      }
     }
     
     return filtered;
-  }, [courses, filters.showBookmarked, filters.courseType, weeklyFreeCourse, search]);
+  }, [courses, filters.showBookmarked, filters.courseType, filters.competences, weeklyFreeCourse]);
 
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] dark:bg-gray-900">

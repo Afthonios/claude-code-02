@@ -143,7 +143,8 @@
       "title": "Service temporarily unavailable",
       "message": "We're having trouble loading courses. Please try again in a few moments.",
       "retry": "Retry"
-    }
+    },
+    "viewAll": "View all courses"
   },
   "theme": {
     "light": "Light",

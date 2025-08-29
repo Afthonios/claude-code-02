@@ -34,7 +34,7 @@ export const coursesApi = {
         const url = new URL('/api/courses', window.location.origin);
         
         // Add parameters that will be forwarded to Directus
-        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_type,course_image,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*,main_competences.competences_id.*,competence.competences_id.id,competence.competences_id.parent_competence');
+        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_type,course_image,quote_author,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*,main_competences.competences_id.*,competence.competences_id.id,competence.competences_id.parent_competence');
         url.searchParams.set('filter[status][_eq]', 'published');
         url.searchParams.set('limit', limit.toString());
         url.searchParams.set('page', page.toString());
@@ -127,6 +127,7 @@ export const coursesApi = {
         'duration',
         'course_type',
         'course_image',
+        'quote_author',
         'gradient_from_light',
         'gradient_to_light',
         'gradient_from_dark',
@@ -187,6 +188,7 @@ export const coursesApi = {
             'date_updated',
             'duration',
             'course_image',
+            'quote_author',
             'gradient_from_light',
             'gradient_to_light',
             'gradient_from_dark',
@@ -221,7 +223,7 @@ export const coursesApi = {
         
         // Search by translation slug
         const url = new URL(`${baseUrl}/items/courses`);
-        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_image,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*,main_competences.competences_id.id,main_competences.competences_id.color_light,main_competences.competences_id.color_dark,main_competences.competences_id.translations.*');
+        url.searchParams.set('fields', 'id,legacy_id,status,duration,course_image,quote_author,gradient_from_light,gradient_to_light,gradient_from_dark,gradient_to_dark,on_light,on_dark,translations.*,main_competences.competences_id.id,main_competences.competences_id.color_light,main_competences.competences_id.color_dark,main_competences.competences_id.translations.*');
         url.searchParams.set('filter[status][_eq]', 'published');
         url.searchParams.set('filter[translations][slug][_eq]', slug);
 
@@ -250,6 +252,7 @@ export const coursesApi = {
             'date_updated',
             'duration',
             'course_image',
+            'quote_author',
             'gradient_from_light',
             'gradient_to_light',
             'gradient_from_dark',
@@ -282,6 +285,7 @@ export const coursesApi = {
             'status',
             'duration',
             'course_image',
+            'quote_author',
             'gradient_from_light',
             'gradient_to_light',
             'gradient_from_dark',
@@ -488,6 +492,7 @@ export const freeWeeklyApi = {
             'course_id.status',
             'course_id.duration',
             'course_id.course_image',
+            'course_id.quote_author',
             'course_id.gradient_from_light',
             'course_id.gradient_to_light',
             'course_id.gradient_from_dark',

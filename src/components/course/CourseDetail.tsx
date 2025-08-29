@@ -288,9 +288,9 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
             {translation.quote}
             <span className="text-3xl text-blue-500 dark:text-blue-400 leading-none">&rdquo;</span>
           </blockquote>
-          {translation.quote_author && (
+          {course.quote_author && (
             <cite className="block mt-4 text-right text-base font-medium text-gray-600 dark:text-gray-400 not-italic">
-              &mdash; {translation.quote_author}
+              &mdash; {course.quote_author}
             </cite>
           )}
         </div>
