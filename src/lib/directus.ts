@@ -505,6 +505,8 @@ export const freeWeeklyApi = {
             'course_id.main_competences.competences_id.color_light',
             'course_id.main_competences.competences_id.color_dark',
             'course_id.main_competences.competences_id.translations.*',
+            'course_id.competence.competences_id.id',
+            'course_id.competence.competences_id.parent_competence',
           ],
           filter: {
             status: { _eq: 'published' },

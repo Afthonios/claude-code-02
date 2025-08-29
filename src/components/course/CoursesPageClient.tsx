@@ -204,7 +204,7 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
         array.findIndex(c => c.value === competence.value) === index
       );
       
-      console.log('📊 [CoursesPageClient] Setting main competences from Directus:', uniqueCompetences);
+      console.log('📊 [CoursesPageClient] Setting main competences from Directus for locale', locale, ':', uniqueCompetences.length, 'competences');
       setCompetenceOptions(uniqueCompetences);
       lastLoadedLocale.current = locale;
     } catch (error) {
