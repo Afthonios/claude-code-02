@@ -76,16 +76,17 @@ function getMain8CompetencesFallback(locale: string) {
 interface CoursesPageClientProps {
   locale: string;
   initialCourses: DirectusCourse[];
+  initialWeeklyFreeCourse?: DirectusCourse | null;
   hasApiError?: boolean;
 }
 
-function CoursesPageClient({ locale, initialCourses, hasApiError = false }: CoursesPageClientProps) {
+function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, hasApiError = false }: CoursesPageClientProps) {
   const t = useTranslations('courses');
   
   // TODO: Replace with actual user authentication check
   const isPaidUser = false; // This should be determined from user session/auth
   const [courses, setCourses] = useState<DirectusCourse[]>(initialCourses);
-  const [weeklyFreeCourse, setWeeklyFreeCourse] = useState<DirectusCourse | null>(null);
+  const [weeklyFreeCourse, setWeeklyFreeCourse] = useState<DirectusCourse | null>(initialWeeklyFreeCourse || null);
   const [competenceOptions, setCompetenceOptions] = useState<Array<{ value: string; label: string; title?: string; colorLight?: string; colorDark?: string }>>([]);
   
   // Remove unused memoized competence options
@@ -101,20 +102,36 @@ function CoursesPageClient({ locale, initialCourses, hasApiError = false }: Cour
   const isLoadingCompetences = useRef<boolean>(false);
   const lastLoadedLocale = useRef<string>('');
 
-  // Load free weekly course
+  // Load free weekly course (only if not provided via SSR)
   useEffect(() => {
+    // Skip client-side fetch if we already have the weekly course from SSR
+    if (initialWeeklyFreeCourse !== undefined) {
+      console.log('🎯 [Weekly Course] Using SSR weekly course:', initialWeeklyFreeCourse ? {
+        id: initialWeeklyFreeCourse.id,
+        title: initialWeeklyFreeCourse.translations?.[0]?.title,
+        course_type: initialWeeklyFreeCourse.course_type
+      } : null);
+      return;
+    }
+    
     const loadWeeklyCourse = async () => {
+      console.log('🎯 [Weekly Course] Starting to load weekly course via client...');
       try {
         const course = await freeWeeklyApi.getCurrentWeekCourse();
+        console.log('🎯 [Weekly Course] Loaded course:', course ? {
+          id: course.id,
+          title: course.translations?.[0]?.title,
+          course_type: course.course_type
+        } : 'null');
         setWeeklyFreeCourse(course);
       } catch (error) {
-        console.error('Error loading weekly free course:', error);
+        console.error('🎯 [Weekly Course] Error loading weekly free course:', error);
         setWeeklyFreeCourse(null);
       }
     };
 
     loadWeeklyCourse();
-  }, []);
+  }, [initialWeeklyFreeCourse]);
   
   
   const {
@@ -460,71 +477,133 @@ function CoursesPageClient({ locale, initialCourses, hasApiError = false }: Cour
       filtered = filtered.filter(course => bookmarks.includes(course.id));
     }
 
-    // Add weekly free course at position 1 if conditions are met
-    if (weeklyFreeCourse && 
-        !filtered.find(course => course.id === weeklyFreeCourse.id) &&
-        !filters.showBookmarked) {
+    // Add or move weekly free course to position 1 - more permissive logic
+    if (weeklyFreeCourse && !filters.showBookmarked) {
+      
+      // Check if weekly course is already in the results
+      const existingWeeklyCourseIndex = filtered.findIndex(course => course.id === weeklyFreeCourse.id);
       
       let shouldShowWeeklyCourse = false;
       
-      // Show weekly course first when:
-      // 1. No filters applied at all
-      // 2. Only "Formation" course type filter is applied (all weekly courses are formations)
-      // 3. Any competence filter matches the weekly course's competences
+      console.log('🎯 [Weekly Course Debug] Evaluating weekly course display conditions');
+      console.log('🎯 Weekly course:', {
+        id: weeklyFreeCourse.id,
+        title: weeklyFreeCourse.translations?.[0]?.title,
+        course_type: weeklyFreeCourse.course_type,
+        hasMainCompetences: !!weeklyFreeCourse.main_competences?.length,
+        hasLegacyCompetences: !!weeklyFreeCourse.competence?.length
+      });
+      console.log('🎯 Current filters:', {
+        courseType: filters.courseType,
+        competences: filters.competences,
+        hideCompleted: filters.hideCompleted
+      });
+      console.log('🎯 Filtered courses before weekly positioning:', filtered.length);
+      console.log('🎯 Weekly course position in results:', existingWeeklyCourseIndex);
       
+      // More permissive conditions: Show weekly course unless explicitly filtered out
       const hasNoFilters = filters.courseType.length === 0 && 
                           filters.competences.length === 0;
       
-      const hasOnlyFormationFilter = filters.courseType.length === 1 && 
-                                   filters.courseType.includes('Formation') && 
-                                   filters.competences.length === 0;
-      
-      const hasMatchingCompetenceFilter = filters.competences.length > 0 && 
-        (() => {
-          const courseCompetences = weeklyFreeCourse.main_competences || weeklyFreeCourse.competence || [];
-          return courseCompetences.some((comp: unknown) => {
-            if (comp && typeof comp === 'object' && 'competences_id' in comp) {
-              const typedComp = comp as { 
-                competences_id?: { 
-                  id?: string | number;
-                  parent_competence?: string | number | null;
-                } 
-              };
+      // Show if no filters are applied
+      if (hasNoFilters) {
+        shouldShowWeeklyCourse = true;
+        console.log('🎯 Weekly course shown: No filters applied');
+      }
+      // Show if only Formation filter is applied (weekly courses are typically formations)
+      else if (filters.courseType.length === 1 && 
+               filters.courseType.includes('Formation') && 
+               filters.competences.length === 0) {
+        shouldShowWeeklyCourse = true;
+        console.log('🎯 Weekly course shown: Formation filter only');
+      }
+      // Show if only Parcours filter is applied and weekly course is a Parcours
+      else if (filters.courseType.length === 1 && 
+               filters.courseType.includes('Parcours') && 
+               filters.competences.length === 0 &&
+               weeklyFreeCourse.course_type === 'Parcours') {
+        shouldShowWeeklyCourse = true;
+        console.log('🎯 Weekly course shown: Parcours filter matches');
+      }
+      // Show if course type filter includes the weekly course type
+      else if (filters.courseType.length > 0 && 
+               filters.competences.length === 0 &&
+               filters.courseType.includes(weeklyFreeCourse.course_type || '')) {
+        shouldShowWeeklyCourse = true;
+        console.log('🎯 Weekly course shown: Course type filter matches');
+      }
+      // Show if any competence filter matches the weekly course's competences
+      else if (filters.competences.length > 0) {
+        const courseCompetences = weeklyFreeCourse.main_competences || weeklyFreeCourse.competence || [];
+        const matchesCompetence = courseCompetences.some((comp: unknown) => {
+          if (comp && typeof comp === 'object' && 'competences_id' in comp) {
+            const typedComp = comp as { 
+              competences_id?: { 
+                id?: string | number;
+                parent_competence?: string | number | null;
+              } 
+            };
+            
+            if (typedComp.competences_id && typeof typedComp.competences_id === 'object') {
+              let competenceId: string | null = null;
               
-              if (typedComp.competences_id && typeof typedComp.competences_id === 'object') {
-                let competenceId: string | null = null;
-                
-                if (weeklyFreeCourse.main_competences) {
+              if (weeklyFreeCourse.main_competences) {
+                competenceId = String(typedComp.competences_id.id);
+              } else {
+                // Legacy competence field logic
+                if (typedComp.competences_id.parent_competence) {
+                  competenceId = String(typedComp.competences_id.parent_competence);
+                } else if (typedComp.competences_id.parent_competence === null && typedComp.competences_id.id) {
                   competenceId = String(typedComp.competences_id.id);
-                } else {
-                  // Legacy competence field logic
-                  if (typedComp.competences_id.parent_competence) {
-                    competenceId = String(typedComp.competences_id.parent_competence);
-                  } else if (typedComp.competences_id.parent_competence === null && typedComp.competences_id.id) {
-                    competenceId = String(typedComp.competences_id.id);
-                  }
                 }
-                
-                return competenceId && filters.competences.includes(competenceId);
               }
+              
+              return competenceId && filters.competences.includes(competenceId);
             }
-            return false;
-          });
-        })();
-      
-      shouldShowWeeklyCourse = hasNoFilters || hasOnlyFormationFilter || hasMatchingCompetenceFilter;
+          }
+          return false;
+        });
+        
+        // Only require competence match if course type filter is also satisfied (or not set)
+        const courseTypeMatches = filters.courseType.length === 0 || 
+                                filters.courseType.includes(weeklyFreeCourse.course_type || '');
+        
+        shouldShowWeeklyCourse = matchesCompetence && courseTypeMatches;
+        console.log('🎯 Weekly course competence check:', { matchesCompetence, courseTypeMatches, shouldShow: shouldShowWeeklyCourse });
+      }
       
       if (shouldShowWeeklyCourse) {
-        filtered = [weeklyFreeCourse, ...filtered];
+        if (existingWeeklyCourseIndex === -1) {
+          // Weekly course not in results, add it at position 1
+          filtered = [weeklyFreeCourse, ...filtered];
+          console.log('🎯 Weekly course added at position 1');
+        } else if (existingWeeklyCourseIndex !== 0) {
+          // Weekly course is in results but not at position 1, move it there
+          const coursesToReorder = [...filtered];
+          const [weeklyCourse] = coursesToReorder.splice(existingWeeklyCourseIndex, 1);
+          if (weeklyCourse) {
+            filtered = [weeklyCourse, ...coursesToReorder];
+            console.log('🎯 Weekly course moved from position', existingWeeklyCourseIndex, 'to position 1');
+          }
+        } else {
+          console.log('🎯 Weekly course already at position 1');
+        }
+      } else {
+        console.log('🎯 Weekly course NOT shown due to current filter combination');
       }
+    } else if (weeklyFreeCourse) {
+      console.log('🎯 Weekly course skipped:', {
+        showingBookmarks: filters.showBookmarked
+      });
     }
     
     return filtered;
-  }, [courses, filters.showBookmarked, filters.courseType, filters.competences, weeklyFreeCourse]);
+  }, [courses, filters.showBookmarked, filters.courseType, filters.competences, filters.hideCompleted, weeklyFreeCourse]);
 
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] dark:bg-gray-900">
       <div className="container py-8">
+        
         
         {/* Header */}
         <div className="mb-8">

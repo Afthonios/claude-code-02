@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 
-import { coursesApi } from '@/lib/directus';
+import { coursesApi, freeWeeklyApi } from '@/lib/directus';
 import CoursesPageClient from '@/components/course/CoursesPageClient';
 
 type Props = {
@@ -23,18 +23,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 async function CoursesContent({ locale }: { locale: string }) {
   
   try {
-    // Load initial courses for SSR
-    const result = await coursesApi.getAll({ limit: 1000 });
+    // Load both initial courses and weekly course for SSR
+    const [coursesResult, weeklyFreeCourse] = await Promise.all([
+      coursesApi.getAll({ limit: 1000 }),
+      freeWeeklyApi.getCurrentWeekCourse()
+    ]);
+    
+    console.log('🎯 [SSR] Weekly course fetched:', weeklyFreeCourse ? {
+      id: weeklyFreeCourse.id,
+      title: weeklyFreeCourse.translations?.[0]?.title,
+      course_type: weeklyFreeCourse.course_type
+    } : null);
     
     return (
       <CoursesPageClient 
         locale={locale} 
-        initialCourses={result.data} 
-        hasApiError={!result.success && result.error === 'api_failure'}
+        initialCourses={coursesResult.data} 
+        initialWeeklyFreeCourse={weeklyFreeCourse}
+        hasApiError={!coursesResult.success && coursesResult.error === 'api_failure'}
       />
     );
   } catch (error) {
-    console.error('❌ [CoursesPage] Error loading initial courses:', error);
+    console.error('❌ [CoursesPage] Error loading initial data:', error);
     return <CoursesPageClient locale={locale} initialCourses={[]} hasApiError={true} />;
   }
 }

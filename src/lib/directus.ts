@@ -491,6 +491,7 @@ export const freeWeeklyApi = {
             'course_id.legacy_id',
             'course_id.status',
             'course_id.duration',
+            'course_id.course_type',
             'course_id.course_image',
             'course_id.quote_author',
             'course_id.gradient_from_light',

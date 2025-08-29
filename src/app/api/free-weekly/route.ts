@@ -6,7 +6,7 @@ export async function GET() {
     const now = new Date();
     
     const url = new URL(`${baseUrl}/items/free_weekly`);
-    url.searchParams.set('fields', 'id,week_start,week_end,course_id.id,course_id.legacy_id,course_id.status,course_id.duration,course_id.course_image,course_id.gradient_from_light,course_id.gradient_to_light,course_id.gradient_from_dark,course_id.gradient_to_dark,course_id.on_light,course_id.on_dark,course_id.translations.*,course_id.main_competences.competences_id.id,course_id.main_competences.competences_id.color_light,course_id.main_competences.competences_id.color_dark,course_id.main_competences.competences_id.translations.*');
+    url.searchParams.set('fields', 'id,week_start,week_end,course_id.id,course_id.legacy_id,course_id.status,course_id.duration,course_id.course_type,course_id.course_image,course_id.gradient_from_light,course_id.gradient_to_light,course_id.gradient_from_dark,course_id.gradient_to_dark,course_id.on_light,course_id.on_dark,course_id.translations.*,course_id.main_competences.competences_id.id,course_id.main_competences.competences_id.color_light,course_id.main_competences.competences_id.color_dark,course_id.main_competences.competences_id.translations.*,course_id.competence.competences_id.id,course_id.competence.competences_id.parent_competence');
     url.searchParams.set('filter[status][_eq]', 'published');
     url.searchParams.set('filter[week_start][_lte]', now.toISOString());
     url.searchParams.set('filter[week_end][_gte]', now.toISOString());
