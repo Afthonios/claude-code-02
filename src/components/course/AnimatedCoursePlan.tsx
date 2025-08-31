@@ -56,8 +56,13 @@ export default function AnimatedCoursePlan({
 }: AnimatedCoursePlanProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
+  const [hasMounted, setHasMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   // Parse markdown plan content into structured sections
   const parsePlanSections = (markdownContent: string): PlanSection[] => {
@@ -365,8 +370,13 @@ export default function AnimatedCoursePlan({
 
   // Helper function to format a line with specific icons
   const formatLineWithIcons = (line: string, hasGradient: boolean, courseId: string) => {
+    if (!hasMounted) {
+      return line; // Return plain text on server-side
+    }
+    
     const elements: React.ReactElement[] = [];
-    // Remove unused variable
+    // Create a hash of the line for consistent key generation
+    const lineHash = line.replace(/\s/g, '').substring(0, 10);
     let keyIndex = 0;
     
     // Pattern 1: Add video icon after video-related content
@@ -378,7 +388,7 @@ export default function AnimatedCoursePlan({
       // Add text before match
       if (match.index > lastIndex) {
         elements.push(
-          <span key={`text-${keyIndex++}`}>
+          <span key={`${lineHash}-text-${keyIndex++}`}>
             {line.substring(lastIndex, match.index)}
           </span>
         );
@@ -386,7 +396,7 @@ export default function AnimatedCoursePlan({
       
       // Add the matched text
       elements.push(
-        <span key={`video-text-${keyIndex++}`}>
+        <span key={`${lineHash}-video-text-${keyIndex++}`}>
           {match[0]}
         </span>
       );
@@ -394,7 +404,7 @@ export default function AnimatedCoursePlan({
       // Add video icon
       elements.push(
         <Video
-          key={`video-icon-${keyIndex++}`}
+          key={`${lineHash}-video-icon-${keyIndex++}`}
           className={cn(
             "inline w-4 h-4 mx-1 align-text-bottom",
             hasGradient 
@@ -419,7 +429,7 @@ export default function AnimatedCoursePlan({
       // Add text before download match
       if (actualIndex > downloadLastIndex) {
         elements.push(
-          <span key={`download-text-before-${keyIndex++}`}>
+          <span key={`${lineHash}-download-text-before-${keyIndex++}`}>
             {line.substring(downloadLastIndex, actualIndex)}
           </span>
         );
@@ -427,7 +437,7 @@ export default function AnimatedCoursePlan({
       
       // Add the matched text
       elements.push(
-        <span key={`download-text-${keyIndex++}`}>
+        <span key={`${lineHash}-download-text-${keyIndex++}`}>
           {downloadMatch[0]}
         </span>
       );
@@ -435,7 +445,7 @@ export default function AnimatedCoursePlan({
       // Add download icon
       elements.push(
         <Download
-          key={`download-icon-${keyIndex++}`}
+          key={`${lineHash}-download-icon-${keyIndex++}`}
           className={cn(
             "inline w-4 h-4 mx-1 align-text-bottom",
             hasGradient 
@@ -465,7 +475,7 @@ export default function AnimatedCoursePlan({
       // Add text before true/false match
       if (actualIndex > trueFalseLastIndex) {
         elements.push(
-          <span key={`truefalse-text-before-${keyIndex++}`}>
+          <span key={`${lineHash}-truefalse-text-before-${keyIndex++}`}>
             {line.substring(trueFalseLastIndex, actualIndex)}
           </span>
         );
@@ -473,7 +483,7 @@ export default function AnimatedCoursePlan({
       
       // Add the matched text
       elements.push(
-        <span key={`truefalse-text-${keyIndex++}`}>
+        <span key={`${lineHash}-truefalse-text-${keyIndex++}`}>
           {trueFalseMatch[0]}
         </span>
       );
@@ -481,7 +491,7 @@ export default function AnimatedCoursePlan({
       // Add boxed check and X icons
       elements.push(
         <CheckSquare
-          key={`check-icon-${keyIndex++}`}
+          key={`${lineHash}-check-icon-${keyIndex++}`}
           className={cn(
             "inline w-4 h-4 mx-0.5 align-text-bottom",
             hasGradient 
@@ -493,7 +503,7 @@ export default function AnimatedCoursePlan({
       
       elements.push(
         <XSquare
-          key={`x-icon-${keyIndex++}`}
+          key={`${lineHash}-x-icon-${keyIndex++}`}
           className={cn(
             "inline w-4 h-4 ml-0.5 mr-1 align-text-bottom",
             hasGradient 
@@ -523,7 +533,7 @@ export default function AnimatedCoursePlan({
       // Add text before youtube match
       if (actualIndex > youtubeLastIndex) {
         elements.push(
-          <span key={`youtube-text-before-${keyIndex++}`}>
+          <span key={`${lineHash}-youtube-text-before-${keyIndex++}`}>
             {line.substring(youtubeLastIndex, actualIndex)}
           </span>
         );
@@ -531,7 +541,7 @@ export default function AnimatedCoursePlan({
       
       // Add the matched text
       elements.push(
-        <span key={`youtube-text-${keyIndex++}`}>
+        <span key={`${lineHash}-youtube-text-${keyIndex++}`}>
           {youtubeMatch[0]}
         </span>
       );
@@ -539,7 +549,7 @@ export default function AnimatedCoursePlan({
       // Add YouTube icon
       elements.push(
         <Youtube
-          key={`youtube-icon-${keyIndex++}`}
+          key={`${lineHash}-youtube-icon-${keyIndex++}`}
           className={cn(
             "inline w-4 h-4 mx-1 align-text-bottom",
             hasGradient 
@@ -569,7 +579,7 @@ export default function AnimatedCoursePlan({
       // Add text before quiz match
       if (actualIndex > quizLastIndex) {
         elements.push(
-          <span key={`quiz-text-before-${keyIndex++}`}>
+          <span key={`${lineHash}-quiz-text-before-${keyIndex++}`}>
             {line.substring(quizLastIndex, actualIndex)}
           </span>
         );
@@ -577,7 +587,7 @@ export default function AnimatedCoursePlan({
       
       // Add the matched text
       elements.push(
-        <span key={`quiz-text-${keyIndex++}`}>
+        <span key={`${lineHash}-quiz-text-${keyIndex++}`}>
           {quizMatch[0]}
         </span>
       );
@@ -585,7 +595,7 @@ export default function AnimatedCoursePlan({
       // Add quiz icon (grid for quizzes/forms)
       elements.push(
         <Grid3X3
-          key={`quiz-icon-${keyIndex++}`}
+          key={`${lineHash}-quiz-icon-${keyIndex++}`}
           className={cn(
             "inline w-4 h-4 mx-1 align-text-bottom",
             hasGradient 
@@ -618,7 +628,7 @@ export default function AnimatedCoursePlan({
       // Add text before match
       if (timeMatch.index > timeLastIndex) {
         timeElements.push(
-          <span key={`time-text-${timeKeyIndex++}`}>
+          <span key={`${lineHash}-time-text-${timeKeyIndex++}`}>
             {processedLine.substring(timeLastIndex, timeMatch.index)}
           </span>
         );
@@ -627,7 +637,7 @@ export default function AnimatedCoursePlan({
       // Add clock icon
       timeElements.push(
         <Clock
-          key={`clock-icon-${timeKeyIndex++}`}
+          key={`${lineHash}-clock-icon-${timeKeyIndex++}`}
           className={cn(
             "inline w-4 h-4 mr-1 align-text-bottom",
             hasGradient 
@@ -639,7 +649,7 @@ export default function AnimatedCoursePlan({
       
       // Add the time text
       timeElements.push(
-        <span key={`time-duration-${timeKeyIndex++}`}>
+        <span key={`${lineHash}-time-duration-${timeKeyIndex++}`}>
           {timeMatch[0]}
         </span>
       );
@@ -650,7 +660,7 @@ export default function AnimatedCoursePlan({
     // Add remaining text after time matches
     if (timeLastIndex < processedLine.length) {
       timeElements.push(
-        <span key={`remaining-time-text-${timeKeyIndex++}`}>
+        <span key={`${lineHash}-remaining-time-text-${timeKeyIndex++}`}>
           {processedLine.substring(timeLastIndex)}
         </span>
       );
@@ -710,7 +720,7 @@ export default function AnimatedCoursePlan({
     return lines.length > 0 && lines[0] ? lines[0] : '';
   };
   
-  const firstLineSubtitle = getFirstLine(plan_md);
+  const firstLineSubtitle = hasMounted ? getFirstLine(plan_md) : '';
 
   // Helper function to get section icon component
   const getSectionIcon = (sectionTitle: string) => {
@@ -917,7 +927,7 @@ export default function AnimatedCoursePlan({
       
       {/* Subtitle with first line of plan_md */}
       {firstLineSubtitle && (
-        <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 mb-6 sm:mb-8">
+        <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 mb-6 sm:mb-8" suppressHydrationWarning>
           {firstLineSubtitle}
         </p>
       )}

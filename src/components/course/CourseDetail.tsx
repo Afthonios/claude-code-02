@@ -20,8 +20,19 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
   const objectivesRef = useRef<HTMLUListElement>(null);
   
   const [isVisible, setIsVisible] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  // Pre-compute the objectives label to ensure consistency
+  const objectivesLabel = translation?.objectives_label || 
+    (locale === 'fr' ? 'Dans cette formation en ligne, vous découvrirez comment :' : 'In this online training, you will discover how to:');
 
   useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hasMounted) return;
+    
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) {
@@ -44,7 +55,7 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
         observer.unobserve(currentRef);
       }
     };
-  }, []);
+  }, [hasMounted]);
   
   if (!translation) {
     return (
@@ -90,7 +101,7 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
   return (
     <div className="max-w-3xl mx-auto">
       {/* Inject CSS for gradient styling */}
-      {gradientStyles.hasGradient && (
+      {hasMounted && gradientStyles.hasGradient && (
         <style dangerouslySetInnerHTML={{
           __html: `
             .course-detail-${course.id} {
@@ -239,8 +250,8 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
       {/* Objectives - No Box Styling */}
       {translation.objectives_json && translation.objectives_json.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            {translation.objectives_label || (locale === 'fr' ? 'Objectifs pédagogiques' : 'Learning Objectives')}
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4" suppressHydrationWarning>
+            {objectivesLabel}
           </h2>
           <ul ref={objectivesRef} className="space-y-3">
             {translation.objectives_json.map((objective, index) => (
@@ -248,12 +259,15 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
                 key={index} 
                 className={cn(
                   "flex transition-all duration-500",
-                  isVisible 
-                    ? "opacity-100 translate-y-0" 
-                    : "opacity-0 translate-y-4"
+                  "opacity-0 translate-y-4"
                 )}
                 style={{ 
-                  transitionDelay: isVisible ? `${(index + 1) * 200}ms` : '0ms'
+                  transitionDelay: '0ms',
+                  ...(hasMounted && isVisible && {
+                    opacity: 1,
+                    transform: 'translateY(0)',
+                    transitionDelay: `${(index + 1) * 200}ms`
+                  })
                 }}
               >
                 <span className="text-primary mr-3 mt-0.5 text-lg leading-none flex-shrink-0">•</span>
@@ -286,13 +300,13 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
         <div className="text-center py-8 mb-12">
           <blockquote className="text-xl md:text-2xl font-light italic text-gray-700 dark:text-gray-300 leading-relaxed max-w-4xl mx-auto">
             <span className="text-4xl text-blue-500 dark:text-blue-400 font-serif leading-none">&ldquo;</span>
-            <span className="mx-2">
+            <span className="mx-2" style={{hyphens: 'none', wordBreak: 'keep-all', overflowWrap: 'break-word'}}>
               {renderSafeHTML(translation.quote)}
             </span>
             <span className="text-4xl text-blue-500 dark:text-blue-400 font-serif leading-none">&rdquo;</span>
           </blockquote>
           {course.quote_author && (
-            <cite className="block mt-6 text-base font-medium text-gray-600 dark:text-gray-400 not-italic">
+            <cite className="block mt-6 text-base font-medium text-gray-600 dark:text-gray-400 not-italic" style={{wordBreak: 'keep-all'}}>
               &mdash; {course.quote_author}
             </cite>
           )}
