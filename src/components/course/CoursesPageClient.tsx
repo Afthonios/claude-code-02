@@ -1,77 +1,20 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef, useMemo, memo } from 'react';
+import { useEffect, useCallback, useRef, useMemo, memo } from 'react';
 import { useTranslations } from 'next-intl';
-import { coursesApi, competencesApi, freeWeeklyApi } from '@/lib/directus';
-import { filterTranslations } from '@/lib/directus';
+import { coursesApi, freeWeeklyApi } from '@/lib/directus';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
+import { useCompetenceProcessing } from '@/hooks/useCompetenceProcessing';
+import { useWeeklyCoursePositioning } from '@/hooks/useWeeklyCoursePositioning';
+import { useCoursesPageState } from '@/hooks/useCoursesPageState';
+import { filterCourses, generateDirectusFilters, hasActiveFilters, getBookmarks } from '@/lib/services/courseFiltering';
+import { COURSE_TYPES } from '@/lib/constants/courseTypes';
 import SearchBar from './SearchBar';
 import FilterSidebar from './FilterSidebar';
 import ActiveFilters from './ActiveFilters';
 import CourseCard from './CourseCard';
-import type { DirectusCourse, DirectusCompetence } from '@/types/directus';
+import type { DirectusCourse } from '@/types/directus';
 
-// Fallback competences used when Directus API is not available
-// Note: In production, real competence titles come from Directus competences.translations.card_title
-function getMain8Competences(locale: string) {
-  const competences = [
-    { 
-      value: 'communication-fallback', 
-      label: locale === 'fr' ? 'Communication et Relations' : 'Communication & Relations', 
-      colorLight: '#3B82F6', 
-      colorDark: '#1D4ED8' 
-    },
-    { 
-      value: 'leadership-fallback', 
-      label: locale === 'fr' ? 'Management et Leadership' : 'Management & Leadership', 
-      colorLight: '#10B981', 
-      colorDark: '#047857' 
-    },
-    { 
-      value: 'strategic-fallback', 
-      label: locale === 'fr' ? 'Leadership Stratégique & Vision Inspirante' : 'Strategic Leadership & Vision', 
-      colorLight: '#EF4444', 
-      colorDark: '#DC2626' 
-    },
-    { 
-      value: 'innovation-fallback', 
-      label: locale === 'fr' ? 'Conduite du Changement, Innovation & Inclusion' : 'Change Management & Innovation', 
-      colorLight: '#8B5CF6', 
-      colorDark: '#7C3AED' 
-    },
-    { 
-      value: 'transformation-fallback', 
-      label: locale === 'fr' ? 'Changement et Transformation Organisationnelle' : 'Organizational Transformation', 
-      colorLight: '#06B6D4', 
-      colorDark: '#0891B2' 
-    },
-    { 
-      value: 'customer-fallback', 
-      label: locale === 'fr' ? 'Orientation client' : 'Customer Focus', 
-      colorLight: '#84CC16', 
-      colorDark: '#65A30D' 
-    },
-    { 
-      value: 'diversity-fallback', 
-      label: locale === 'fr' ? 'Diversité et Inclusion' : 'Diversity & Inclusion', 
-      colorLight: '#EC4899', 
-      colorDark: '#DB2777' 
-    },
-    { 
-      value: 'digital-fallback', 
-      label: locale === 'fr' ? 'Transformation Digitale' : 'Digital Transformation', 
-      colorLight: '#F59E0B', 
-      colorDark: '#D97706' 
-    }
-  ];
-  return competences;
-}
-
-// Fallback function for when Directus API is not available - provides basic competences
-function getMain8CompetencesFallback(locale: string) {
-  // Use generic competence names as fallback - in practice, these will be replaced by real Directus data
-  return getMain8Competences(locale);
-}
 
 interface CoursesPageClientProps {
   locale: string;
@@ -85,22 +28,21 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
   
   // TODO: Replace with actual user authentication check
   const isPaidUser = false; // This should be determined from user session/auth
-  const [courses, setCourses] = useState<DirectusCourse[]>(initialCourses);
-  const [weeklyFreeCourse, setWeeklyFreeCourse] = useState<DirectusCourse | null>(initialWeeklyFreeCourse || null);
-  const [competenceOptions, setCompetenceOptions] = useState<Array<{ value: string; label: string; title?: string; colorLight?: string; colorDark?: string }>>([]);
   
-  // Remove unused memoized competence options
-  const [isLoading, setIsLoading] = useState(false);
-  const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [hasInitialLoad, setHasInitialLoad] = useState(initialCourses.length > 0);
-  const [apiError, setApiError] = useState<boolean>(hasApiError);
+  // Use the new state management hook
+  const { state, actions } = useCoursesPageState({
+    courses: initialCourses,
+    weeklyFreeCourse: initialWeeklyFreeCourse || null,
+    hasInitialLoad: initialCourses.length > 0,
+    apiError: hasApiError
+  });
   
   // Use refs to track previous values and prevent unnecessary re-renders
   const previousFilters = useRef<string>('');  
   const previousSearch = useRef<string>('');
-  const isLoadingCompetences = useRef<boolean>(false);
-  const lastLoadedLocale = useRef<string>('');
+  
+  // Use the new hooks for competence processing
+  const { competenceOptions } = useCompetenceProcessing(locale, initialCourses);
 
   // Load free weekly course (only if not provided via SSR)
   useEffect(() => {
@@ -123,16 +65,15 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
           title: course.translations?.[0]?.title,
           course_type: course.course_type
         } : 'null');
-        setWeeklyFreeCourse(course);
+        actions.setWeeklyFreeCourse(course);
       } catch (error) {
         console.error('🎯 [Weekly Course] Error loading weekly free course:', error);
-        setWeeklyFreeCourse(null);
+        actions.setWeeklyFreeCourse(null);
       }
     };
 
     loadWeeklyCourse();
-  }, [initialWeeklyFreeCourse]);
-  
+  }, [initialWeeklyFreeCourse, actions]);
   
   const {
     search,
@@ -142,110 +83,19 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
     removeFilter,
     clearAll,
     clearSearch,
-    getDirectusFilters,
-    hasActiveFilters,
   } = useSearchFilters();
-
-  // Load competence options for filter - memoized to prevent re-renders
-  const loadCompetences = useCallback(async () => {
-    // Prevent multiple simultaneous loads
-    if (isLoadingCompetences.current) {
-      return;
-    }
-    
-    // Skip if already loaded for current locale
-    if (lastLoadedLocale.current === locale && competenceOptions.length > 0) {
-      return;
-    }
-    
-    isLoadingCompetences.current = true;
-    try {
-      const competences = await competencesApi.getAll();
-      
-      if (competences.length === 0) {
-        console.log('📊 [CoursesPageClient] Using fallback 8 main competences');
-        setCompetenceOptions(getMain8CompetencesFallback(locale));
-        lastLoadedLocale.current = locale;
-        return;
-      }
-      
-      // Map and filter to get exactly 8 main competences, ensuring unique IDs
-      const seenIds = new Set<string>();
-      const allOptions = competences
-        .filter(competence => competence.translations && competence.translations.length > 0)
-        .map((competence: DirectusCompetence) => {
-          const translation = filterTranslations(competence.translations, locale);
-          const option: { value: string; label: string; title?: string; colorLight?: string; colorDark?: string } = {
-            value: String(competence.id),
-            label: translation?.card_title || translation?.title || `Competence ${competence.id}`,
-          };
-          if (translation?.title) {
-            option.title = translation.title;
-          }
-          if (competence.color_light) {
-            option.colorLight = competence.color_light.startsWith('#') ? competence.color_light : `#${competence.color_light}`;
-          }
-          if (competence.color_dark) {
-            option.colorDark = competence.color_dark.startsWith('#') ? competence.color_dark : `#${competence.color_dark}`;
-          }
-          return option;
-        })
-        .filter(option => {
-          if (seenIds.has(option.value)) {
-            console.warn(`🔍 [CoursesPageClient] Duplicate competence ID found: ${option.value}`);
-            return false;
-          }
-          seenIds.add(option.value);
-          return true;
-        });
-      
-      const main8Competences = allOptions.slice(0, 8);
-      const uniqueCompetences = main8Competences.filter((competence, index, array) => 
-        array.findIndex(c => c.value === competence.value) === index
-      );
-      
-      console.log('📊 [CoursesPageClient] Setting main competences from Directus for locale', locale, ':', uniqueCompetences.length, 'competences');
-      setCompetenceOptions(uniqueCompetences);
-      lastLoadedLocale.current = locale;
-    } catch (error) {
-      console.error('🔍 [CoursesPageClient] Error loading competences:', error);
-      setCompetenceOptions(getMain8CompetencesFallback(locale));
-      lastLoadedLocale.current = locale;
-    } finally {
-      isLoadingCompetences.current = false;
-    }
-  }, [locale, competenceOptions.length]);
-
-  // Load competences only on locale change or initial load
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    
-    // Load competences if locale changed or if we have no competences yet
-    if (lastLoadedLocale.current !== locale || (competenceOptions.length === 0 && !isLoadingCompetences.current)) {
-      timeoutId = setTimeout(() => {
-        loadCompetences();
-      }, 100);
-    }
-    
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locale, loadCompetences]);
 
   // Memoized fetch courses function with stable dependencies  
   const fetchCourses = useCallback(async (skipIfLoading = false) => {
-    if (skipIfLoading && isLoading) {
+    if (skipIfLoading && state.isLoading) {
       return;
     }
     
-    setIsLoading(true);
-    setError(null);
+    actions.setLoading(true);
+    actions.setError(null);
     
     try {
-      const directusFilters = getDirectusFilters();
+      const directusFilters = generateDirectusFilters(filters);
       const searchQuery = search.trim();
       
       const fetchOptions: {
@@ -266,18 +116,18 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
       const result = await coursesApi.getAll(fetchOptions);
       
       if (result.success) {
-        setCourses(result.data);
-        setHasInitialLoad(true);
-        setApiError(false);
-        setError(null);
+        actions.setCourses(result.data);
+        actions.setInitialLoad(true);
+        actions.setApiError(false);
+        actions.setError(null);
       } else if (result.error === 'api_failure') {
-        setApiError(true);
-        setError(null);
+        actions.setApiError(true);
+        actions.setError(null);
       } else {
-        setCourses([]);
-        setHasInitialLoad(true);
-        setApiError(false);
-        setError(null);
+        actions.setCourses([]);
+        actions.setInitialLoad(true);
+        actions.setApiError(false);
+        actions.setError(null);
       }
     } catch (fetchError) {
       console.error('❌ [CoursesPageClient] Error fetching courses:', fetchError);
@@ -293,21 +143,24 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
         }
       }
       
-      setError(errorMessage);
-      if (hasInitialLoad) {
-        setCourses([]);
+      actions.setError(errorMessage);
+      if (state.hasInitialLoad) {
+        actions.setCourses([]);
       }
     } finally {
-      setIsLoading(false);
+      actions.setLoading(false);
     }
-  }, [search, getDirectusFilters, isLoading, hasInitialLoad]);
+  }, [search, filters, state.isLoading, state.hasInitialLoad, actions]);
 
   // Initialize courses from initialCourses if needed
   useEffect(() => {
-    if (courses.length === 0 && initialCourses.length > 0) {
-      setCourses(initialCourses);
+    if (state.courses.length === 0 && initialCourses.length > 0) {
+      actions.setCourses(initialCourses);
     }
-  }, [initialCourses, courses.length]);
+  }, [initialCourses, state.courses.length, actions]);
+
+  // Check if filters are active
+  const hasFiltersActive = hasActiveFilters(filters, search);
 
   // Debounced effect for search and filter changes
   useEffect(() => {
@@ -336,28 +189,28 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
     const delay = isSearchOnly ? 300 : 0;
     
     const timeoutId = setTimeout(() => {
-      if (hasActiveFilters) {
+      if (hasFiltersActive) {
         fetchCourses(true);
       } else {
         // Reset to initial courses when no filters active
-        setCourses(initialCourses);
+        actions.setCourses(initialCourses);
       }
     }, delay);
     
     return () => clearTimeout(timeoutId);
-  }, [search, filters.competences, filters.showBookmarked, filters.courseType, filters.hideCompleted, hasActiveFilters, fetchCourses, initialCourses]);
+  }, [search, filters.competences, filters.showBookmarked, filters.courseType, filters.hideCompleted, hasFiltersActive, fetchCourses, initialCourses, actions]);
   
 
   // Memoized event handlers to prevent child re-renders
   const handleClearAllFilters = useCallback(() => {
     clearAll();
-    setIsFilterSidebarOpen(false);
-  }, [clearAll]);
+    actions.setFilterSidebarOpen(false);
+  }, [clearAll, actions]);
 
   const handleRetryApiCall = useCallback(() => {
-    setApiError(false);
+    actions.setApiError(false);
     fetchCourses();
-  }, [fetchCourses]);
+  }, [fetchCourses, actions]);
 
   const handleFilterRemove = useCallback((filterType: keyof typeof filters, value: string) => {
     // Handle boolean filters differently
@@ -371,10 +224,6 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
     }
   }, [filters, setFilters, removeFilter]);
 
-  const toggleFilterSidebar = useCallback(() => {
-    setIsFilterSidebarOpen(!isFilterSidebarOpen);
-  }, [isFilterSidebarOpen]);
-
 
   // Memoized course type counts
   const courseTypeCounts = useMemo(() => {
@@ -383,11 +232,11 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
       parcours: 0,
     };
     
-    // Count from all available courses (not filtered) - match capitalized Directus values
+    // Count from all available courses (not filtered) - use constants
     initialCourses.forEach(course => {
-      if (course.course_type === 'Formation') {
+      if (course.course_type === COURSE_TYPES.FORMATION) {
         counts.formation++;
-      } else if (course.course_type === 'Parcours') {
+      } else if (course.course_type === COURSE_TYPES.PARCOURS) {
         counts.parcours++;
       }
     });
@@ -395,210 +244,22 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
     return counts;
   }, [initialCourses]);
 
-  // Memoized competence counts calculation to prevent re-renders
-  const competenceOptionsWithCounts = useMemo(() => {
-    if (competenceOptions.length === 0 || initialCourses.length === 0) {
-      return competenceOptions;
-    }
-
-    // Create a map to count courses by competence ID
-    const competenceCounts: Record<string, number> = {};
-    
-    initialCourses.forEach(course => {
-      // Use the new main_competences field for direct access, fallback to legacy competence field
-      const competenceRelations = course.main_competences || course.competence;
-      
-      if (competenceRelations && Array.isArray(competenceRelations)) {
-        const processedCompetenceIds = new Set<string>(); // Track competence IDs for this course to avoid double counting
-        
-        competenceRelations.forEach((comp: unknown) => {
-          let competenceId: string | null = null;
-          
-          // Type guard for comp structure
-          if (comp && typeof comp === 'object' && 'competences_id' in comp) {
-            const typedComp = comp as { 
-              competences_id?: { 
-                id?: string | number;
-                parent_competence?: string | number | null;
-              } 
-            };
-            
-            if (typedComp.competences_id && typeof typedComp.competences_id === 'object') {
-              if (course.main_competences) {
-                // For main_competences, use the competence ID directly (it's already a main competence)
-                competenceId = String(typedComp.competences_id.id);
-              } else {
-                // For legacy competence field, check if it has a parent (sub-competence) or is main
-                if (typedComp.competences_id.parent_competence) {
-                  // This is a sub-competence, use the parent ID
-                  competenceId = String(typedComp.competences_id.parent_competence);
-                } else if (typedComp.competences_id.parent_competence === null && typedComp.competences_id.id) {
-                  // This is already a main competence
-                  competenceId = String(typedComp.competences_id.id);
-                }
-              }
-            }
-          }
-          
-          // Only count each competence once per course
-          if (competenceId && !processedCompetenceIds.has(competenceId)) {
-            competenceCounts[competenceId] = (competenceCounts[competenceId] || 0) + 1;
-            processedCompetenceIds.add(competenceId);
-          }
-        });
-      }
+  // Use the new filtering service and weekly course positioning hook
+  const baseFilteredCourses = useMemo(() => {
+    return filterCourses({
+      courses: state.courses,
+      filters,
+      search,
+      bookmarks: getBookmarks()
     });
+  }, [state.courses, filters, search]);
 
-    // Add counts to competence options and sort by count (descending)
-    const optionsWithCounts = competenceOptions
-      .map(option => ({
-        ...option,
-        count: competenceCounts[option.value] || 0
-      }))
-      .sort((a, b) => (b.count || 0) - (a.count || 0)); // Sort by count, highest first
-
-    return optionsWithCounts;
-  }, [competenceOptions, initialCourses]);
-
-  // Memoized filtered courses to prevent unnecessary recalculations
-  const filteredCourses = useMemo(() => {
-    let filtered = courses;
-    
-    // Apply course type filter (client-side fallback when API filtering fails)
-    if (filters.courseType.length > 0) {
-      filtered = filtered.filter(course => 
-        filters.courseType.includes(course.course_type || '')
-      );
-    }
-    
-    // Apply bookmark filter
-    if (filters.showBookmarked && typeof window !== 'undefined') {
-      const bookmarks = JSON.parse(localStorage.getItem('courseBookmarks') || '[]');
-      filtered = filtered.filter(course => bookmarks.includes(course.id));
-    }
-
-    // Add or move weekly free course to position 1 - more permissive logic
-    if (weeklyFreeCourse && !filters.showBookmarked) {
-      
-      // Check if weekly course is already in the results
-      const existingWeeklyCourseIndex = filtered.findIndex(course => course.id === weeklyFreeCourse.id);
-      
-      let shouldShowWeeklyCourse = false;
-      
-      console.log('🎯 [Weekly Course Debug] Evaluating weekly course display conditions');
-      console.log('🎯 Weekly course:', {
-        id: weeklyFreeCourse.id,
-        title: weeklyFreeCourse.translations?.[0]?.title,
-        course_type: weeklyFreeCourse.course_type,
-        hasMainCompetences: !!weeklyFreeCourse.main_competences?.length,
-        hasLegacyCompetences: !!weeklyFreeCourse.competence?.length
-      });
-      console.log('🎯 Current filters:', {
-        courseType: filters.courseType,
-        competences: filters.competences,
-        hideCompleted: filters.hideCompleted
-      });
-      console.log('🎯 Filtered courses before weekly positioning:', filtered.length);
-      console.log('🎯 Weekly course position in results:', existingWeeklyCourseIndex);
-      
-      // More permissive conditions: Show weekly course unless explicitly filtered out
-      const hasNoFilters = filters.courseType.length === 0 && 
-                          filters.competences.length === 0;
-      
-      // Show if no filters are applied
-      if (hasNoFilters) {
-        shouldShowWeeklyCourse = true;
-        console.log('🎯 Weekly course shown: No filters applied');
-      }
-      // Show if only Formation filter is applied (weekly courses are typically formations)
-      else if (filters.courseType.length === 1 && 
-               filters.courseType.includes('Formation') && 
-               filters.competences.length === 0) {
-        shouldShowWeeklyCourse = true;
-        console.log('🎯 Weekly course shown: Formation filter only');
-      }
-      // Show if only Parcours filter is applied and weekly course is a Parcours
-      else if (filters.courseType.length === 1 && 
-               filters.courseType.includes('Parcours') && 
-               filters.competences.length === 0 &&
-               weeklyFreeCourse.course_type === 'Parcours') {
-        shouldShowWeeklyCourse = true;
-        console.log('🎯 Weekly course shown: Parcours filter matches');
-      }
-      // Show if course type filter includes the weekly course type
-      else if (filters.courseType.length > 0 && 
-               filters.competences.length === 0 &&
-               filters.courseType.includes(weeklyFreeCourse.course_type || '')) {
-        shouldShowWeeklyCourse = true;
-        console.log('🎯 Weekly course shown: Course type filter matches');
-      }
-      // Show if any competence filter matches the weekly course's competences
-      else if (filters.competences.length > 0) {
-        const courseCompetences = weeklyFreeCourse.main_competences || weeklyFreeCourse.competence || [];
-        const matchesCompetence = courseCompetences.some((comp: unknown) => {
-          if (comp && typeof comp === 'object' && 'competences_id' in comp) {
-            const typedComp = comp as { 
-              competences_id?: { 
-                id?: string | number;
-                parent_competence?: string | number | null;
-              } 
-            };
-            
-            if (typedComp.competences_id && typeof typedComp.competences_id === 'object') {
-              let competenceId: string | null = null;
-              
-              if (weeklyFreeCourse.main_competences) {
-                competenceId = String(typedComp.competences_id.id);
-              } else {
-                // Legacy competence field logic
-                if (typedComp.competences_id.parent_competence) {
-                  competenceId = String(typedComp.competences_id.parent_competence);
-                } else if (typedComp.competences_id.parent_competence === null && typedComp.competences_id.id) {
-                  competenceId = String(typedComp.competences_id.id);
-                }
-              }
-              
-              return competenceId && filters.competences.includes(competenceId);
-            }
-          }
-          return false;
-        });
-        
-        // Only require competence match if course type filter is also satisfied (or not set)
-        const courseTypeMatches = filters.courseType.length === 0 || 
-                                filters.courseType.includes(weeklyFreeCourse.course_type || '');
-        
-        shouldShowWeeklyCourse = matchesCompetence && courseTypeMatches;
-        console.log('🎯 Weekly course competence check:', { matchesCompetence, courseTypeMatches, shouldShow: shouldShowWeeklyCourse });
-      }
-      
-      if (shouldShowWeeklyCourse) {
-        if (existingWeeklyCourseIndex === -1) {
-          // Weekly course not in results, add it at position 1
-          filtered = [weeklyFreeCourse, ...filtered];
-          console.log('🎯 Weekly course added at position 1');
-        } else if (existingWeeklyCourseIndex !== 0) {
-          // Weekly course is in results but not at position 1, move it there
-          const coursesToReorder = [...filtered];
-          const [weeklyCourse] = coursesToReorder.splice(existingWeeklyCourseIndex, 1);
-          if (weeklyCourse) {
-            filtered = [weeklyCourse, ...coursesToReorder];
-            console.log('🎯 Weekly course moved from position', existingWeeklyCourseIndex, 'to position 1');
-          }
-        } else {
-          console.log('🎯 Weekly course already at position 1');
-        }
-      } else {
-        console.log('🎯 Weekly course NOT shown due to current filter combination');
-      }
-    } else if (weeklyFreeCourse) {
-      console.log('🎯 Weekly course skipped:', {
-        showingBookmarks: filters.showBookmarked
-      });
-    }
-    
-    return filtered;
-  }, [courses, filters.showBookmarked, filters.courseType, filters.competences, filters.hideCompleted, weeklyFreeCourse]);
+  // Apply weekly course positioning logic
+  const filteredCourses = useWeeklyCoursePositioning(
+    baseFilteredCourses, 
+    state.weeklyFreeCourse, 
+    filters
+  );
 
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] dark:bg-gray-900">
@@ -626,14 +287,14 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
 
             {/* Filter Toggle Button (Mobile) */}
             <button
-              onClick={toggleFilterSidebar}
+              onClick={actions.toggleFilterSidebar}
               className="lg:hidden flex items-center px-4 py-2 border border-input rounded-md bg-background text-foreground hover:bg-muted"
             >
               <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
               {t('filters.title')}
-              {hasActiveFilters && (
+              {hasFiltersActive && (
                 <span className="ml-2 px-2 py-1 text-xs bg-primary text-primary-foreground rounded-full">
                   {Object.values(filters).flat().length + (search ? 1 : 0)}
                 </span>
@@ -642,7 +303,7 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
 
             {/* Results Count */}
             <div className="text-sm text-muted-foreground">
-              {isLoading ? (
+              {state.isLoading ? (
                 t('resultsCount.loading')
               ) : (() => {
                 // Determine which message to show based on selected course type
@@ -650,9 +311,9 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
                 
                 if (courseType.length === 1) {
                   // Single course type selected
-                  if (courseType.includes('Formation')) {
+                  if (courseType.includes(COURSE_TYPES.FORMATION)) {
                     return t('resultsCount.foundFormations', { count: filteredCourses.length });
-                  } else if (courseType.includes('Parcours')) {
+                  } else if (courseType.includes(COURSE_TYPES.PARCOURS)) {
                     return t('resultsCount.foundParcours', { count: filteredCourses.length });
                   }
                 } else if (courseType.length === 0) {
@@ -674,7 +335,7 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
           onFilterRemove={handleFilterRemove}
           onSearchClear={clearSearch}
           onClearAll={handleClearAllFilters}
-          competenceOptions={competenceOptionsWithCounts}
+          competenceOptions={competenceOptions}
         />
 
         {/* Main Content Area */}
@@ -683,18 +344,18 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
           <FilterSidebar
             filters={filters}
             onFiltersChange={setFilters}
-            competenceOptions={competenceOptionsWithCounts}
-            isOpen={isFilterSidebarOpen}
-            onToggle={toggleFilterSidebar}
+            competenceOptions={competenceOptions}
+            isOpen={state.isFilterSidebarOpen}
+            onToggle={actions.toggleFilterSidebar}
             isPaidUser={isPaidUser}
             courseTypeCounts={courseTypeCounts}
           />
 
           {/* Main Content */}
           <div className="flex-1 lg:ml-0 safari-flex-content">
-            {error && (
+            {state.error && (
               <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-                <p className="text-destructive">{error}</p>
+                <p className="text-destructive">{state.error}</p>
                 <button
                   onClick={() => fetchCourses()}
                   className="mt-2 text-sm text-destructive hover:text-destructive/80 underline"
@@ -705,7 +366,7 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
             )}
 
             {/* Loading State */}
-            {isLoading && (
+            {state.isLoading && (
               <div className="course-grid-safari">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="min-w-0 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
@@ -727,7 +388,7 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
             )}
 
             {/* API Error State */}
-            {apiError && (
+            {state.apiError && (
               <div className="text-center py-12">
                 <div className="text-red-400 dark:text-red-600 text-6xl mb-4">⚠️</div>
                 <h3 className="text-lg font-medium text-foreground mb-2">
@@ -738,16 +399,16 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
                 </p>
                 <button
                   onClick={handleRetryApiCall}
-                  disabled={isLoading}
+                  disabled={state.isLoading}
                   className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 px-4 py-2 rounded-md transition-colors"
                 >
-                  {isLoading ? t('common.loading') : t('apiError.retry')}
+                  {state.isLoading ? t('common.loading') : t('apiError.retry')}
                 </button>
               </div>
             )}
 
             {/* Course Results */}
-            {!isLoading && !error && !apiError && (
+            {!state.isLoading && !state.error && !state.apiError && (
               <>
                 {filteredCourses.length > 0 ? (
                   <div className="course-grid-safari">
@@ -757,7 +418,7 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
                           course={course} 
                           locale={locale} 
                           priority={index < 8} // First 8 courses get priority loading
-                          isWeeklyFreeCourse={weeklyFreeCourse?.id === course.id}
+                          isWeeklyFreeCourse={state.weeklyFreeCourse?.id === course.id}
                         />
                       </div>
                     ))}
@@ -769,11 +430,11 @@ function CoursesPageClient({ locale, initialCourses, initialWeeklyFreeCourse, ha
                       {t('noResults.title')}
                     </h3>
                     <p className="text-muted-foreground mb-4">
-                      {hasActiveFilters
+                      {hasFiltersActive
                         ? t('noResults.withFilters')
                         : t('noResults.withoutFilters')}
                     </p>
-                    {hasActiveFilters && (
+                    {hasFiltersActive && (
                       <button
                         onClick={handleClearAllFilters}
                         className="text-primary hover:text-primary/80 underline"

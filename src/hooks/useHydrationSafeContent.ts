@@ -65,10 +65,10 @@ export function useHydrationSafeTextContent(
  */
 export function useHydrationSafeKey(
   baseKey: string,
-  generateKey: (base: string) => string,
+  _generateKey: (base: string) => string, // Prefix with underscore to indicate intentionally unused
   dependencies: React.DependencyList = []
 ): string {
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [, setIsHydrated] = useState(false); // Use underscore for unused state
 
   useEffect(() => {
     setIsHydrated(true);

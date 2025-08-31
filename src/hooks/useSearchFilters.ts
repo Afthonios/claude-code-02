@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { generateDirectusFilters, hasActiveFilters as hasActiveFiltersFromService } from '@/lib/services/courseFiltering';
 
 export interface FilterState {
   competences: string[];
@@ -161,35 +162,24 @@ export function useSearchFilters() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]); // Remove state dependency to avoid infinite loop
 
-  // Generate Directus API filter object
+  // Generate Directus API filter object using the service
   const getDirectusFilters = useCallback(() => {
-    
-    const filters: Record<string, unknown> = {
-      status: { _eq: 'published' },
-    };
+    return generateDirectusFilters({
+      competences: state.competences,
+      showBookmarked: state.showBookmarked,
+      courseType: state.courseType,
+      hideCompleted: state.hideCompleted,
+    });
+  }, [state.competences, state.courseType, state.showBookmarked, state.hideCompleted]);
 
-    // Course type filter
-    if (state.courseType.length > 0) {
-      filters.course_type = { _in: state.courseType };
-    }
-
-    // Competences filter (filtering by parent competence through legacy competence field)
-    if (state.competences.length > 0) {
-      // Real courses use 'competence' field with sub-competences that have parent_competence
-      // We need to filter by the parent_competence field to get courses with specific main competences
-      filters.competence = {
-        competences_id: {
-          parent_competence: { _in: state.competences }
-        }
-      };
-    }
-
-    return filters;
-  }, [state.competences, state.courseType]); // Include courseType in dependencies
-
-  // Stable hasActiveFilters computation
+  // Stable hasActiveFilters computation using the service
   const hasActiveFilters = useMemo(() => {
-    return state.search || state.competences.length > 0 || state.showBookmarked || state.courseType.length > 0 || state.hideCompleted;
+    return hasActiveFiltersFromService({
+      competences: state.competences,
+      showBookmarked: state.showBookmarked,
+      courseType: state.courseType,
+      hideCompleted: state.hideCompleted,
+    }, state.search);
   }, [state.search, state.competences, state.showBookmarked, state.courseType, state.hideCompleted]);
 
   return {
