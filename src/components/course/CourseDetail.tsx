@@ -18,6 +18,7 @@ interface CourseDetailProps {
 export default function CourseDetail({ course, locale }: CourseDetailProps) {
   const translation = filterTranslations(course.translations, locale);
   const objectivesRef = useRef<HTMLUListElement>(null);
+  
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -280,18 +281,18 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
         </div>
       )}
 
-      {/* Quote - Enhanced with author attribution */}
+      {/* Quote - Simple Centered Design */}
       {translation.quote && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-8 mb-8 border border-blue-200 dark:border-blue-800 shadow-sm">
-          <blockquote className="text-xl italic text-gray-800 dark:text-gray-200 leading-relaxed">
-            <span className="text-3xl text-blue-500 dark:text-blue-400 leading-none">&ldquo;</span>
-            <span
-              dangerouslySetInnerHTML={{ __html: renderSafeHTML(translation.quote) }}
-            />
-            <span className="text-3xl text-blue-500 dark:text-blue-400 leading-none">&rdquo;</span>
+        <div className="text-center py-8 mb-12">
+          <blockquote className="text-xl md:text-2xl font-light italic text-gray-700 dark:text-gray-300 leading-relaxed max-w-4xl mx-auto">
+            <span className="text-4xl text-blue-500 dark:text-blue-400 font-serif leading-none">&ldquo;</span>
+            <span className="mx-2">
+              {renderSafeHTML(translation.quote)}
+            </span>
+            <span className="text-4xl text-blue-500 dark:text-blue-400 font-serif leading-none">&rdquo;</span>
           </blockquote>
           {course.quote_author && (
-            <cite className="block mt-4 text-right text-base font-medium text-gray-600 dark:text-gray-400 not-italic">
+            <cite className="block mt-6 text-base font-medium text-gray-600 dark:text-gray-400 not-italic">
               &mdash; {course.quote_author}
             </cite>
           )}

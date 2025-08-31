@@ -1,6 +1,5 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
-import DOMPurify from 'dompurify'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -347,21 +346,7 @@ export function isValidHexColor(color: string): boolean {
 export function renderSafeHTML(html: string): string {
   if (!html) return '';
   
-  // Only run DOMPurify on the client side
-  if (typeof window === 'undefined') {
-    // On server side, strip all HTML tags for safety
-    return html.replace(/<[^>]*>/g, '');
-  }
-
-  // Configure DOMPurify to allow basic formatting tags commonly used in quotes
-  const config = {
-    ALLOWED_TAGS: ['p', 'br', 'em', 'strong', 'i', 'b', 'span'],
-    ALLOWED_ATTR: ['class', 'style'],
-    ALLOW_DATA_ATTR: false,
-    FORBID_SCRIPT: true,
-    FORBID_TAGS: ['script', 'object', 'embed', 'link', 'style', 'img'],
-    FORBID_ATTR: ['onclick', 'onload', 'onerror', 'src', 'href']
-  };
-
-  return DOMPurify.sanitize(html, config);
+  // For now, just strip HTML tags and return clean text
+  // This is a safe fallback that works on both server and client
+  return html.replace(/<[^>]*>/g, '');
 }
