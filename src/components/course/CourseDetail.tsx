@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { formatDuration, filterTranslations, getAssetUrlWithTransforms, getCoursesListUrl } from '@/lib/directus';
-import { getCourseGradientStyles, cn, type CourseGradientData } from '@/lib/utils';
+import { getCourseGradientStyles, cn, renderSafeHTML, type CourseGradientData } from '@/lib/utils';
 import type { DirectusCourse } from '@/types/directus';
 import BookmarkButton from './BookmarkButton';
 import AnimatedCoursePlan from './AnimatedCoursePlan';
@@ -285,7 +285,9 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-8 mb-8 border border-blue-200 dark:border-blue-800 shadow-sm">
           <blockquote className="text-xl italic text-gray-800 dark:text-gray-200 leading-relaxed">
             <span className="text-3xl text-blue-500 dark:text-blue-400 leading-none">&ldquo;</span>
-            {translation.quote}
+            <span
+              dangerouslySetInnerHTML={{ __html: renderSafeHTML(translation.quote) }}
+            />
             <span className="text-3xl text-blue-500 dark:text-blue-400 leading-none">&rdquo;</span>
           </blockquote>
           {course.quote_author && (

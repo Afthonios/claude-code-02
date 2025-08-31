@@ -477,53 +477,58 @@ export const freeWeeklyApi = {
       }
     }
 
-    // Server-side: Use Directus SDK directly
+    // Server-side: Use fetch instead of Directus SDK for better reliability
     try {
       const now = new Date();
+      const baseUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://api.afthonios.com';
       
-      const response = await directus.request(
-        readItems('free_weekly', {
-          fields: [
-            'id',
-            'week_start',
-            'week_end',
-            'course_id.id',
-            'course_id.legacy_id',
-            'course_id.status',
-            'course_id.duration',
-            'course_id.course_type',
-            'course_id.course_image',
-            'course_id.quote_author',
-            'course_id.gradient_from_light',
-            'course_id.gradient_to_light',
-            'course_id.gradient_from_dark',
-            'course_id.gradient_to_dark',
-            'course_id.on_light',
-            'course_id.on_dark',
-            'course_id.translations.*',
-            'course_id.main_competences.competences_id.id',
-            'course_id.main_competences.competences_id.color_light',
-            'course_id.main_competences.competences_id.color_dark',
-            'course_id.main_competences.competences_id.translations.*',
-            'course_id.competence.competences_id.id',
-            'course_id.competence.competences_id.parent_competence',
-          ],
-          filter: {
-            status: { _eq: 'published' },
-            week_start: { _lte: now.toISOString() },
-            week_end: { _gte: now.toISOString() },
-          },
-          limit: 1,
-        })
-      );
+      const url = new URL(`${baseUrl}/items/free_weekly`);
+      url.searchParams.set('fields', [
+        'id',
+        'week_start',
+        'week_end',
+        'course_id.id',
+        'course_id.legacy_id',
+        'course_id.status',
+        'course_id.duration',
+        'course_id.course_type',
+        'course_id.course_image',
+        'course_id.quote_author',
+        'course_id.gradient_from_light',
+        'course_id.gradient_to_light',
+        'course_id.gradient_from_dark',
+        'course_id.gradient_to_dark',
+        'course_id.on_light',
+        'course_id.on_dark',
+        'course_id.translations.*',
+        'course_id.main_competences.competences_id.id',
+        'course_id.main_competences.competences_id.color_light',
+        'course_id.main_competences.competences_id.color_dark',
+        'course_id.main_competences.competences_id.translations.*',
+        'course_id.competence.competences_id.id',
+        'course_id.competence.competences_id.parent_competence',
+      ].join(','));
+      url.searchParams.set('filter[status][_eq]', 'published');
+      url.searchParams.set('filter[week_start][_lte]', now.toISOString());
+      url.searchParams.set('filter[week_end][_gte]', now.toISOString());
+      url.searchParams.set('limit', '1');
 
-      if (response.length > 0 && response[0]) {
-        return response[0].course_id as DirectusCourse;
+      const response = await fetch(url.toString());
+      
+      if (!response.ok) {
+        console.error('🔍 [freeWeeklyApi] Server-side fetch failed:', response.status, response.statusText);
+        return null;
+      }
+
+      const data = await response.json();
+      
+      if (data.data && data.data.length > 0 && data.data[0]) {
+        return data.data[0].course_id as DirectusCourse;
       }
 
       return null;
     } catch (error) {
-      console.error('🔍 [freeWeeklyApi] Directus SDK failed:', error);
+      console.error('🔍 [freeWeeklyApi] Server-side fetch failed:', error);
       return null;
     }
   },
