@@ -127,33 +127,28 @@ export default withAuth(
           ? pathname.substring(3) // Remove /{locale} prefix
           : pathname;
         
-        // Check if the route requires authentication
-        const isProtectedRoute = protectedRoutes.some(route => 
-          pathWithoutLocale.startsWith(route)
-        );
+        // Determine required role for this route
+        const requiredRole = getRequiredRole(pathWithoutLocale);
         
-        // Check if the route requires admin access
-        const isAdminRoute = adminRoutes.some(route => 
-          pathWithoutLocale.startsWith(route)
-        );
-        
-        // If it's not a protected route, allow access
-        if (!isProtectedRoute && !isAdminRoute) {
+        // If no authentication is required, allow access
+        if (requiredRole === null) {
           return true;
         }
         
-        // If it's a protected route, user must be authenticated
-        if (isProtectedRoute && !token) {
+        // If authentication is required but user is not authenticated, deny access
+        if (!token) {
           return false;
         }
         
-        // If it's an admin route, user must be authenticated and have admin role
-        if (isAdminRoute) {
-          return !!token && token.role === 'admin';
+        // Check if user has the required role
+        const userRole = token.role as UserRole;
+        if (!userRole) {
+          // If user has no role, only allow access to basic authenticated routes
+          return requiredRole === UserRole.AUTHENTICATED;
         }
         
-        // Default: allow access if user has token
-        return !!token;
+        // Check if user's role meets the requirement
+        return hasRequiredRole(userRole, requiredRole);
       },
     },
   }
