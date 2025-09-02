@@ -4,6 +4,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import type { Locale } from '@/i18n';
+import { UserRole, hasRoleOrHigher, isB2BUser, isPayingCustomer, hasAdminPrivileges } from '@/lib/roles';
 
 export function useAuth() {
   const { data: session, status } = useSession();
