@@ -2,6 +2,7 @@ import createIntlMiddleware from 'next-intl/middleware';
 import { withAuth } from 'next-auth/middleware';
 import { NextRequest } from 'next/server';
 import { locales, defaultLocale } from './src/i18n';
+import { UserRole } from './src/lib/roles';
 
 // Create the internationalization middleware
 const intlMiddleware = createIntlMiddleware({
