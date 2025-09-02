@@ -273,9 +273,14 @@ export class DirectusAuthService {
   static createAuthenticatedClient(accessToken: string) {
     const client = createDirectus(
       process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://api.afthonios.com'
-    ).with(rest());
+    ).with(rest()).with(authentication('json'));
     
-    client.setToken(accessToken);
+    // Set token manually in the client
+    (client as any).globals = { 
+      ...((client as any).globals || {}),
+      access_token: accessToken 
+    };
+    
     return client;
   }
 
