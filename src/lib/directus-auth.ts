@@ -259,6 +259,7 @@ export class DirectusAuthService {
     try {
       // This would require a custom endpoint or admin privileges
       // For now, we'll let the registration attempt handle duplicate emails
+      console.log(`Email check requested for: ${email}`);
       return false;
     } catch (error) {
       console.error('Email check error:', error);
