@@ -72,8 +72,12 @@ export function useAuth() {
     redirectToLogin,
     redirectToSignup,
     
-    // Helpers
+    // Role Helpers
     hasRole,
+    hasRoleOrHigher,
     isAdmin,
+    isB2B,
+    isPaid,
+    canAccessRoute,
   };
 }
