@@ -98,7 +98,9 @@ export const DirectusCallbacks = {
         firstName: user.firstName,
         lastName: user.lastName,
         avatar: user.avatar,
-        role: user.role,
+        role: user.role, // UserRole enum value
+        roleId: user.roleId, // Directus role UUID
+        roleName: user.roleName, // User-friendly role name
         accessToken: user.accessToken,
         refreshToken: user.refreshToken,
         tokenExpires: user.tokenExpires,
