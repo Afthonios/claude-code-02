@@ -405,8 +405,7 @@ export class DirectusAuthService {
    * Invite user with specific role (admin function)
    */
   static async inviteUser(
-    userData: Omit<CreateUserData, 'password'> & { inviteRole: UserRole },
-    adminToken: string
+    userData: Omit<CreateUserData, 'password'> & { inviteRole: UserRole }
   ): Promise<DirectusAuthResult<EnhancedDirectusUser>> {
     try {
       // Generate a temporary password (user will be prompted to change)
