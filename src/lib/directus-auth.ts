@@ -7,9 +7,12 @@ import {
   readMe,
   refresh,
   logout,
+  readUsers,
+  updateUser,
   type DirectusUser,
   type AuthenticationData
 } from '@directus/sdk';
+import { UserRole, getRoleId, getRoleFromId } from '@/lib/roles';
 
 // Separate Directus client for authentication
 // This uses server-side authentication with proper token management
