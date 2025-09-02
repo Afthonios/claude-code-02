@@ -17,18 +17,95 @@ const intlMiddleware = createIntlMiddleware({
   localePrefix: 'always'
 });
 
-// Define protected routes that require authentication
-const protectedRoutes = [
-  '/dashboard',
-  '/profile',
-  '/my-courses',
-  '/settings'
-];
+// Route configuration with role-based access
+const routeConfig = {
+  // Public routes (no authentication required)
+  public: [
+    '/',
+    '/courses',
+    '/cours-de-la-semaine',
+    '/gestion-de-projet',
+    '/nouvelle-offre',
+    '/auth',
+  ],
+  
+  // Authenticated routes (any logged-in user)
+  authenticated: [
+    '/profile',
+    '/settings',
+  ],
+  
+  // Customer routes (paid customers only)
+  customer: [
+    '/my-courses',
+    '/course',
+  ],
+  
+  // B2B routes (B2B members and admins)
+  b2b: [
+    '/b2b/workspace',
+  ],
+  
+  // B2B admin routes (B2B admins only)
+  b2bAdmin: [
+    '/b2b/dashboard',
+    '/b2b/manage',
+    '/b2b/users',
+  ],
+  
+  // System admin routes (system administrators only)
+  admin: [
+    '/admin',
+  ],
+};
 
-// Define admin-only routes
-const adminRoutes = [
-  '/admin'
-];
+// Helper function to check if a route matches any patterns
+function matchesRoutes(pathname: string, routes: string[]): boolean {
+  return routes.some(route => {
+    if (route.endsWith('*')) {
+      return pathname.startsWith(route.slice(0, -1));
+    }
+    return pathname === route || pathname.startsWith(route + '/');
+  });
+}
+
+// Helper function to determine required role for a path
+function getRequiredRole(pathWithoutLocale: string): UserRole | null {
+  if (matchesRoutes(pathWithoutLocale, routeConfig.admin)) {
+    return UserRole.ADMIN;
+  }
+  if (matchesRoutes(pathWithoutLocale, routeConfig.b2bAdmin)) {
+    return UserRole.B2B_ADMIN;
+  }
+  if (matchesRoutes(pathWithoutLocale, routeConfig.b2b)) {
+    return UserRole.B2B_MEMBER;
+  }
+  if (matchesRoutes(pathWithoutLocale, routeConfig.customer)) {
+    return UserRole.CUSTOMER_PAID;
+  }
+  if (matchesRoutes(pathWithoutLocale, routeConfig.authenticated)) {
+    return UserRole.AUTHENTICATED;
+  }
+  if (matchesRoutes(pathWithoutLocale, routeConfig.public)) {
+    return null; // No authentication required
+  }
+  
+  // Default: require authentication for unknown routes
+  return UserRole.AUTHENTICATED;
+}
+
+// Helper function to check if user has required role or higher
+function hasRequiredRole(userRole: UserRole, requiredRole: UserRole): boolean {
+  const roleHierarchy = {
+    [UserRole.AUTHENTICATED]: 1,
+    [UserRole.CUSTOMER_PAID]: 2,
+    [UserRole.B2B_MEMBER]: 3,
+    [UserRole.B2B_ADMIN]: 4,
+    [UserRole.ADMIN]: 5,
+  };
+  
+  return roleHierarchy[userRole] >= roleHierarchy[requiredRole];
+}
 
 export default withAuth(
   function middleware(req: NextRequest) {
