@@ -1,6 +1,7 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { DirectusProvider, DirectusCallbacks } from '@/lib/auth/directus-provider';
+import { UserRole, hasRoleOrHigher } from '@/lib/roles';
 import { z } from 'zod';
 
 // Schema for credentials validation
