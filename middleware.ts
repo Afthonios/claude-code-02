@@ -167,11 +167,18 @@ export const config = {
     '/nouvelle-offre',
     '/auth/:path*',
     
-    // Protected routes
-    '/dashboard/:path*',
+    // Authenticated routes
     '/profile/:path*',
-    '/my-courses/:path*',
     '/settings/:path*',
+    
+    // Customer routes
+    '/my-courses/:path*',
+    '/course/:path*',
+    
+    // B2B routes
+    '/b2b/:path*',
+    
+    // Admin routes
     '/admin/:path*',
     
     // Set a cookie to remember the previous locale for
