@@ -99,37 +99,6 @@ export const authOptions: NextAuthOptions = {
     jwt: DirectusCallbacks.jwt,
     session: DirectusCallbacks.session,
     async redirect({ url, baseUrl }) {
-      // Custom role-based redirects after successful authentication
-      if (token?.role) {
-        const userRole = token.role as UserRole;
-        
-        // Extract locale from baseUrl or use default
-        const locale = 'fr'; // You might want to get this from the request or user preferences
-        
-        // Admin users go to admin dashboard
-        if (userRole === UserRole.ADMIN) {
-          return `${baseUrl}/${locale}/admin/dashboard`;
-        }
-        
-        // B2B Admins go to B2B management
-        if (userRole === UserRole.B2B_ADMIN) {
-          return `${baseUrl}/${locale}/b2b/dashboard`;
-        }
-        
-        // B2B Members go to B2B workspace
-        if (userRole === UserRole.B2B_MEMBER) {
-          return `${baseUrl}/${locale}/b2b/workspace`;
-        }
-        
-        // Paid customers go to their dashboard
-        if (userRole === UserRole.CUSTOMER_PAID) {
-          return `${baseUrl}/${locale}/my-courses`;
-        }
-        
-        // Default authenticated users go to profile
-        return `${baseUrl}/${locale}/profile`;
-      }
-      
       // Handle URL redirects
       if (url.startsWith('/')) {
         return `${baseUrl}${url}`;
@@ -140,7 +109,8 @@ export const authOptions: NextAuthOptions = {
         return url;
       }
       
-      return baseUrl;
+      // Default redirect to French locale root
+      return `${baseUrl}/fr`;
     },
     async signIn({ user }) {
       // Additional sign-in validation based on role
