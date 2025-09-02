@@ -239,7 +239,7 @@ export class DirectusAuthService {
    */
   static async logoutUser(refreshToken: string): Promise<DirectusAuthResult<void>> {
     try {
-      await directusAuth.request(logout(refreshToken));
+      await directusAuth.request(logout());
       return {
         success: true,
       };
