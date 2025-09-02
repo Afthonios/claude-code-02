@@ -196,8 +196,8 @@ export class DirectusAuthService {
    */
   static async getUserProfile(accessToken: string): Promise<DirectusAuthResult<EnhancedDirectusUser>> {
     try {
-      // Set the token for this request
-      directusAuth.setToken(accessToken);
+      // Create authenticated client for this request
+      const client = this.createAuthenticatedClient(accessToken);
       
       const user = await directusAuth.request(readMe({
         fields: [
