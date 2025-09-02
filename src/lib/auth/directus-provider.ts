@@ -1,5 +1,6 @@
 import CredentialsProvider from 'next-auth/providers/credentials';
 import DirectusAuthService from '@/lib/directus-auth';
+import { UserRole, getRoleFromId } from '@/lib/roles';
 
 // Directus profile interface (for potential future use)
 // interface DirectusProfile {
