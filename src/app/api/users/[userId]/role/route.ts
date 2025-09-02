@@ -229,8 +229,8 @@ export async function GET(
         role: result.data?.role_name,
         avatar: result.data?.avatar,
         status: result.data?.status,
-        createdAt: result.data?.date_created,
-        updatedAt: result.data?.date_updated,
+        createdAt: (result.data as any)?.date_created,
+        updatedAt: (result.data as any)?.date_updated,
       },
     });
 
