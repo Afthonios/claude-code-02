@@ -277,6 +277,162 @@ export class DirectusAuthService {
     client.setToken(accessToken);
     return client;
   }
+
+  /**
+   * Update user role (admin function)
+   */
+  static async updateUserRole(
+    userId: string, 
+    newRole: UserRole,
+    adminToken: string
+  ): Promise<DirectusAuthResult<EnhancedDirectusUser>> {
+    try {
+      const adminClient = this.createAuthenticatedClient(adminToken);
+      const roleId = getRoleId(newRole);
+
+      const result = await adminClient.request(
+        updateUser(userId, {
+          role: roleId,
+        })
+      );
+
+      // Enhance result with role information
+      const enhancedResult: EnhancedDirectusUser = {
+        ...result,
+        role_name: newRole,
+        role_display: newRole,
+      };
+
+      return {
+        success: true,
+        data: enhancedResult,
+      };
+    } catch (error: unknown) {
+      console.error('Role update error:', error);
+      return {
+        success: false,
+        error: 'Failed to update user role',
+      };
+    }
+  }
+
+  /**
+   * Get users by role (admin function)
+   */
+  static async getUsersByRole(
+    role: UserRole,
+    adminToken: string
+  ): Promise<DirectusAuthResult<EnhancedDirectusUser[]>> {
+    try {
+      const adminClient = this.createAuthenticatedClient(adminToken);
+      const roleId = getRoleId(role);
+
+      const result = await adminClient.request(
+        readUsers({
+          filter: {
+            role: { _eq: roleId },
+            status: { _eq: 'active' },
+          },
+          fields: [
+            'id',
+            'first_name',
+            'last_name',
+            'email',
+            'avatar',
+            'role',
+            'status',
+            'date_created',
+            'date_updated',
+          ],
+        })
+      );
+
+      // Enhance all users with role information
+      const enhancedUsers: EnhancedDirectusUser[] = result.map(user => ({
+        ...user,
+        role_name: role,
+        role_display: role,
+      }));
+
+      return {
+        success: true,
+        data: enhancedUsers,
+      };
+    } catch (error: unknown) {
+      console.error('Get users by role error:', error);
+      return {
+        success: false,
+        error: 'Failed to fetch users by role',
+      };
+    }
+  }
+
+  /**
+   * Create admin client using environment credentials
+   */
+  static async createAdminClient(): Promise<DirectusAuthResult<ReturnType<typeof this.createAuthenticatedClient>>> {
+    try {
+      if (!process.env.DIRECTUS_ADMIN_EMAIL || !process.env.DIRECTUS_ADMIN_PASSWORD) {
+        throw new Error('Admin credentials not configured');
+      }
+
+      const loginResult = await this.loginUser({
+        email: process.env.DIRECTUS_ADMIN_EMAIL,
+        password: process.env.DIRECTUS_ADMIN_PASSWORD,
+      });
+
+      if (!loginResult.success || !loginResult.data?.tokens.access_token) {
+        throw new Error('Failed to authenticate admin user');
+      }
+
+      const adminClient = this.createAuthenticatedClient(loginResult.data.tokens.access_token);
+
+      return {
+        success: true,
+        data: adminClient,
+      };
+    } catch (error: unknown) {
+      console.error('Admin client creation error:', error);
+      return {
+        success: false,
+        error: 'Failed to create admin client',
+      };
+    }
+  }
+
+  /**
+   * Invite user with specific role (admin function)
+   */
+  static async inviteUser(
+    userData: Omit<CreateUserData, 'password'> & { inviteRole: UserRole },
+    adminToken: string
+  ): Promise<DirectusAuthResult<EnhancedDirectusUser>> {
+    try {
+      // Generate a temporary password (user will be prompted to change)
+      const tempPassword = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const result = await this.registerUser({
+        ...userData,
+        password: tempPassword,
+        role: userData.inviteRole,
+      });
+
+      if (!result.success) {
+        return result;
+      }
+
+      // TODO: Send invitation email with password reset link
+      // This would typically be handled by Directus workflows or external email service
+
+      return result;
+    } catch (error: unknown) {
+      console.error('User invitation error:', error);
+      return {
+        success: false,
+        error: 'Failed to invite user',
+      };
+    }
+  }
 }
 
 // Export the service as default
