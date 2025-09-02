@@ -166,7 +166,9 @@ declare module 'next-auth' {
     firstName?: string;
     lastName?: string;
     avatar?: string;
-    role?: string;
+    role?: UserRole;
+    roleId?: string;
+    roleName?: string;
     accessToken?: string;
     refreshToken?: string;
     tokenExpires?: number;
@@ -180,7 +182,9 @@ declare module 'next-auth' {
       firstName?: string;
       lastName?: string;
       avatar?: string;
-      role?: string;
+      role?: UserRole;
+      roleId?: string;
+      roleName?: string;
     };
     accessToken?: string;
   }
