@@ -58,11 +58,9 @@ export class DirectusAuthService {
         : process.env.DIRECTUS_DEFAULT_USER_ROLE || getRoleId(UserRole.AUTHENTICATED);
 
       const result = await directusAuth.request(
-        registerUser({
+        registerUser(userData.email, userData.password, {
           first_name: userData.first_name,
           last_name: userData.last_name,
-          email: userData.email,
-          password: userData.password,
           role: roleId,
         })
       );
