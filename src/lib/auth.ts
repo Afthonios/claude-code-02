@@ -142,7 +142,7 @@ export const authOptions: NextAuthOptions = {
       
       return baseUrl;
     },
-    async signIn({ user, account, profile }) {
+    async signIn({ user }) {
       // Additional sign-in validation based on role
       if (user?.role) {
         // You can add custom validation here
