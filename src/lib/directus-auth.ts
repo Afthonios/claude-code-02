@@ -276,8 +276,9 @@ export class DirectusAuthService {
     ).with(rest()).with(authentication('json'));
     
     // Set token manually in the client
-    (client as any).globals = { 
-      ...((client as any).globals || {}),
+    const clientWithAuth = client as Record<string, unknown>;
+    clientWithAuth.globals = { 
+      ...(clientWithAuth.globals as Record<string, unknown> || {}),
       access_token: accessToken 
     };
     
