@@ -129,11 +129,12 @@ export class DirectusAuthService {
         ],
       }));
 
-      // Enhance user data with role information
+      // Enhance user data with role information  
+      const userRole = getRoleFromId(user.role as string);
       const enhancedUser: EnhancedDirectusUser = {
         ...user,
-        role_name: getRoleFromId(user.role as string),
-        role_display: getRoleFromId(user.role as string),
+        role_name: userRole,
+        role_display: userRole,
       };
 
       return {
@@ -212,11 +213,12 @@ export class DirectusAuthService {
         ],
       }));
 
-      // Enhance user data with role information
+      // Enhance user data with role information  
+      const userRole = getRoleFromId(user.role as string);
       const enhancedUser: EnhancedDirectusUser = {
         ...user,
-        role_name: getRoleFromId(user.role as string),
-        role_display: getRoleFromId(user.role as string),
+        role_name: userRole,
+        role_display: userRole,
       };
 
       return {
