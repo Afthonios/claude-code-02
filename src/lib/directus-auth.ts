@@ -40,6 +40,12 @@ interface DirectusAuthResult<T = unknown> {
   error?: string;
 }
 
+// Enhanced user data with role information
+interface EnhancedDirectusUser extends DirectusUser {
+  role_name?: UserRole;
+  role_display?: string;
+}
+
 export class DirectusAuthService {
   /**
    * Register a new user in Directus
