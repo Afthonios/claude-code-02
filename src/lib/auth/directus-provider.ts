@@ -61,7 +61,16 @@ export function DirectusProvider() {
         if (user.first_name) authUser.firstName = user.first_name;
         if (user.last_name) authUser.lastName = user.last_name;
         if (typeof user.avatar === 'string') authUser.avatar = user.avatar;
-        if (typeof user.role === 'string') authUser.role = user.role;
+        
+        // Handle role information
+        if (typeof user.role === 'string') {
+          authUser.roleId = user.role;
+          authUser.role = getRoleFromId(user.role);
+        }
+        
+        // Store role name for easy access
+        if (user.role_name) authUser.roleName = user.role_name;
+        
         if (tokens.access_token) authUser.accessToken = tokens.access_token;
         if (tokens.refresh_token) authUser.refreshToken = tokens.refresh_token;
         if (tokens.expires) authUser.tokenExpires = tokens.expires;
