@@ -174,7 +174,7 @@ export class DirectusAuthService {
   static async refreshToken(refreshToken: string): Promise<DirectusAuthResult<AuthenticationData>> {
     try {
       const result = await directusAuth.request(
-        refresh('json', refreshToken)
+        refresh('json', { refresh_token: refreshToken })
       );
 
       return {
