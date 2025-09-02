@@ -34,12 +34,30 @@ export function useAuth() {
     router.push(`/${currentLocale}/auth/signup?callbackUrl=${encodedCallback}`);
   };
 
-  const hasRole = (role: string) => {
+  const hasRole = (role: UserRole) => {
     return user?.role === role;
   };
 
+  const hasRoleOrHigher = (role: UserRole) => {
+    if (!user?.role) return false;
+    return hasRoleOrHigher(user.role, role);
+  };
+
   const isAdmin = () => {
-    return hasRole('admin');
+    return user?.role ? hasAdminPrivileges(user.role) : false;
+  };
+
+  const isB2B = () => {
+    return user?.role ? isB2BUser(user.role) : false;
+  };
+
+  const isPaid = () => {
+    return user?.role ? isPayingCustomer(user.role) : false;
+  };
+
+  const canAccessRoute = (requiredRole: UserRole) => {
+    if (!user?.role) return requiredRole === UserRole.AUTHENTICATED;
+    return hasRoleOrHigher(user.role, requiredRole);
   };
 
   return {
