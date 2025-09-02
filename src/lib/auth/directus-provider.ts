@@ -196,7 +196,9 @@ declare module 'next-auth/jwt' {
     firstName?: string;
     lastName?: string;
     avatar?: string;
-    role?: string;
+    role?: UserRole;
+    roleId?: string;
+    roleName?: string;
     accessToken?: string;
     refreshToken?: string;
     tokenExpires?: number;
