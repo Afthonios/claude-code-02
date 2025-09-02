@@ -144,7 +144,9 @@ export const DirectusCallbacks = {
         firstName: token.firstName as string,
         lastName: token.lastName as string,
         avatar: token.avatar as string,
-        role: token.role as string,
+        role: token.role as UserRole,
+        roleId: token.roleId as string,
+        roleName: token.roleName as string,
       };
       
       // Add access token to session (be careful with this in production)
