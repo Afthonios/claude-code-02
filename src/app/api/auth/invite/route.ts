@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
       last_name: lastName,
       email,
       inviteRole: role,
-    }, session.accessToken);
+    });
 
     if (!result.success) {
       // Handle specific error cases
