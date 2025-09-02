@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Get pending invitations (for admin dashboard)
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     
