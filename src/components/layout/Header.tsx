@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import LanguageSwitcher from "@/components/i18n/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import SearchOverlay from "@/components/layout/SearchOverlay";
+import UserMenu from "@/components/auth/UserMenu";
 import Image from "next/image";
 import { getCoursesListUrl } from "@/lib/directus";
 import type { Locale } from "@/i18n";
@@ -109,21 +110,8 @@ export default function Header() {
             <LanguageSwitcher />
             <ThemeToggle />
             
-            {/* Auth buttons - placeholder for now */}
-            <nav className="hidden md:flex items-center space-x-2">
-              <Link
-                href={`/${currentLocale}/auth/login`}
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-accent text-secondary border border-secondary/30 hover:border-secondary dark:text-accent dark:border-accent/30 dark:hover:border-accent h-9 px-3"
-              >
-                {t('login')}
-              </Link>
-              <Link
-                href={`/${currentLocale}/auth/signup`}
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-accent bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3"
-              >
-                {t('signup')}
-              </Link>
-            </nav>
+            {/* User Menu with Authentication */}
+            <UserMenu />
           </div>
         </div>
       </div>
