@@ -68,7 +68,7 @@ export class DirectusAuthService {
       // Enhance the result with role information
       const enhancedResult: EnhancedDirectusUser = {
         ...result,
-        role_name: getRoleFromId(result.role as string),
+        role_name: userData.role || UserRole.AUTHENTICATED,
         role_display: userData.role || UserRole.AUTHENTICATED,
       };
 
