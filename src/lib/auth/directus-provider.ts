@@ -134,7 +134,7 @@ export const DirectusCallbacks = {
     return token;
   },
 
-  async session({ session, token }: any) {
+  async session({ session, token }: { session: any; token?: any }) {
     // Add Directus user data to session
     if (token) {
       session.user = {
