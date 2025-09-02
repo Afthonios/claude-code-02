@@ -199,7 +199,7 @@ export class DirectusAuthService {
       // Create authenticated client for this request
       const client = this.createAuthenticatedClient(accessToken);
       
-      const user = await directusAuth.request(readMe({
+      const user = await client.request(readMe({
         fields: [
           'id',
           'first_name',
