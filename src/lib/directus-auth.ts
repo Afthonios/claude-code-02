@@ -439,4 +439,4 @@ export class DirectusAuthService {
 export default DirectusAuthService;
 
 // Export types for use in other files
-export type { CreateUserData, LoginCredentials, DirectusAuthResult };
+export type { CreateUserData, LoginCredentials, DirectusAuthResult, EnhancedDirectusUser };
