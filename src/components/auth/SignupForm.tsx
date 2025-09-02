@@ -50,18 +50,40 @@ export default function SignupForm({ locale }: SignupFormProps) {
     setSuccess('');
 
     try {
-      // TODO: Implement actual user registration
-      // This is a placeholder - in production, you would:
-      // 1. Create a user registration API endpoint
-      // 2. Hash passwords securely
-      // 3. Store user in your database (Directus, PostgreSQL, etc.)
-      // 4. Send verification email if needed
-      
-      // For now, simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Simulate successful registration
-      setSuccess('Account created successfully! Please sign in.');
+      // Call our registration API endpoint
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: name.split(' ')[0] || name,
+          lastName: name.split(' ').slice(1).join(' ') || '',
+          email,
+          password,
+          confirmPassword,
+          acceptTerms,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        // Handle specific error cases
+        if (result.code === 'EMAIL_EXISTS') {
+          setError('An account with this email already exists. Please try signing in instead.');
+        } else if (result.details) {
+          // Handle validation errors
+          const firstError = result.details[0];
+          setError(firstError?.message || result.error);
+        } else {
+          setError(result.error || 'Registration failed. Please try again.');
+        }
+        return;
+      }
+
+      // Registration successful
+      setSuccess('Account created successfully! Please sign in with your new credentials.');
       
       // Redirect to login page after 2 seconds
       setTimeout(() => {
@@ -69,7 +91,7 @@ export default function SignupForm({ locale }: SignupFormProps) {
       }, 2000);
       
     } catch (err) {
-      setError('An error occurred while creating your account. Please try again.');
+      setError('Unable to connect to the server. Please check your internet connection and try again.');
       console.error('Signup error:', err);
     } finally {
       setIsLoading(false);

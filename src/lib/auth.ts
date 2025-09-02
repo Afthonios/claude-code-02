@@ -1,5 +1,6 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { DirectusProvider, DirectusCallbacks } from '@/lib/auth/directus-provider';
 import { z } from 'zod';
 
 // Schema for credentials validation
@@ -8,44 +9,22 @@ const credentialsSchema = z.object({
   password: z.string().min(6),
 });
 
-// User type for TypeScript
-declare module 'next-auth' {
-  interface User {
-    id: string;
-    email: string;
-    name: string;
-    role?: string;
-  }
-
-  interface Session {
-    user: {
-      id: string;
-      email: string;
-      name: string;
-      role?: string | undefined;
-    };
-  }
-}
-
-declare module 'next-auth/jwt' {
-  interface JWT {
-    id: string;
-    email: string;
-    name: string;
-    role?: string | undefined;
-  }
-}
+// NextAuth type augmentations are handled in directus-provider.ts
 
 export const authOptions: NextAuthOptions = {
   providers: [
+    // Primary Directus provider for real user authentication
+    DirectusProvider(),
+    
+    // Keep demo credentials provider for development/testing
     CredentialsProvider({
-      id: 'credentials',
-      name: 'credentials',
+      id: 'demo',
+      name: 'Demo Account',
       credentials: {
         email: { 
           label: 'Email', 
           type: 'email',
-          placeholder: 'user@example.com'
+          placeholder: 'user@afthonios.com'
         },
         password: { 
           label: 'Password', 
@@ -64,23 +43,17 @@ export const authOptions: NextAuthOptions = {
             password: credentials.password,
           });
 
-          // TODO: Replace this with actual user authentication
-          // This is a temporary implementation - in production, you should:
-          // 1. Hash and compare passwords securely (bcrypt, scrypt, etc.)
-          // 2. Query your actual user database (Directus, PostgreSQL, etc.)
-          // 3. Validate user credentials against your auth system
-
-          // Temporary demo users for development
+          // Demo users for development/testing
           const demoUsers = [
             {
-              id: '1',
+              id: 'demo-1',
               email: 'user@afthonios.com',
               name: 'Demo User',
               password: 'password123',
               role: 'user'
             },
             {
-              id: '2',
+              id: 'demo-2',
               email: 'admin@afthonios.com',
               name: 'Admin User',
               password: 'admin123',
@@ -94,7 +67,6 @@ export const authOptions: NextAuthOptions = {
           );
 
           if (user) {
-            // Return user object without password
             return {
               id: user.id,
               email: user.email,
@@ -105,7 +77,7 @@ export const authOptions: NextAuthOptions = {
 
           return null;
         } catch (error) {
-          console.error('Authentication error:', error);
+          console.error('Demo authentication error:', error);
           return null;
         }
       }
@@ -123,30 +95,8 @@ export const authOptions: NextAuthOptions = {
     error: '/auth/error', // Error code passed in query string as ?error=
   },
   callbacks: {
-    async jwt({ token, user }) {
-      // Persist the OAuth access_token and user info to the token right after signin
-      if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.name = user.name;
-        if (user.role) {
-          token.role = user.role;
-        }
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      // Send properties to the client, like an access_token and user id from a provider.
-      if (token) {
-        session.user.id = token.id;
-        session.user.email = token.email;
-        session.user.name = token.name;
-        if (token.role) {
-          session.user.role = token.role;
-        }
-      }
-      return session;
-    },
+    jwt: DirectusCallbacks.jwt,
+    session: DirectusCallbacks.session,
     async redirect({ url, baseUrl }) {
       // Allows relative callback URLs
       if (url.startsWith('/')) return `${baseUrl}${url}`;

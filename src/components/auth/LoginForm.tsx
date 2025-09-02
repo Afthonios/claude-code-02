@@ -31,16 +31,29 @@ export default function LoginForm({ locale }: LoginFormProps) {
     setError('');
 
     try {
-      const result = await signIn('credentials', {
+      // Try Directus authentication first
+      const result = await signIn('directus', {
         email,
         password,
         redirect: false,
       });
 
       if (result?.error) {
-        setError('Invalid credentials. Please try again.');
+        // If Directus auth fails, try demo credentials
+        const demoResult = await signIn('demo', {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (demoResult?.error) {
+          setError('Invalid credentials. Please check your email and password and try again.');
+        } else if (demoResult?.ok) {
+          // Redirect to the courses page
+          router.push(`/${locale}/courses`);
+        }
       } else if (result?.ok) {
-        // Redirect to the courses page or dashboard
+        // Directus auth successful, redirect to courses page
         router.push(`/${locale}/courses`);
       }
     } catch (err) {
