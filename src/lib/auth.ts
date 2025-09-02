@@ -98,7 +98,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     jwt: DirectusCallbacks.jwt,
     session: DirectusCallbacks.session,
-    async redirect({ url, baseUrl, token }) {
+    async redirect({ url, baseUrl }) {
       // Custom role-based redirects after successful authentication
       if (token?.role) {
         const userRole = token.role as UserRole;
