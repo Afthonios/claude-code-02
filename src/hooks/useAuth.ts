@@ -38,7 +38,7 @@ export function useAuth() {
     return user?.role === role;
   };
 
-  const hasRoleOrHigher = (role: UserRole) => {
+  const hasRoleOrHigherThan = (role: UserRole) => {
     if (!user?.role) return false;
     return hasRoleOrHigher(user.role, role);
   };
