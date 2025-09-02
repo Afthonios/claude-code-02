@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { firstName, lastName, email, role, organizationId, message } = validationResult.data;
+    const { firstName, lastName, email, role } = validationResult.data;
 
     // Additional role validation based on inviter's role
     if (userRole === UserRole.B2B_ADMIN && role === UserRole.B2B_ADMIN) {
