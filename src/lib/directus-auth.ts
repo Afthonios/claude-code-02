@@ -193,9 +193,9 @@ export class DirectusAuthService {
   }
 
   /**
-   * Get user profile by access token
+   * Get enhanced user profile by access token
    */
-  static async getUserProfile(accessToken: string): Promise<DirectusAuthResult<DirectusUser>> {
+  static async getUserProfile(accessToken: string): Promise<DirectusAuthResult<EnhancedDirectusUser>> {
     try {
       // Set the token for this request
       directusAuth.setToken(accessToken);
@@ -214,9 +214,16 @@ export class DirectusAuthService {
         ],
       }));
 
+      // Enhance user data with role information
+      const enhancedUser: EnhancedDirectusUser = {
+        ...user,
+        role_name: getRoleFromId(user.role as string),
+        role_display: getRoleFromId(user.role as string),
+      };
+
       return {
         success: true,
-        data: user,
+        data: enhancedUser,
       };
     } catch (error: unknown) {
       console.error('Profile fetch error:', error);
