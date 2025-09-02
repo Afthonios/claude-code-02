@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import DirectusAuthService from '@/lib/directus-auth';
-import { UserRole, isValidUserRole } from '@/lib/roles';
+import { UserRole } from '@/lib/roles';
 
 // Validation schema for registration data
 const registrationSchema = z.object({
