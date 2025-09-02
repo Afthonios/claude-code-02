@@ -158,7 +158,7 @@ export async function PUT(
 
 // Get user details with role information
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { userId: string } }
 ) {
   try {
