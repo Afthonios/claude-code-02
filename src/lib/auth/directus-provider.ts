@@ -31,7 +31,7 @@ export function DirectusProvider() {
         type: 'password' 
       }
     },
-    async authorize(credentials) {
+    async authorize(credentials): Promise<any> {
       if (!credentials?.email || !credentials?.password) {
         throw new Error('Email and password are required');
       }
