@@ -103,9 +103,9 @@ export class DirectusAuthService {
   }
 
   /**
-   * Authenticate user with Directus
+   * Authenticate user with Directus and enhance with role information
    */
-  static async loginUser(credentials: LoginCredentials): Promise<DirectusAuthResult<{ user: DirectusUser; tokens: AuthenticationData }>> {
+  static async loginUser(credentials: LoginCredentials): Promise<DirectusAuthResult<{ user: EnhancedDirectusUser; tokens: AuthenticationData }>> {
     try {
       // Authenticate with Directus
       const authResult = await directusAuth.request(
@@ -116,13 +116,32 @@ export class DirectusAuthService {
         throw new Error('No access token received');
       }
 
-      // Get user profile
-      const user = await directusAuth.request(readMe());
+      // Get user profile with role information
+      const user = await directusAuth.request(readMe({
+        fields: [
+          'id',
+          'first_name',
+          'last_name',
+          'email',
+          'avatar',
+          'role',
+          'status',
+          'date_created',
+          'date_updated',
+        ],
+      }));
+
+      // Enhance user data with role information
+      const enhancedUser: EnhancedDirectusUser = {
+        ...user,
+        role_name: getRoleFromId(user.role as string),
+        role_display: getRoleFromId(user.role as string),
+      };
 
       return {
         success: true,
         data: {
-          user,
+          user: enhancedUser,
           tokens: authResult,
         },
       };
