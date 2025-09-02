@@ -15,7 +15,7 @@ export function useWeeklyCoursePositioning(
   filters: FilterState
 ) {
   return useMemo(() => {
-    if (!weeklyFreeCourse || filters.showBookmarked) {
+    if (!weeklyFreeCourse) {
       return courses;
     }
 
@@ -23,28 +23,31 @@ export function useWeeklyCoursePositioning(
     const existingWeeklyCourseIndex = courses.findIndex(course => course.id === weeklyFreeCourse.id);
     const shouldShowWeeklyCourse = shouldShowWeeklyFreeCourse(weeklyFreeCourse, filters);
 
-    console.log('🎯 [Weekly Course Debug] Evaluating weekly course display conditions');
-    console.log('🎯 Weekly course:', {
-      id: weeklyFreeCourse.id,
-      title: weeklyFreeCourse.translations?.[0]?.title,
-      course_type: weeklyFreeCourse.course_type,
-      hasMainCompetences: !!weeklyFreeCourse.main_competences?.length,
-      hasLegacyCompetences: !!weeklyFreeCourse.competence?.length
-    });
-    console.log('🎯 Current filters:', {
-      courseType: filters.courseType,
-      competences: filters.competences,
-      hideCompleted: filters.hideCompleted
-    });
-    console.log('🎯 Filtered courses before weekly positioning:', courses.length);
-    console.log('🎯 Weekly course position in results:', existingWeeklyCourseIndex);
-    console.log('🎯 Should show weekly course:', shouldShowWeeklyCourse);
+    // Debug logging (can be enabled for troubleshooting)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🎯 [Weekly Course Debug] Evaluating weekly course display conditions');
+      console.log('🎯 Weekly course:', {
+        id: weeklyFreeCourse.id,
+        title: weeklyFreeCourse.translations?.[0]?.title,
+        course_type: weeklyFreeCourse.course_type
+      });
+      console.log('🎯 Current filters:', {
+        courseType: filters.courseType,
+        competences: filters.competences,
+        showBookmarked: filters.showBookmarked
+      });
+      console.log('🎯 Filtered courses before weekly positioning:', courses.length);
+      console.log('🎯 Weekly course position in results:', existingWeeklyCourseIndex);
+      console.log('🎯 Should show weekly course:', shouldShowWeeklyCourse);
+    }
 
     if (shouldShowWeeklyCourse) {
       return positionWeeklyCourseFirst(courses, weeklyFreeCourse, existingWeeklyCourseIndex);
     }
 
-    console.log('🎯 Weekly course NOT shown due to current filter combination');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🎯 Weekly course NOT shown due to current filter combination');
+    }
     return courses;
   }, [courses, weeklyFreeCourse, filters]);
 }
@@ -53,11 +56,22 @@ export function useWeeklyCoursePositioning(
  * Determine if the weekly free course should be shown based on current filters
  */
 function shouldShowWeeklyFreeCourse(weeklyFreeCourse: DirectusCourse, filters: FilterState): boolean {
-  const hasNoFilters = filters.courseType.length === 0 && filters.competences.length === 0;
+  const hasNoFilters = filters.courseType.length === 0 && filters.competences.length === 0 && !filters.showBookmarked;
 
   // Show if no filters are applied
   if (hasNoFilters) {
-    console.log('🎯 Weekly course shown: No filters applied');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🎯 Weekly course shown: No filters applied');
+    }
+    return true;
+  }
+
+  // Special case: if only bookmark filter is active, check if weekly course is in results
+  // This means it was already filtered by the bookmark service and should be shown
+  if (filters.showBookmarked && filters.courseType.length === 0 && filters.competences.length === 0) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🎯 Weekly course shown: Only bookmark filter active and course is bookmarked');
+    }
     return true;
   }
 
@@ -67,30 +81,27 @@ function shouldShowWeeklyFreeCourse(weeklyFreeCourse: DirectusCourse, filters: F
      isValidCourseType(weeklyFreeCourse.course_type) &&
      filters.courseType.includes(weeklyFreeCourse.course_type));
 
-  // If only course type filter is applied
-  if (filters.competences.length === 0) {
-    if (courseTypeMatches) {
-      console.log('🎯 Weekly course shown: Course type filter matches');
-      return true;
+  // Check competence filter match
+  const competenceMatches = filters.competences.length === 0 || 
+    matchesCompetenceFilter(weeklyFreeCourse, filters.competences);
+
+  // For bookmark filter combined with other filters, we rely on the fact that 
+  // if the weekly course is in the filtered results, it already passed all filters
+  const shouldShow = Boolean(courseTypeMatches && competenceMatches);
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🎯 Weekly course filter check:', { 
+      courseTypeMatches, 
+      competenceMatches, 
+      showBookmarked: filters.showBookmarked,
+      shouldShow 
+    });
+
+    if (shouldShow) {
+      console.log('🎯 Weekly course shown: All active filters match');
+    } else {
+      console.log('🎯 Weekly course hidden: Filters do not match');
     }
-    console.log('🎯 Weekly course hidden: Course type filter does not match');
-    return false;
-  }
-
-  // If competence filters are applied
-  const competenceMatches = matchesCompetenceFilter(weeklyFreeCourse, filters.competences);
-  const shouldShow = Boolean(competenceMatches && courseTypeMatches);
-
-  console.log('🎯 Weekly course competence check:', { 
-    competenceMatches, 
-    courseTypeMatches, 
-    shouldShow 
-  });
-
-  if (shouldShow) {
-    console.log('🎯 Weekly course shown: Competence and course type filters match');
-  } else {
-    console.log('🎯 Weekly course hidden: Filters do not match');
   }
 
   return shouldShow;
@@ -106,18 +117,24 @@ function positionWeeklyCourseFirst(
 ): DirectusCourse[] {
   if (existingWeeklyCourseIndex === -1) {
     // Weekly course not in results, add it at position 0
-    console.log('🎯 Weekly course added at position 1');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🎯 Weekly course added at position 1');
+    }
     return [weeklyFreeCourse, ...courses];
   } else if (existingWeeklyCourseIndex !== 0) {
     // Weekly course is in results but not at position 0, move it there
     const coursesToReorder = [...courses];
     const [weeklyCourse] = coursesToReorder.splice(existingWeeklyCourseIndex, 1);
     if (weeklyCourse) {
-      console.log('🎯 Weekly course moved from position', existingWeeklyCourseIndex + 1, 'to position 1');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🎯 Weekly course moved from position', existingWeeklyCourseIndex + 1, 'to position 1');
+      }
       return [weeklyCourse, ...coursesToReorder];
     }
   } else {
-    console.log('🎯 Weekly course already at position 1');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🎯 Weekly course already at position 1');
+    }
   }
 
   return courses;

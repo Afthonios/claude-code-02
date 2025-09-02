@@ -63,7 +63,7 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           {locale === 'fr' ? 'Cours non trouvé' : 'Course not found'}
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600 dark:text-gray-200">
           {locale === 'fr' 
             ? 'Le cours demandé n\'est pas disponible dans cette langue.' 
             : 'The requested course is not available in this language.'}
@@ -214,7 +214,7 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
                 "text-sm",
                 gradientStyles.hasGradient 
                   ? `course-detail-${course.id}-text`
-                  : "text-gray-700 dark:text-gray-300"
+                  : "text-gray-700 dark:text-gray-100"
               )}>
                 {translation.public}
               </p>
@@ -271,7 +271,7 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
                 }}
               >
                 <span className="text-primary mr-3 mt-0.5 text-lg leading-none flex-shrink-0">•</span>
-                <span className="text-gray-700 dark:text-gray-300 leading-relaxed">{objective}</span>
+                <span className="text-gray-700 dark:text-gray-100 leading-relaxed">{objective}</span>
               </li>
             ))}
           </ul>
@@ -298,7 +298,7 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
       {/* Quote - Simple Centered Design */}
       {translation.quote && (
         <div className="text-center py-8 mb-12">
-          <blockquote className="text-xl md:text-2xl font-light italic text-gray-700 dark:text-gray-300 leading-relaxed max-w-4xl mx-auto">
+          <blockquote className="text-xl md:text-2xl font-light italic text-gray-700 dark:text-gray-100 leading-relaxed max-w-4xl mx-auto">
             <span className="text-4xl text-blue-500 dark:text-blue-400 font-serif leading-none">&ldquo;</span>
             <span className="mx-2" style={{hyphens: 'none', wordBreak: 'keep-all', overflowWrap: 'break-word'}}>
               {renderSafeHTML(translation.quote)}
@@ -306,7 +306,7 @@ export default function CourseDetail({ course, locale }: CourseDetailProps) {
             <span className="text-4xl text-blue-500 dark:text-blue-400 font-serif leading-none">&rdquo;</span>
           </blockquote>
           {course.quote_author && (
-            <cite className="block mt-6 text-base font-medium text-gray-600 dark:text-gray-400 not-italic" style={{wordBreak: 'keep-all'}}>
+            <cite className="block mt-6 text-base font-medium text-gray-600 dark:text-gray-200 not-italic" style={{wordBreak: 'keep-all'}}>
               &mdash; {course.quote_author}
             </cite>
           )}
