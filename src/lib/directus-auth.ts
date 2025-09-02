@@ -48,24 +48,35 @@ interface EnhancedDirectusUser extends DirectusUser {
 
 export class DirectusAuthService {
   /**
-   * Register a new user in Directus
+   * Register a new user in Directus with role management
    */
-  static async registerUser(userData: CreateUserData): Promise<DirectusAuthResult<DirectusUser>> {
+  static async registerUser(userData: CreateUserData): Promise<DirectusAuthResult<EnhancedDirectusUser>> {
     try {
+      // Determine the role ID to use
+      const roleId = userData.role 
+        ? getRoleId(userData.role)
+        : process.env.DIRECTUS_DEFAULT_USER_ROLE || getRoleId(UserRole.AUTHENTICATED);
+
       const result = await directusAuth.request(
         registerUser({
           first_name: userData.first_name,
           last_name: userData.last_name,
           email: userData.email,
           password: userData.password,
-          // Use default role from environment or fallback to a customer role UUID
-          role: userData.role || process.env.DIRECTUS_DEFAULT_USER_ROLE || null,
+          role: roleId,
         })
       );
 
+      // Enhance the result with role information
+      const enhancedResult: EnhancedDirectusUser = {
+        ...result,
+        role_name: getRoleFromId(result.role as string),
+        role_display: userData.role || UserRole.AUTHENTICATED,
+      };
+
       return {
         success: true,
-        data: result,
+        data: enhancedResult,
       };
     } catch (error: unknown) {
       console.error('Registration error:', error);
