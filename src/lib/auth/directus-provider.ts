@@ -89,7 +89,7 @@ export function DirectusProvider() {
 
 // Export JWT and session callback helpers for Directus integration
 export const DirectusCallbacks = {
-  async jwt({ token, user, account }) {
+  async jwt({ token, user, account }: any) {
     // Initial sign in
     if (account && user) {
       return {
