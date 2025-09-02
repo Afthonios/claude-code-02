@@ -11,6 +11,9 @@ const registrationSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string(),
   acceptTerms: z.boolean().refine(val => val === true, 'You must accept the terms and conditions'),
+  role: z.enum([UserRole.AUTHENTICATED, UserRole.CUSTOMER_PAID]).optional().default(UserRole.AUTHENTICATED),
+  registrationType: z.enum(['standard', 'b2b_invitation']).optional().default('standard'),
+  invitationCode: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
