@@ -237,7 +237,7 @@ export class DirectusAuthService {
   /**
    * Logout user (invalidate token)
    */
-  static async logoutUser(refreshToken: string): Promise<DirectusAuthResult<void>> {
+  static async logoutUser(_refreshToken: string): Promise<DirectusAuthResult<void>> {
     try {
       await directusAuth.request(logout());
       return {
