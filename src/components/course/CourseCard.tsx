@@ -148,10 +148,24 @@ export default function CourseCard({ course, locale, isWeeklyFreeCourse = false,
             }
             ${isWeeklyFreeCourse ? `
             .course-card-${course.id} .weekly-content-bg {
-              background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%) !important;
+              background: linear-gradient(135deg, #c2410c 0%, #c2410c 100%) !important;
             }
             .dark .course-card-${course.id} .weekly-content-bg {
               background: linear-gradient(135deg, #c2410c 0%, #c2410c 100%) !important;
+            }
+            .course-card-${course.id} .weekly-badge {
+              background: linear-gradient(135deg, #c2410c 0%, #c2410c 100%) !important;
+              border-color: #ffffff !important;
+            }
+            .dark .course-card-${course.id} .weekly-badge {
+              background: linear-gradient(135deg, #c2410c 0%, #c2410c 100%) !important;
+              border-color: #ffffff !important;
+            }
+            .course-card-${course.id} .weekly-text {
+              color: #ffffff !important;
+            }
+            .dark .course-card-${course.id} .weekly-text {
+              color: #ffffff !important;
             }
             ` : ''}
           `
@@ -184,7 +198,7 @@ export default function CourseCard({ course, locale, isWeeklyFreeCourse = false,
           {/* Free Course of the Week badge */}
           {isWeeklyFreeCourse && (
             <div className="absolute top-2 left-2 z-10">
-              <div className="bg-[#C2410C]/75 backdrop-blur-sm border-2 border-white/30 dark:border-white text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
+              <div className="weekly-badge border border-white text-white text-xs font-semibold px-2 py-1 rounded-full shadow-lg">
                 {locale === 'fr' ? 'Gratuite cette semaine' : 'Free this Week'}
               </div>
             </div>
@@ -203,7 +217,7 @@ export default function CourseCard({ course, locale, isWeeklyFreeCourse = false,
         <div className={cn(
           "p-6 flex flex-col flex-1",
           isWeeklyFreeCourse && !gradientStyles.hasGradient
-            ? "bg-gradient-to-br from-orange-100 to-orange-200 dark:bg-[#c2410c]"
+            ? "bg-[#c2410c] dark:bg-[#c2410c]"
             : "",
           isWeeklyFreeCourse && gradientStyles.hasGradient
             ? "weekly-content-bg"
@@ -214,9 +228,10 @@ export default function CourseCard({ course, locale, isWeeklyFreeCourse = false,
             ref={titleRef}
             className={cn(
               "text-xl font-semibold mb-3 group-hover:opacity-80 transition-all duration-200 course-title leading-tight",
-              gradientStyles.hasGradient 
+              isWeeklyFreeCourse ? "weekly-text" : "",
+              gradientStyles.hasGradient && !isWeeklyFreeCourse
                 ? `course-card-${course.id}-text`
-                : "text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400"
+                : !isWeeklyFreeCourse ? "text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400" : ""
             )}
           >
             {translation.title}
@@ -226,9 +241,10 @@ export default function CourseCard({ course, locale, isWeeklyFreeCourse = false,
             as="p"
             className={cn(
               "text-sm mb-5 opacity-90 course-card-text flex-1 leading-relaxed",
-              gradientStyles.hasGradient 
+              isWeeklyFreeCourse ? "weekly-text" : "",
+              gradientStyles.hasGradient && !isWeeklyFreeCourse
                 ? `course-card-${course.id}-text`
-                : "text-gray-600 dark:text-gray-400"
+                : !isWeeklyFreeCourse ? "text-gray-600 dark:text-gray-400" : ""
             )}
             style={{
               display: '-webkit-box',
@@ -248,17 +264,19 @@ export default function CourseCard({ course, locale, isWeeklyFreeCourse = false,
           <div 
             className={cn(
               "flex items-center justify-between text-sm mt-auto pt-3",
-              gradientStyles.hasGradient 
+              isWeeklyFreeCourse ? "weekly-text" : "",
+              gradientStyles.hasGradient && !isWeeklyFreeCourse
                 ? `course-card-${course.id}-text`
-                : "text-gray-500 dark:text-gray-400"
+                : !isWeeklyFreeCourse ? "text-gray-500 dark:text-gray-400" : ""
             )}
           >
             {duration && (
               <span className={cn(
                 "px-2 py-1 rounded text-xs",
-                gradientStyles.hasGradient 
+                isWeeklyFreeCourse ? "bg-white/20 backdrop-blur-sm weekly-text" : "",
+                gradientStyles.hasGradient && !isWeeklyFreeCourse
                   ? "bg-white/20 backdrop-blur-sm"
-                  : "bg-gray-100 dark:bg-gray-700"
+                  : !isWeeklyFreeCourse ? "bg-gray-100 dark:bg-gray-700" : ""
               )}>
                 {duration}
               </span>
@@ -266,9 +284,10 @@ export default function CourseCard({ course, locale, isWeeklyFreeCourse = false,
             <span 
               className={cn(
                 "font-medium group-hover:translate-x-1 transition-transform duration-200",
-                gradientStyles.hasGradient 
+                isWeeklyFreeCourse ? "weekly-text" : "",
+                gradientStyles.hasGradient && !isWeeklyFreeCourse
                   ? `course-card-${course.id}-text`
-                  : "text-blue-600 dark:text-blue-400"
+                  : !isWeeklyFreeCourse ? "text-blue-600 dark:text-blue-400" : ""
               )}
             >
               {getViewButtonText()}
