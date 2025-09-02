@@ -74,7 +74,7 @@ export function useAuth() {
     
     // Role Helpers
     hasRole,
-    hasRoleOrHigher,
+    hasRoleOrHigher: hasRoleOrHigherThan,
     isAdmin,
     isB2B,
     isPaid,
