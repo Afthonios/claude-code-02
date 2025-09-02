@@ -42,7 +42,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { firstName, lastName, email, password } = validationResult.data;
+    const { firstName, lastName, email, password, role, registrationType, invitationCode } = validationResult.data;
+
+    // Handle B2B invitation registration
+    if (registrationType === 'b2b_invitation') {
+      if (!invitationCode) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: 'Invitation code is required for B2B registration',
+            code: 'INVITATION_CODE_REQUIRED'
+          },
+          { status: 400 }
+        );
+      }
+
+      // TODO: Validate invitation code and determine B2B role
+      // This would typically check against a database of pending invitations
+      // For now, we'll assume valid invitation codes grant B2B_MEMBER role
+      
+      // In a real implementation, you'd:
+      // 1. Look up the invitation in your database
+      // 2. Verify it's not expired
+      // 3. Get the intended role from the invitation
+      // 4. Mark the invitation as used
+    }
+
+    // Determine final role
+    let finalRole = role;
+    if (registrationType === 'b2b_invitation') {
+      // B2B invitations typically create member roles
+      // This could be customized based on the invitation details
+      finalRole = UserRole.B2B_MEMBER;
+    }
 
     // Register user with Directus
     const registrationData = {
@@ -50,8 +82,7 @@ export async function POST(request: NextRequest) {
       last_name: lastName,
       email,
       password,
-      // Only include role if it's defined
-      ...(process.env.DIRECTUS_DEFAULT_USER_ROLE && { role: process.env.DIRECTUS_DEFAULT_USER_ROLE }),
+      role: finalRole,
     };
     
     const result = await DirectusAuthService.registerUser(registrationData);
