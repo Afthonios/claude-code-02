@@ -255,7 +255,7 @@ export class DirectusAuthService {
   /**
    * Validate if an email already exists in Directus
    */
-  static async checkEmailExists(_email: string): Promise<boolean> {
+  static async checkEmailExists(email: string): Promise<boolean> {
     try {
       // This would require a custom endpoint or admin privileges
       // For now, we'll let the registration attempt handle duplicate emails
