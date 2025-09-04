@@ -152,6 +152,15 @@ export default function SimpleAuthTest() {
             </div>
           </div>
         )}
+
+        {directusTest && (
+          <div className="mt-6 bg-gray-50 p-4 rounded">
+            <h3 className="font-semibold mb-2">Directus API Test Result:</h3>
+            <pre className="text-xs overflow-x-auto bg-white p-2 rounded border">
+              {JSON.stringify(directusTest, null, 2)}
+            </pre>
+          </div>
+        )}
         
         <div className="mt-6 text-center">
           <p className="text-xs text-gray-500">Status: {status}</p>
