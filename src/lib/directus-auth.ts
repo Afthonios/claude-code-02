@@ -61,7 +61,6 @@ export class DirectusAuthService {
         registerUser(userData.email, userData.password, {
           first_name: userData.first_name,
           last_name: userData.last_name,
-          role: roleId,
         })
       );
 
