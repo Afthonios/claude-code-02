@@ -126,20 +126,21 @@ export class DirectusAuthService {
         throw new Error('No access token received');
       }
 
-      // Get user profile with role information
-      const user = await directusAuth.request(readMe({
-        fields: [
-          'id',
-          'first_name',
-          'last_name',
-          'email',
-          'avatar',
-          'role',
-          'status',
-          'date_created',
-          'date_updated',
-        ],
-      }));
+      // Get user profile with role information using direct API call
+      const userResponse = await fetch(`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/users/me`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authResult.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!userResponse.ok) {
+        throw new Error(`Failed to fetch user profile: ${userResponse.status} ${userResponse.statusText}`);
+      }
+
+      const userResult = await userResponse.json();
+      const user = userResult.data;
 
       // Enhance user data with role information  
       const userRole = getRoleFromId(user.role as string);
