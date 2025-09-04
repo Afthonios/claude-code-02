@@ -121,8 +121,11 @@ export class DirectusAuthService {
       }
 
       const authResult = await response.json();
+      
+      // Directus returns tokens nested under data.data
+      const tokenData = authResult.data || authResult;
 
-      if (!authResult.access_token) {
+      if (!tokenData.access_token) {
         throw new Error('No access token received');
       }
 
