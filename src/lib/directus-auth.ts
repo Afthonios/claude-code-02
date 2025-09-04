@@ -133,7 +133,7 @@ export class DirectusAuthService {
       const userResponse = await fetch(`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/users/me`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${authResult.access_token}`,
+          'Authorization': `Bearer ${tokenData.access_token}`,
           'Content-Type': 'application/json',
         },
       });
