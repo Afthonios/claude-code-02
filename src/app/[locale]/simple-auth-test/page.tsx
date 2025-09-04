@@ -9,6 +9,7 @@ export default function SimpleAuthTest() {
     email: 'user@afthonios.com',
     password: 'password123'
   });
+  const [directusTest, setDirectusTest] = useState<any>(null);
 
   const handleDemoLogin = async () => {
     try {
