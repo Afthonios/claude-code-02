@@ -104,10 +104,23 @@ export class DirectusAuthService {
    */
   static async loginUser(credentials: LoginCredentials): Promise<DirectusAuthResult<{ user: EnhancedDirectusUser; tokens: AuthenticationData }>> {
     try {
-      // Authenticate with Directus
-      const authResult = await directusAuth.request(
-        login(credentials.email, credentials.password)
-      );
+      // Authenticate with Directus using direct API call
+      const response = await fetch(`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Authentication failed: ${response.status} ${response.statusText}`);
+      }
+
+      const authResult = await response.json();
 
       if (!authResult.access_token) {
         throw new Error('No access token received');
