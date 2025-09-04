@@ -157,7 +157,7 @@ export class DirectusAuthService {
         success: true,
         data: {
           user: enhancedUser,
-          tokens: authResult,
+          tokens: tokenData,
         },
       };
     } catch (error: unknown) {
