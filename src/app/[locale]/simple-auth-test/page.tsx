@@ -49,6 +49,21 @@ export default function SimpleAuthTest() {
     }
   };
 
+  const testDirectusAPI = async () => {
+    try {
+      const response = await fetch('/api/test-directus', {
+        method: 'POST',
+      });
+      const result = await response.json();
+      setDirectusTest(result);
+    } catch (error) {
+      setDirectusTest({
+        error: 'Failed to test Directus API',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
   if (status === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
