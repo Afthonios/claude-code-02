@@ -134,6 +134,13 @@ export default function SimpleAuthTest() {
               >
                 Sign In (Directus Provider)
               </button>
+
+              <button
+                onClick={testDirectusAPI}
+                className="w-full bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Test Directus API Connection
+              </button>
             </div>
 
             <div className="text-sm text-gray-600 bg-gray-50 p-4 rounded">
