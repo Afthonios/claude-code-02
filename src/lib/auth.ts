@@ -51,14 +51,14 @@ export const authOptions: NextAuthOptions = {
               email: 'user@afthonios.com',
               name: 'Demo User',
               password: 'password123',
-              role: 'user'
+              role: UserRole.AUTHENTICATED
             },
             {
               id: 'demo-2',
               email: 'admin@afthonios.com',
               name: 'Admin User',
               password: 'admin123',
-              role: 'admin'
+              role: UserRole.ADMIN
             }
           ];
 
