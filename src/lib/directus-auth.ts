@@ -106,7 +106,7 @@ export class DirectusAuthService {
     try {
       // Authenticate with Directus
       const authResult = await directusAuth.request(
-        login(credentials.email, credentials.password, { mode: 'json' })
+        login(credentials.email, credentials.password)
       );
 
       if (!authResult.access_token) {
